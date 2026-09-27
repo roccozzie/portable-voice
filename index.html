@@ -319,6 +319,19 @@
     .pro-features .soon-tag { margin-left:6px; }
     .card-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
     .upgrade-shell h2 { line-height:1.05; }
+    .setup-shell { max-width:720px; margin:0 auto; padding:64px 28px 90px; }
+    .setup-shell h2 { margin:0 0 8px; font-size:clamp(28px,4vw,44px); font-weight:500; letter-spacing:-.04em; }
+    .setup-shell > .auth-sub { margin-bottom:30px; }
+    .setup-card { border-top:1px solid var(--line); padding:22px 0; }
+    .setup-card h3 { margin:0 0 6px; font-size:17px; font-weight:600; letter-spacing:-.02em; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .setup-path { font-size:11px; font-weight:600; margin:0 0 8px; }
+    .setup-card p { color:var(--muted); font-size:11px; line-height:1.65; margin:0 0 8px; max-width:62ch; }
+    .setup-card ul { margin:0 0 12px; padding-left:18px; color:var(--muted); font-size:11px; line-height:1.7; }
+    .setup-card ul strong { color:var(--ink); }
+    .setup-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:4px; }
+    .setup-actions button { border:1px solid var(--ink); background:var(--paper); padding:10px 14px; font-size:11px; cursor:pointer; }
+    .setup-actions button:hover { background:var(--ink); color:var(--paper); }
+    .setup-card a { color:var(--ink); }
     .provider-list { display:flex; flex-wrap:wrap; gap:7px; margin-top:14px; }
     .provider-list span { border:1px solid var(--line); padding:6px 8px; font-size:9px; }
     .prompt-card-summary { display:flex; align-items:center; justify-content:space-between; gap:24px; padding:18px 0; }
@@ -585,12 +598,8 @@ Direct, curious, and willing to find the surprising connection.
               <div><button type="button" class="flow-btn" id="copyCombinedBtn">Copy combined file</button></div>
             </li>
             <li>
-              <div><strong>Paste it where each AI keeps standing instructions.</strong></div>
-              <ul class="provider-steps">
-                <li><strong>ChatGPT</strong><span>Settings &rarr; Personalization &rarr; Custom instructions</span></li>
-                <li><strong>Claude</strong><span>Settings &rarr; personal context</span></li>
-                <li><strong>Gemini</strong><span>Settings &rarr; Saved info</span></li>
-              </ul>
+              <div><strong>Paste it where each AI keeps standing instructions.</strong><span>ChatGPT: Settings &rarr; Personalization &rarr; Custom instructions &middot; Claude: Settings &rarr; Profile &middot; Gemini: Settings &rarr; Saved info. Sizes differ &mdash; the guide covers what fits where.</span></div>
+              <div><a class="flow-btn" href="#/setup">Setup guide &rarr;</a></div>
             </li>
             <li>
               <div><strong>No instruction box? Paste at the top of any chat.</strong><span>Open a new conversation, paste the combined file first, then ask your question.</span></div>
@@ -732,6 +741,51 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
         <button class="auth-alt" id="googleSignupBtn" type="button">Continue with Google</button>
         <p class="auth-switch">Already have one? <a href="#/login">Log in</a></p>
       </div>
+    </main>
+  </section>
+  <section class="screen" id="setupScreen">
+    <main class="setup-shell">
+      <div class="index">Setup guide</div>
+      <h2>Get it into your AIs.</h2>
+      <p class="auth-sub">Every AI keeps standing instructions in its own box, and every box has its own size limit. Your combined file is <strong id="setupSize">about 3,500</strong> characters &mdash; here is exactly what goes where.</p>
+      <article class="setup-card">
+        <h3>ChatGPT</h3>
+        <p class="setup-path">Profile &rarr; Settings &rarr; Personalization &rarr; Custom instructions</p>
+        <p>Two boxes: &ldquo;What would you like ChatGPT to know about you?&rdquo; and &ldquo;How would you like ChatGPT to respond?&rdquo;</p>
+        <ul>
+          <li><strong>Paid plans</strong> (Plus and up): 5,000 characters per box &mdash; the combined file fits. Paste it into &ldquo;How would you like ChatGPT to respond?&rdquo;</li>
+          <li><strong>Free / Go</strong>: 1,500 characters per box &mdash; it will not fit. Use the compact version, or put the full file in a Project (8,000 characters).</li>
+        </ul>
+        <div class="setup-actions"><button type="button" data-setup-copy="combined">Copy combined</button><button type="button" data-setup-copy="compact">Copy compact (&sim;1,400)</button></div>
+      </article>
+      <article class="setup-card">
+        <h3>Claude</h3>
+        <p class="setup-path">Settings &rarr; Profile</p>
+        <p>No published character cap &mdash; the combined file pastes in whole. To scope it to one project instead, use that Project&rsquo;s instructions.</p>
+        <div class="setup-actions"><button type="button" data-setup-copy="combined">Copy combined</button></div>
+      </article>
+      <article class="setup-card">
+        <h3>Gemini</h3>
+        <p class="setup-path">Settings &rarr; Saved info</p>
+        <p>Entries are short &mdash; if the combined file will not save, use the compact version, or a Gem (instructions take about 4,000 characters).</p>
+        <div class="setup-actions"><button type="button" data-setup-copy="combined">Copy combined</button><button type="button" data-setup-copy="compact">Copy compact (&sim;1,400)</button></div>
+      </article>
+      <article class="setup-card">
+        <h3>Claude Code, Cursor &amp; other coding tools</h3>
+        <p class="setup-path">CLAUDE.md &middot; AGENTS.md &middot; project rules</p>
+        <p>Paste the combined file into your project&rsquo;s instruction file. No size limit to worry about.</p>
+        <div class="setup-actions"><button type="button" data-setup-copy="combined">Copy combined</button></div>
+      </article>
+      <article class="setup-card">
+        <h3>Anything else</h3>
+        <p>No instruction box? Paste the combined file as the first message of a new chat &mdash; or as the system prompt if you are calling an API.</p>
+        <div class="setup-actions"><button type="button" data-setup-copy="combined">Copy combined</button></div>
+      </article>
+      <article class="setup-card">
+        <h3>MCP <span class="soon-tag">Pro &middot; Early access</span></h3>
+        <p>Pro members get the hosted MCP endpoint first &mdash; Claude Desktop, Cursor, and any MCP client read your latest version directly. <a href="#/upgrade">Unlock Pro &mdash; $10</a></p>
+      </article>
+      <p class="auth-switch"><a href="#/settings">&larr; Back to my settings</a></p>
     </main>
   </section>
   <section class="screen" id="upgradeScreen">
@@ -1104,7 +1158,7 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
   var INITIAL_COUNT = 8;
   var state = { index:0, scope:INITIAL_COUNT, deepCompleted:false, answers:{}, lines:[], importedLines:[], suppressedTexts:[], v0Lines:[], diffFilter:'all', diffExpanded:false, scenario:'build', mergeItems:[], fileVersion:1 };
   var $ = function(s){ return document.querySelector(s); };
-  var screens = {intro:$('#introScreen'), interview:$('#interviewScreen'), review:$('#reviewScreen'), finish:$('#finishScreen'), login:$('#loginScreen'), signup:$('#signupScreen'), account:$('#accountScreen'), upgrade:$('#upgradeScreen')};
+  var screens = {intro:$('#introScreen'), interview:$('#interviewScreen'), review:$('#reviewScreen'), finish:$('#finishScreen'), login:$('#loginScreen'), signup:$('#signupScreen'), account:$('#accountScreen'), upgrade:$('#upgradeScreen'), setup:$('#setupScreen')};
 
   function show(name){
     Object.keys(screens).forEach(function(k){ screens[k].classList.toggle('active', k===name); });
@@ -1118,17 +1172,19 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
     '/login':{screen:'login',title:'Log in — Portable Voice'},
     '/signup':{screen:'signup',title:'Sign up — Portable Voice'},
     '/account':{screen:'account',title:'Your account — Portable Voice'},
-    '/upgrade':{screen:'upgrade',title:'Go Pro — Portable Voice'}
+    '/upgrade':{screen:'upgrade',title:'Go Pro — Portable Voice'},
+    '/setup':{screen:'setup',title:'Setup guide — Portable Voice'}
   };
   function go(h){ if(location.hash===h) route(); else location.hash=h; }
   function route(){
     var h=(location.hash||'#/').replace(/^#/,'');
     var r=ROUTES[h]||ROUTES['/'];
-    if((r.screen==='review'||r.screen==='finish') && !state.lines.length && !Object.keys(state.answers).length){ go('#/'); return; }
+    if((r.screen==='review'||r.screen==='finish'||r.screen==='setup') && !state.lines.length && !Object.keys(state.answers).length){ go('#/'); return; }
     if(r.screen==='account' && !getUser()){ go('#/login'); return; }
     if(r.screen==='account') renderAccount();
     if(r.screen==='finish'){ renderPro(); renderFunnel(); }
     if(r.screen==='intro'){ renderReturning(); }
+    if(r.screen==='setup'){ renderSetup(); }
     document.title=r.title;
     show(r.screen);
   }
@@ -1854,6 +1910,7 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
   });
   $('#importAnotherBtn').addEventListener('click',function(){ resetImporter(); $('#digestInput').focus(); });
   document.querySelectorAll('[data-copy]').forEach(function(btn){btn.addEventListener('click',function(){ var text=fileText(btn.dataset.copy); copyText(text).then(function(){toast(btn.dataset.copy+'.md copied');}).catch(function(){toast('Copy unavailable — select the text instead');});});});
+  document.querySelectorAll('[data-setup-copy]').forEach(function(btn){btn.addEventListener('click',function(){ var kind=btn.dataset.setupCopy; var text=kind==='compact'?compactText():combinedText(); copyText(text).then(function(){toast((kind==='compact'?'Compact':'Combined')+' file copied ('+text.length+' chars)');}).catch(function(){toast('Copy unavailable — select the text instead');});});});
   document.querySelectorAll('[data-download]').forEach(function(btn){btn.addEventListener('click',function(){download(btn.dataset.download,fileText(btn.dataset.download));});});
   function loadSaved(){ try{ var raw=localStorage.getItem('pv1'); if(!raw) return null; var s=JSON.parse(raw); return (s&&s.lines&&s.lines.length)?s:null; }catch(e){ return null; } }
   function resumeSaved(){
@@ -1877,6 +1934,13 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
     else { el.innerHTML='Have a voice already? <a href="#/login">Log in</a> or <a href="#/signup">create an account</a>.'; }
   }
   function afterAuth(){ renderAuthNav(); renderReturning(); if(!resumeSaved()) go('#/account'); }
+  function combinedText(){ return fileText('agent')+'\n\n---\n\n'+fileText('voice'); }
+  function compactText(){
+    var max=1400, out='', lines=combinedText().split('\n');
+    for(var i=0;i<lines.length;i++){ var nl=lines[i]+'\n'; if(out.length+nl.length>max) break; out+=nl; }
+    return out.replace(/\s+$/,'');
+  }
+  function renderSetup(){ var el=$('#setupSize'); if(el){ var n=combinedText().length; el.textContent='about '+Math.round(n/100)*100; } }
   function isPro(){ try{ return localStorage.getItem('pv-pro')==='1'; }catch(e){ return false; } }
   function renderPro(){
     var pro=isPro();
