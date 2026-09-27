@@ -306,6 +306,10 @@
     .deep-resume { display:grid; grid-template-columns:.75fr 1.25fr; gap:36px; align-items:center; padding:24px 0; border-bottom:1px solid var(--ink); }
     .deep-resume strong { font-size:14px; }
     .deep-resume p { color:var(--muted); font-size:11px; line-height:1.6; margin:5px 0 0; }
+    .always-on { display:grid; grid-template-columns:1fr auto; gap:36px; align-items:center; padding:26px 0 8px; border-top:1px solid var(--ink); margin-top:8px; }
+    .always-on strong { font-size:14px; }
+    .always-on p { color:var(--muted); font-size:11px; line-height:1.6; margin:5px 0 0; max-width:62ch; }
+    .soon-tag { display:inline-block; border:1px solid var(--ink); font-size:9px; font-weight:600; padding:8px 12px; letter-spacing:.1em; text-transform:uppercase; white-space:nowrap; }
     .deep-resume > div:last-child { display:flex; justify-content:flex-end; align-items:center; gap:12px; flex-wrap:wrap; }
     .deep-resume .prototype-note { margin:0; max-width:360px; }
 
@@ -592,6 +596,10 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
         </div>
       </section>
       <p class="privacy-rule"><strong>Built-in boundary:</strong> personal identifiers and secrets never belong in these files. Useful context is generalized before it reaches either one.</p>
+      <div class="always-on">
+        <div><strong>It stays current wherever you go.</strong><p>Your settings keep learning on their own: periodic re-checks catch how your preferences shift, and corrections you make in one AI flow back into the file automatically. Set it once — it stays yours everywhere.</p></div>
+        <div><span class="soon-tag">Coming soon</span></div>
+      </div>
     </main>
   </section>
   <div class="toast" id="toast" role="status"></div>
