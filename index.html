@@ -1873,8 +1873,8 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
       el.innerHTML='Welcome back, '+escapeHTML(u.name||u.email)+' &mdash; <button type="button" class="linklike" id="returningGo">jump straight to your settings &rarr;</button>';
       $('#returningGo').addEventListener('click',function(){ resumeSaved(); });
     }
-    else if(saved){ el.innerHTML='Been here before? <a href="#/login">Log in</a> &mdash; your settings are saved in this browser.'; }
-    else { el.innerHTML='Been here before? <a href="#/login">Log in</a> or <a href="#/signup">create an account</a>.'; }
+    else if(saved){ el.innerHTML='Your voice is waiting &mdash; <a href="#/login">log in</a> to pick up where you left off.'; }
+    else { el.innerHTML='Have a voice already? <a href="#/login">Log in</a> or <a href="#/signup">create an account</a>.'; }
   }
   function afterAuth(){ renderAuthNav(); renderReturning(); if(!resumeSaved()) go('#/account'); }
   function isPro(){ try{ return localStorage.getItem('pv-pro')==='1'; }catch(e){ return false; } }
