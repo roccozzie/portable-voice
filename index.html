@@ -1127,12 +1127,37 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
       .replace(/\bI (\w+)ies\b/g,'I $1y')
       .replace(/\bI (\w*[^s])s\b/g,'I $1');
   }
+  function cleanFileLine(s){
+    // Final-output cleanup: every line in the rendered files must match the
+    // file styles no matter which source it came from (exercises, hand-written
+    // lines, accepted imports). Direct/first-person voice, no evidence tags
+    // leaking from the review UI, no stray whitespace.
+    var t=normalizeVoice(String(s||''));
+    t=t.replace(/\[(stated|observed)\]/gi,'')
+         .replace(/\((stated|observed)\)/gi,'')
+         .replace(/\((strong|moderate)\)/gi,'')
+         .replace(/\s+/g,' ')
+         .trim();
+    return t;
+  }
   function fileText(bucket){
     var title=bucket==='agent'?'# How to work with me':'# How to communicate with me';
     var intro=bucket==='agent'?'\n\nUse these choices to guide judgment, decisions, and collaboration.':'\n\nUse these choices to guide tone, phrasing, and structure.';
     var lines=state.lines.filter(function(l){return l.bucket===bucket&&l.text;});
     var groups={};
-    lines.forEach(function(l){ var h=headingFor(l); (groups[h]=groups[h]||[]).push(l); });
+    var seen={};
+    lines.forEach(function(l){
+      // Normalize every line at output time: voice, tags, whitespace, and
+      // exact duplicates collapsed within their section.
+      var text=cleanFileLine(l.text);
+      if(!text) return;
+      var h=headingFor(l);
+      var key=h+'\n'+normalizeImportText(text);
+      if(seen[key]) return;
+      seen[key]=true;
+      var examples=(l.examples||[]).map(function(ex){return cleanFileLine(ex);}).filter(function(x){return x;});
+      (groups[h]=groups[h]||[]).push({text:text,examples:examples});
+    });
     var out=title+'\n\nVersion: v0.'+state.fileVersion+intro+'\n';
     var any=false;
     HEADING_ORDER.forEach(function(h){
