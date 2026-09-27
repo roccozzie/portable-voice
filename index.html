@@ -292,6 +292,8 @@
     .merge-copy .existing { display:block; margin-bottom:8px; padding:9px 10px; background:var(--red-bg); color:var(--red); }
     .merge-copy .incoming { display:block; padding:9px 10px; background:var(--green-bg); color:var(--green); }
     .merge-copy .example { display:block; padding:5px 10px 5px 24px; font-size:10px; color:var(--muted); }
+    .merge-row.resolved { opacity:.55; }
+    .merge-status { font-size:11px; font-weight:600; color:var(--green); white-space:nowrap; }
     .merge-choice { display:flex; gap:6px; }
     .merge-choice button { border:1px solid var(--ink); background:var(--paper); padding:8px 9px; font-size:9px; white-space:nowrap; }
     .merge-choice button.selected { background:var(--ink); color:var(--paper); }
@@ -586,7 +588,7 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
             <div class="merge-review" id="mergeReview">
               <div class="merge-summary" id="mergeSummary"></div>
               <div id="mergeRows"></div>
-              <div class="merge-footer"><span>Nothing changes until you merge the choices above.</span><button type="button" id="mergeDigestBtn">Merge accepted changes</button></div>
+              <div class="merge-footer"><span>Accepting adds the line straight into the file.</span><span><button type="button" id="acceptAllBtn">Accept all new</button> <button type="button" id="mergeDoneBtn">Done →</button></span></div>
             </div>
             <div class="merge-done" id="mergeDone"><div><strong id="mergeDoneTitle"></strong><span id="mergeDoneCopy"></span></div><button type="button" class="import-reset" id="importAnotherBtn">Import another summary</button></div>
           </section>
@@ -1458,26 +1460,47 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
     $('#mergeRows').querySelectorAll('[data-merge-choice]').forEach(function(button){
       button.addEventListener('click',function(){
         var item=state.mergeItems.find(function(x){return x.id===button.dataset.id;});
-        if(!item) return;
+        if(!item || item.resolved) return;
         item.choice=button.dataset.mergeChoice;
+        if(item.choice==='incoming') importMergeItem(item);
+        item.resolved=true;
         renderMergeReview();
+        toast(item.choice==='incoming'?'Added to the file':(item.choice==='existing'?'Kept the current line':'Skipped'));
       });
     });
-    $('#mergeDigestBtn').disabled=!items.some(function(x){ return x.choice==='incoming'; });
+  }
+  function importMergeItem(item){
+    if(item.type==='conflict' && item.match){
+      state.suppressedTexts.push(item.match.text);
+      state.importedLines=state.importedLines.filter(function(line){ return line.text!==item.match.text; });
+    }
+    if(!state.importedLines.some(function(line){ return line.bucket===item.bucket && normalizeImportText(line.text)===normalizeImportText(item.text); })){
+      state.importedLines.push({id:'import'+Date.now()+Math.random(),text:sanitizeLine(item.text),bucket:item.bucket,section:item.section,examples:item.examples||[],source:item.evidence,strength:item.strength});
+    }
+    collectLines();
+    state.mergeImportedCount=(state.mergeImportedCount||0)+1;
   }
   function mergeRowHTML(item){
     var meta='<div class="merge-meta"><strong>'+escapeHTML(item.bucket+'.md')+'</strong>'+escapeHTML(item.section)+'<br><span class="confidence">'+escapeHTML(item.evidence)+' · '+escapeHTML(item.strength)+'</span></div>';
     var exHtml=(item.examples||[]).map(function(ex){ return '<span class="example">↳ '+escapeHTML(ex)+'</span>'; }).join('');
-    if(item.type==='conflict'){
-      return '<div class="merge-row">'+meta+'<div class="merge-copy"><span class="existing">CURRENT · '+escapeHTML(item.match.text)+'</span><span class="incoming">IMPORT · '+escapeHTML(item.text)+'</span>'+exHtml+'</div><div class="merge-choice"><button type="button" data-id="'+item.id+'" data-merge-choice="existing" class="'+(item.choice==='existing'?'selected':'')+'">keep current</button><button type="button" data-id="'+item.id+'" data-merge-choice="incoming" class="'+(item.choice==='incoming'?'selected':'')+'">use import</button></div></div>';
+    var copyHtml=item.type==='conflict'
+      ? '<span class="existing">CURRENT · '+escapeHTML(item.match.text)+'</span><span class="incoming">IMPORT · '+escapeHTML(item.text)+'</span>'+exHtml
+      : '<span class="incoming">+ '+escapeHTML(item.text)+'</span>'+exHtml;
+    var choiceHtml;
+    if(item.resolved){
+      choiceHtml='<span class="merge-status">'+(item.choice==='incoming'?'✓ added':(item.choice==='existing'?'kept current':'skipped'))+'</span>';
+    } else if(item.type==='conflict'){
+      choiceHtml='<button type="button" data-id="'+item.id+'" data-merge-choice="existing" class="'+(item.choice==='existing'?'selected':'')+'">keep current</button><button type="button" data-id="'+item.id+'" data-merge-choice="incoming" class="'+(item.choice==='incoming'?'selected':'')+'">use import</button>';
+    } else {
+      choiceHtml='<button type="button" data-id="'+item.id+'" data-merge-choice="incoming" class="'+(item.choice==='incoming'?'selected':'')+'">accept</button><button type="button" data-id="'+item.id+'" data-merge-choice="reject" class="'+(item.choice==='reject'?'selected':'')+'">reject</button>';
     }
-    return '<div class="merge-row">'+meta+'<div class="merge-copy"><span class="incoming">+ '+escapeHTML(item.text)+'</span>'+exHtml+'</div><div class="merge-choice"><button type="button" data-id="'+item.id+'" data-merge-choice="incoming" class="'+(item.choice==='incoming'?'selected':'')+'">accept</button><button type="button" data-id="'+item.id+'" data-merge-choice="reject" class="'+(item.choice==='reject'?'selected':'')+'">reject</button></div></div>';
+    return '<div class="merge-row'+(item.resolved?' resolved':'')+'">'+meta+'<div class="merge-copy">'+copyHtml+'</div><div class="merge-choice">'+choiceHtml+'</div></div>';
   }
   function resetImporter(){
     $('#importInputStep').hidden=false; $('#digestInput').value='';
     $('#importStatus').className='import-status'; $('#importStatus').innerHTML='';
     $('#mergeReview').className='merge-review'; $('#mergeDone').className='merge-done';
-    state.mergeItems=[];
+    state.mergeItems=[]; state.mergeImportedCount=0;
   }
   function toast(msg){ var t=$('#toast'); t.textContent=msg; t.classList.add('show'); setTimeout(function(){t.classList.remove('show');},1600); }
   function copyText(text){
@@ -1577,24 +1600,24 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
       $('#mergeReview').scrollIntoView({behavior:'smooth',block:'start'});
     },650);
   });
-  $('#mergeDigestBtn').addEventListener('click',function(){
-    var accepted=state.mergeItems.filter(function(item){ return item.choice==='incoming' && (item.type==='add'||item.type==='conflict'); });
-    if(!accepted.length) return;
-    accepted.forEach(function(item){
-      if(item.type==='conflict' && item.match){
-        state.suppressedTexts.push(item.match.text);
-        state.importedLines=state.importedLines.filter(function(line){ return line.text!==item.match.text; });
-      }
-      if(!state.importedLines.some(function(line){ return line.bucket===item.bucket && normalizeImportText(line.text)===normalizeImportText(item.text); })){
-        state.importedLines.push({id:'import'+Date.now()+Math.random(),text:sanitizeLine(item.text),bucket:item.bucket,section:item.section,examples:item.examples||[],source:item.evidence,strength:item.strength});
-      }
+  $('#acceptAllBtn').addEventListener('click',function(){
+    var added=0;
+    state.mergeItems.forEach(function(item){
+      if(item.resolved) return;
+      if(item.type==='add'){ item.choice='incoming'; importMergeItem(item); item.resolved=true; added++; }
+      else if(item.type==='duplicate'){ item.choice='reject'; item.resolved=true; }
     });
+    renderMergeReview();
+    toast(added?added+' new line'+(added===1?'':'s')+' added':'Nothing new to add — conflicts and tentative lines still need your call');
+  });
+  $('#mergeDoneBtn').addEventListener('click',function(){
+    var n=state.mergeImportedCount||0;
+    if(n>0){ state.fileVersion+=1; state.mergeImportedCount=0; }
     collectLines();
-    state.fileVersion+=1;
     renderFinish();
     $('#mergeReview').className='merge-review';
-    $('#mergeDoneTitle').textContent='Merged into v0.'+state.fileVersion+'.';
-    $('#mergeDoneCopy').textContent=accepted.length+' accepted change'+(accepted.length===1?'':'s')+' added. Repeats stayed out; tentative lines remain held aside.';
+    $('#mergeDoneTitle').textContent=n?('Merged into v0.'+state.fileVersion+'.'):'No changes merged.';
+    $('#mergeDoneCopy').textContent=n?(n+' accepted change'+(n===1?'':'s')+' added. Repeats stayed out; tentative lines remain held aside.'):'The files are unchanged.';
     $('#mergeDone').className='merge-done show';
     $('#mergeDone').scrollIntoView({behavior:'smooth',block:'center'});
   });
