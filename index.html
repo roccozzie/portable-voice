@@ -332,6 +332,42 @@
     .setup-actions button { border:1px solid var(--ink); background:var(--paper); padding:10px 14px; font-size:11px; cursor:pointer; }
     .setup-actions button:hover { background:var(--ink); color:var(--paper); }
     .setup-card a { color:var(--ink); }
+    .file-tabs { display:flex; gap:8px; margin:20px 0 0; }
+    .file-tab { flex:1; border:1px solid var(--line); background:transparent; color:var(--ink); padding:12px 14px; cursor:pointer; text-align:left; display:flex; flex-direction:column; gap:2px; font:inherit; }
+    .file-tab.active { border-color:var(--ink); }
+    .file-tab strong { font-size:13px; }
+    .file-tab small { color:var(--muted); font-size:10px; }
+    .file-tab .privacy-tag { align-self:flex-start; margin-top:4px; }
+    .file-panel { margin-top:0; border-top:0; }
+    .char-budget { font-size:10px; color:var(--muted); }
+    .char-budget.over { color:#ff6b6b; }
+    .file-actions { display:flex; justify-content:space-between; align-items:center; }
+    .next-list { margin-top:44px; border-top:3px solid var(--ink); }
+    .next-list h3 { font-size:clamp(20px,2.6vw,30px); letter-spacing:-.03em; font-weight:500; margin:20px 0 4px; }
+    .next-row { display:flex; align-items:center; justify-content:space-between; width:100%; padding:15px 2px; border:0; border-bottom:1px solid var(--line); color:var(--ink); text-decoration:none; background:none; font:inherit; cursor:pointer; text-align:left; }
+    .next-row-text { display:flex; flex-direction:column; gap:2px; }
+    .next-row-text strong { font-size:14px; font-weight:600; }
+    .next-row-text em { font-style:normal; color:var(--muted); font-size:11px; }
+    .next-row-arrow { font-size:16px; }
+    .next-row:disabled { opacity:.4; cursor:default; }
+    .dest-chooser { display:flex; gap:8px; flex-wrap:wrap; margin:24px 0 4px; }
+    .dest-btn { border:1px solid var(--line); background:transparent; color:var(--ink); padding:10px 14px; font-size:12px; cursor:pointer; font:inherit; }
+    .dest-btn.active { background:var(--ink); color:var(--paper); border-color:var(--ink); }
+    .dest-panel { border-top:1px solid var(--line); margin-top:16px; padding:20px 0 8px; }
+    .dest-copy { color:var(--muted); font-size:11px; line-height:1.65; max-width:62ch; }
+    .setup-fine { margin-top:26px; font-size:11px; color:var(--muted); }
+    .setup-fine a, .dest-copy a { color:var(--ink); }
+    .dest-budget { font-size:11px; color:var(--muted); margin:14px 0 0; }
+    .dest-budget.over { color:#ff9b9b; }
+    .dest-budget a { color:var(--ink); }
+    .import-shell { max-width:860px; margin:0 auto; padding:64px 28px 90px; }
+    .import-shell h2 { margin:0 0 8px; font-size:clamp(28px,4vw,44px); font-weight:500; letter-spacing:-.04em; }
+    .import-shell > .auth-sub { margin-bottom:26px; }
+    .import-steps { list-style:none; margin:0; padding:0; }
+    .import-steps li { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:14px 0; border-bottom:1px solid var(--line); }
+    .import-steps li > div:first-child { display:flex; flex-direction:column; gap:2px; }
+    .import-steps strong { font-size:13px; }
+    .import-steps span { color:var(--muted); font-size:11px; }
     .provider-list { display:flex; flex-wrap:wrap; gap:7px; margin-top:14px; }
     .provider-list span { border:1px solid var(--line); padding:6px 8px; font-size:9px; }
     .prompt-card-summary { display:flex; align-items:center; justify-content:space-between; gap:24px; padding:18px 0; }
@@ -570,67 +606,95 @@ Direct, curious, and willing to find the surprising connection.
         <button class="show-diff" id="showDiffBtn" type="button"></button>
       </section>
       <div class="files-label">YOUR SETTINGS, IN TWO SIMPLE PARTS<span class="save-state" id="saveState"></span></div>
-      <div class="split-files">
-        <article class="output-file">
-          <div class="output-head"><strong>How it works<small>agent.md</small></strong><span class="privacy-tag">PUBLIC</span></div>
-          <pre class="output-body" id="agentOutput"></pre>
-          <div class="file-actions"><button type="button" data-copy="agent">copy</button><button type="button" data-download="agent">download</button></div>
-        </article>
-        <article class="output-file">
-          <div class="output-head"><strong>How it sounds<small>voice.md</small></strong><span class="privacy-tag">PRIVATE</span></div>
-          <pre class="output-body" id="voiceOutput"></pre>
-          <div class="file-actions"><button type="button" data-copy="voice">copy</button><button type="button" data-download="voice">download</button></div>
-        </article>
+      <div class="file-tabs" role="tablist" aria-label="Settings files">
+        <button type="button" class="file-tab active" data-filetab="agent" role="tab" aria-selected="true"><strong>How it works</strong><small>agent.md</small><span class="privacy-tag">PUBLIC</span></button>
+        <button type="button" class="file-tab" data-filetab="voice" role="tab" aria-selected="false"><strong>How it sounds</strong><small>voice.md</small><span class="privacy-tag">PRIVATE</span></button>
       </div>
+      <article class="output-file file-panel" data-filepanel="agent">
+        <pre class="output-body" id="agentOutput"></pre>
+        <div class="file-actions"><span class="char-budget" id="agentBudget"></span><span class="file-btns"><button type="button" data-copy="agent">copy</button><button type="button" data-download="agent">download</button></span></div>
+      </article>
+      <article class="output-file file-panel" data-filepanel="voice" hidden>
+        <pre class="output-body" id="voiceOutput"></pre>
+        <div class="file-actions"><span class="char-budget" id="voiceBudget"></span><span class="file-btns"><button type="button" data-copy="voice">copy</button><button type="button" data-download="voice">download</button></span></div>
+      </article>
       <div class="finish-actions"><button id="reviewDraftBtn">Tune the draft</button></div>
-      <section class="next-route" aria-labelledby="nextRouteHeading">
-        <header class="next-route-head">
-          <h3 id="nextRouteHeading">Put your settings to work.</h3>
-          <p>Use them in the AIs you already have, then decide how far you want to take it. Your work is saved in this browser as you go.</p>
-        </header>
-        <article class="flow" id="useFlow" aria-labelledby="useFlowHeading">
-          <div class="flow-number">01 · USE THEM</div>
-          <h4 id="useFlowHeading">Paste your settings into the AIs you already use.</h4>
-          <p>They&rsquo;re saved in this browser, so they won&rsquo;t get lost. Copy them once, then paste where each AI keeps standing instructions.</p>
-          <ol class="flow-steps">
-            <li>
-              <div><strong>Copy both files as one paste.</strong><span>Instruction boxes take a single block of text &mdash; this combines agent.md and voice.md.</span></div>
-              <div><button type="button" class="flow-btn" id="copyCombinedBtn">Copy combined file</button></div>
-            </li>
-            <li>
-              <div><strong>Paste it where each AI keeps standing instructions.</strong><span>ChatGPT: Settings &rarr; Personalization &rarr; Custom instructions &middot; Claude: Settings &rarr; Profile &middot; Gemini: Settings &rarr; Saved info. Sizes differ &mdash; the guide covers what fits where.</span></div>
-              <div><a class="flow-btn" href="#/setup">Setup guide &rarr;</a></div>
-            </li>
-            <li>
-              <div><strong>No instruction box? Paste at the top of any chat.</strong><span>Open a new conversation, paste the combined file first, then ask your question.</span></div>
-            </li>
-          </ol>
-        </article>
-        <article class="flow pro-flow" id="proFlow" aria-labelledby="proFlowHeading">
-          <div class="flow-number">04 · PRO &mdash; $10 ONCE</div>
-          <div id="proLocked">
-            <h4 id="proFlowHeading">Plug it into everything.</h4>
-            <p>One payment, yours forever. Unlock the <strong>copy/paste prompt</strong> that folds years of ChatGPT and Claude history into your files &mdash; plus <strong>MCP access</strong> <span class="prototype-note">(early access)</span>, so any MCP client can read your latest version directly.</p>
-            <div class="flow-cta"><a class="flow-btn pro-btn" href="#/upgrade">Unlock Pro &mdash; $10 &rarr;</a></div>
-          </div>
-          <div id="proUnlocked" hidden>
-            <div class="flow-number">04 · PRO</div>
-            <h4>Fold in what your other AIs already know.</h4>
-            <p>Ask a chat with real history for a compact summary of your patterns &mdash; not a transcript. You review every line before it shapes either file.</p>
-          <ol class="flow-steps">
-            <li>
-              <div><strong>Copy the extraction prompt.</strong><span>One compact pattern summary, not a data export. Open it first if you want to read the exact instructions.</span></div>
-              <div class="prompt-card-actions"><button type="button" id="copyPatternPrompt">Copy prompt</button><button type="button" id="togglePromptDetails" aria-expanded="false">View prompt</button></div>
-            </li>
-            <li>
-              <div><strong>Run it in a long-running chat.</strong><span>Paste it into a ChatGPT or Claude conversation &mdash; or a project &mdash; with enough prior context.</span></div>
-              <div class="provider-list" aria-label="Use where prior context is available"><span>ChatGPT</span><span>Claude</span><span>Gemini</span><span>other chats</span></div>
-            </li>
-            <li>
-              <div><strong>Paste the summary back below.</strong><span>The page checks for personal details, sorts each section, skips repeats, and flags conflicts with your current settings.</span></div>
-            </li>
-          </ol>
-          <div class="prompt-box" id="promptDetails">
+            <section class="next-list" aria-labelledby="nextListHeading">
+        <h3 id="nextListHeading">What&apos;s next</h3>
+        <a class="next-row" href="#/setup"><span class="next-row-text"><strong>Use them</strong><em>Get the files into your AIs.</em></span><span class="next-row-arrow" aria-hidden="true">&rarr;</span></a>
+        <button class="next-row" id="deepBtn" type="button"><span class="next-row-text"><strong id="deepTitle">Refine &mdash; free</strong><em id="deepNote">8 more quick exercises.</em></span><span class="next-row-arrow" aria-hidden="true">&rarr;</span></button>
+        <a class="next-row" id="updateCta" href="#/signup"><span class="next-row-text"><strong>Stay updated &mdash; free</strong><em>One account, every version.</em></span><span class="next-row-arrow" aria-hidden="true">&rarr;</span></a>
+        <a class="next-row" id="proCta" href="#/upgrade"><span class="next-row-text"><strong id="proTitle">Go Pro &mdash; $10 once</strong><em id="proNote">Extraction prompt + MCP early access.</em></span><span class="next-row-arrow" aria-hidden="true">&rarr;</span></a>
+      </section>
+<p class="privacy-rule"><strong>Built-in boundary:</strong> personal identifiers and secrets never belong in these files. Useful context is generalized before it reaches either one.</p>
+    </main>
+  </section>
+  <section class="screen" id="loginScreen">
+    <main class="auth-shell">
+      <div class="auth-card">
+        <div class="index">Welcome back</div>
+        <h2>Log in</h2>
+        <p class="auth-sub">Prototype login &mdash; anything you type works, and it never leaves this browser.</p>
+        <form id="loginForm">
+          <label>Email<input type="email" name="email" required autocomplete="email" placeholder="you@example.com"></label>
+          <label>Password<input type="password" name="password" required autocomplete="current-password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"></label>
+          <button class="primary" type="submit">Log in &rarr;</button>
+        </form>
+        <button class="auth-alt" id="googleLoginBtn" type="button">Continue with Google</button>
+        <p class="auth-switch">New here? <a href="#/signup">Create an account</a></p>
+      </div>
+    </main>
+  </section>
+  <section class="screen" id="signupScreen">
+    <main class="auth-shell">
+      <div class="auth-card">
+        <div class="index">Sync prototype</div>
+        <h2>Create your account</h2>
+        <p class="auth-sub">Keeps every version of your settings together in this browser. Real cross-device sync is coming.</p>
+        <form id="signupForm">
+          <label>Name<input type="text" name="name" required autocomplete="name" placeholder="Ada"></label>
+          <label>Email<input type="email" name="email" required autocomplete="email" placeholder="you@example.com"></label>
+          <label>Password<input type="password" name="password" required autocomplete="new-password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"></label>
+          <button class="primary" type="submit">Create account &rarr;</button>
+        </form>
+        <button class="auth-alt" id="googleSignupBtn" type="button">Continue with Google</button>
+        <p class="auth-switch">Already have one? <a href="#/login">Log in</a></p>
+      </div>
+    </main>
+  </section>
+    <section class="screen" id="setupScreen">
+    <main class="setup-shell">
+      <div class="index">Setup guide</div>
+      <h2>Get it into your AIs.</h2>
+      <p class="auth-sub">Each file fits every box. Pick your AI, copy the files, paste them in.</p>
+      <div class="dest-chooser" role="group" aria-label="Choose your AI">
+        <button type="button" class="dest-btn active" data-dest="chatgpt">ChatGPT</button>
+        <button type="button" class="dest-btn" data-dest="claude">Claude</button>
+        <button type="button" class="dest-btn" data-dest="gemini">Gemini</button>
+        <button type="button" class="dest-btn" data-dest="code">Coding tools</button>
+        <button type="button" class="dest-btn" data-dest="other">Something else</button>
+      </div>
+      <div class="dest-panel">
+        <p class="setup-path" id="destPath"></p>
+        <p class="dest-copy" id="destCopy"></p>
+        <div class="setup-actions"><button type="button" data-setup-copy="agent">Copy agent.md</button><button type="button" data-setup-copy="voice">Copy voice.md</button></div>
+        <p class="dest-budget" id="destBudget"></p>
+      </div>
+      <p class="setup-fine">MCP access is coming for Pro members &mdash; <a href="#/upgrade">$10 once</a>.</p>
+      <p class="auth-switch"><a href="#/settings">&larr; Back to my settings</a></p>
+    </main>
+  </section>
+<section class="screen" id="importScreen">
+    <main class="import-shell">
+      <div class="index">Pro &middot; Import</div>
+      <h2>Fold in what your other AIs know.</h2>
+      <p class="auth-sub">Ask a chat with real history for a compact summary of your patterns &mdash; not a transcript. You review every line before it shapes either file.</p>
+      <ol class="import-steps">
+        <li><div><strong>Copy the extraction prompt.</strong><span>One compact pattern summary, not a data export.</span></div><div class="prompt-card-actions"><button type="button" id="copyPatternPrompt">Copy prompt</button><button type="button" id="togglePromptDetails" aria-expanded="false">View prompt</button></div></li>
+        <li><div><strong>Run it in a long-running chat.</strong><span>ChatGPT or Claude, with enough history behind it.</span></div></li>
+        <li><div><strong>Paste the summary below.</strong><span>Each line is checked, sorted, and reviewed by you.</span></div></li>
+      </ol>
+<div class="prompt-box" id="promptDetails">
               <pre id="patternPrompt">Review as much of our past conversation history as you can access and build a profile of how I want AI to communicate and work with me. This profile will be handed to other AI tools, so it must be portable, specific, and free of personal information.
 
 WHAT TO CAPTURE
@@ -668,7 +732,7 @@ Use exactly these headings, in this order, and write nothing outside them:
 
 Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples over many generic ones.</pre>
             </div>
-          <section class="import-flow" id="importFlow" aria-label="Paste a summary to import">
+<section class="import-flow" id="importFlow" aria-label="Paste a summary to import">
             <div id="importInputStep">
               <textarea class="digest-input" id="digestInput" spellcheck="false" placeholder="# Working context
 - [Observed] (strong) …
@@ -685,106 +749,10 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
             </div>
             <div class="merge-done" id="mergeDone"><div><strong id="mergeDoneTitle"></strong><span id="mergeDoneCopy"></span></div><button type="button" class="import-reset" id="importAnotherBtn">Import another summary</button></div>
           </section>
-            <div class="mcp-block">
+<div class="mcp-block">
               <h5>Connect via MCP <span class="soon-tag">Early access</span></h5>
               <p>Pro members get the hosted MCP endpoint first &mdash; your settings, readable by Claude Desktop, Cursor, and any MCP client, always your latest version. The one-line setup lands here when it ships.</p>
             </div>
-          </div>
-        </article>
-        <div class="funnel">
-          <article class="flow funnel-step" id="refineFlow" aria-labelledby="refineFlowHeading">
-            <div class="flow-number">02 · REFINE &mdash; FREE</div>
-            <h4 id="refineFlowHeading">Want more refinement?</h4>
-            <p>Sixteen more quick exercises, same one-tap format. Every answer sharpens the files.</p>
-            <div class="flow-cta"><button type="button" class="flow-btn" id="deepBtn">Start the deeper pass &rarr;</button><span class="prototype-note" id="deepNote">Your partial progress is useful. Finish whenever you have enough.</span></div>
-          </article>
-          <div class="funnel-then" aria-hidden="true"><span>then</span></div>
-          <article class="flow funnel-step" id="updateFlow" aria-labelledby="updateFlowHeading">
-            <div class="flow-number">03 · STAY UPDATED &mdash; FREE</div>
-            <h4 id="updateFlowHeading">Want them to always stay updated?</h4>
-            <p>Create an account and every version lives in one place &mdash; restore any of them anytime, and future refinements stack onto the same profile.</p>
-            <div class="flow-cta"><a class="flow-btn" id="updateCta" href="#/signup">Create an account &rarr;</a></div>
-          </article>
-        </div>
-      </section>
-      <p class="privacy-rule"><strong>Built-in boundary:</strong> personal identifiers and secrets never belong in these files. Useful context is generalized before it reaches either one.</p>
-    </main>
-  </section>
-  <section class="screen" id="loginScreen">
-    <main class="auth-shell">
-      <div class="auth-card">
-        <div class="index">Welcome back</div>
-        <h2>Log in</h2>
-        <p class="auth-sub">Prototype login &mdash; anything you type works, and it never leaves this browser.</p>
-        <form id="loginForm">
-          <label>Email<input type="email" name="email" required autocomplete="email" placeholder="you@example.com"></label>
-          <label>Password<input type="password" name="password" required autocomplete="current-password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"></label>
-          <button class="primary" type="submit">Log in &rarr;</button>
-        </form>
-        <button class="auth-alt" id="googleLoginBtn" type="button">Continue with Google</button>
-        <p class="auth-switch">New here? <a href="#/signup">Create an account</a></p>
-      </div>
-    </main>
-  </section>
-  <section class="screen" id="signupScreen">
-    <main class="auth-shell">
-      <div class="auth-card">
-        <div class="index">Sync prototype</div>
-        <h2>Create your account</h2>
-        <p class="auth-sub">Keeps every version of your settings together in this browser. Real cross-device sync is coming.</p>
-        <form id="signupForm">
-          <label>Name<input type="text" name="name" required autocomplete="name" placeholder="Ada"></label>
-          <label>Email<input type="email" name="email" required autocomplete="email" placeholder="you@example.com"></label>
-          <label>Password<input type="password" name="password" required autocomplete="new-password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"></label>
-          <button class="primary" type="submit">Create account &rarr;</button>
-        </form>
-        <button class="auth-alt" id="googleSignupBtn" type="button">Continue with Google</button>
-        <p class="auth-switch">Already have one? <a href="#/login">Log in</a></p>
-      </div>
-    </main>
-  </section>
-  <section class="screen" id="setupScreen">
-    <main class="setup-shell">
-      <div class="index">Setup guide</div>
-      <h2>Get it into your AIs.</h2>
-      <p class="auth-sub">Every AI keeps standing instructions in its own box, and every box has its own size limit. Your combined file is <strong id="setupSize">about 3,500</strong> characters &mdash; here is exactly what goes where.</p>
-      <article class="setup-card">
-        <h3>ChatGPT</h3>
-        <p class="setup-path">Profile &rarr; Settings &rarr; Personalization &rarr; Custom instructions</p>
-        <p>Two boxes: &ldquo;What would you like ChatGPT to know about you?&rdquo; and &ldquo;How would you like ChatGPT to respond?&rdquo;</p>
-        <ul>
-          <li><strong>Paid plans</strong> (Plus and up): 5,000 characters per box &mdash; the combined file fits. Paste it into &ldquo;How would you like ChatGPT to respond?&rdquo;</li>
-          <li><strong>Free / Go</strong>: 1,500 characters per box &mdash; it will not fit. Use the compact version, or put the full file in a Project (8,000 characters).</li>
-        </ul>
-        <div class="setup-actions"><button type="button" data-setup-copy="combined">Copy combined</button><button type="button" data-setup-copy="compact">Copy compact (&sim;1,400)</button></div>
-      </article>
-      <article class="setup-card">
-        <h3>Claude</h3>
-        <p class="setup-path">Settings &rarr; Profile</p>
-        <p>No published character cap &mdash; the combined file pastes in whole. To scope it to one project instead, use that Project&rsquo;s instructions.</p>
-        <div class="setup-actions"><button type="button" data-setup-copy="combined">Copy combined</button></div>
-      </article>
-      <article class="setup-card">
-        <h3>Gemini</h3>
-        <p class="setup-path">Settings &rarr; Saved info</p>
-        <p>Entries are short &mdash; if the combined file will not save, use the compact version, or a Gem (instructions take about 4,000 characters).</p>
-        <div class="setup-actions"><button type="button" data-setup-copy="combined">Copy combined</button><button type="button" data-setup-copy="compact">Copy compact (&sim;1,400)</button></div>
-      </article>
-      <article class="setup-card">
-        <h3>Claude Code, Cursor &amp; other coding tools</h3>
-        <p class="setup-path">CLAUDE.md &middot; AGENTS.md &middot; project rules</p>
-        <p>Paste the combined file into your project&rsquo;s instruction file. No size limit to worry about.</p>
-        <div class="setup-actions"><button type="button" data-setup-copy="combined">Copy combined</button></div>
-      </article>
-      <article class="setup-card">
-        <h3>Anything else</h3>
-        <p>No instruction box? Paste the combined file as the first message of a new chat &mdash; or as the system prompt if you are calling an API.</p>
-        <div class="setup-actions"><button type="button" data-setup-copy="combined">Copy combined</button></div>
-      </article>
-      <article class="setup-card">
-        <h3>MCP <span class="soon-tag">Pro &middot; Early access</span></h3>
-        <p>Pro members get the hosted MCP endpoint first &mdash; Claude Desktop, Cursor, and any MCP client read your latest version directly. <a href="#/upgrade">Unlock Pro &mdash; $10</a></p>
-      </article>
       <p class="auth-switch"><a href="#/settings">&larr; Back to my settings</a></p>
     </main>
   </section>
@@ -1158,7 +1126,7 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
   var INITIAL_COUNT = 8;
   var state = { index:0, scope:INITIAL_COUNT, deepCompleted:false, answers:{}, lines:[], importedLines:[], suppressedTexts:[], v0Lines:[], diffFilter:'all', diffExpanded:false, scenario:'build', mergeItems:[], fileVersion:1 };
   var $ = function(s){ return document.querySelector(s); };
-  var screens = {intro:$('#introScreen'), interview:$('#interviewScreen'), review:$('#reviewScreen'), finish:$('#finishScreen'), login:$('#loginScreen'), signup:$('#signupScreen'), account:$('#accountScreen'), upgrade:$('#upgradeScreen'), setup:$('#setupScreen')};
+  var screens = {intro:$('#introScreen'), interview:$('#interviewScreen'), review:$('#reviewScreen'), finish:$('#finishScreen'), login:$('#loginScreen'), signup:$('#signupScreen'), account:$('#accountScreen'), upgrade:$('#upgradeScreen'), setup:$('#setupScreen'), import:$('#importScreen')};
 
   function show(name){
     Object.keys(screens).forEach(function(k){ screens[k].classList.toggle('active', k===name); });
@@ -1173,18 +1141,21 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
     '/signup':{screen:'signup',title:'Sign up — Portable Voice'},
     '/account':{screen:'account',title:'Your account — Portable Voice'},
     '/upgrade':{screen:'upgrade',title:'Go Pro — Portable Voice'},
-    '/setup':{screen:'setup',title:'Setup guide — Portable Voice'}
+    '/setup':{screen:'setup',title:'Setup guide — Portable Voice'},
+    '/import':{screen:'import',title:'Import — Portable Voice'}
   };
   function go(h){ if(location.hash===h) route(); else location.hash=h; }
   function route(){
     var h=(location.hash||'#/').replace(/^#/,'');
     var r=ROUTES[h]||ROUTES['/'];
     if((r.screen==='review'||r.screen==='finish'||r.screen==='setup') && !state.lines.length && !Object.keys(state.answers).length){ go('#/'); return; }
+    if(r.screen==='import'){ if(!isPro()){ go('#/upgrade'); return; } if(!state.lines.length && !Object.keys(state.answers).length){ go('#/'); return; } }
     if(r.screen==='account' && !getUser()){ go('#/login'); return; }
     if(r.screen==='account') renderAccount();
     if(r.screen==='finish'){ renderPro(); renderFunnel(); }
     if(r.screen==='intro'){ renderReturning(); }
-    if(r.screen==='setup'){ renderSetup(); }
+    if(r.screen==='setup'){ updateDestBudget(); }
+
     document.title=r.title;
     show(r.screen);
   }
@@ -1230,13 +1201,13 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
   function renderQuestion(){
     var q=questions[state.index];
     var phaseStart=state.scope===INITIAL_COUNT?0:INITIAL_COUNT;
-    var phaseTotal=state.scope===INITIAL_COUNT?INITIAL_COUNT:questions.length-INITIAL_COUNT;
+    var phaseTotal=state.scope===INITIAL_COUNT?INITIAL_COUNT:state.scope-INITIAL_COUNT;
     var phaseIndex=state.index-phaseStart+1;
     $('#progressText').textContent=String(phaseIndex).padStart(2,'0')+' / '+String(phaseTotal).padStart(2,'0');
     $('#progressLabel').innerHTML=escapeHTML(q.phase)+' <span class="phase-mark">'+(state.scope===INITIAL_COUNT?'v0':'deeper')+'</span>';
     $('#progressFill').style.width=(phaseIndex/phaseTotal*100)+'%';
     $('#exitDeepBtn').hidden=state.scope===INITIAL_COUNT;
-    $('#exitDeepBtn').querySelector('span').textContent=deepProgressCount()+' of 24 saved';
+    $('#exitDeepBtn').querySelector('span').textContent=deepProgressCount()+' of '+(state.scope-INITIAL_COUNT)+' saved';
     var body='<div class="question-count">'+escapeHTML(q.label)+'</div><h2 class="question">'+escapeHTML(q.title)+'</h2><p class="prompt-note">'+escapeHTML(q.note)+'</p>';
     if(q.type==='text'){
       body+='<textarea rows="1" class="text-answer" id="textAnswer" placeholder="'+escapeHTML(q.placeholder)+'">'+escapeHTML(state.answers[q.key]||'')+'</textarea>';
@@ -1567,7 +1538,7 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
     });
     var deepCount=deepProgressCount();
     var versionLabel='v0.'+state.fileVersion;
-    $('#responseVersionTag').textContent=versionLabel+(state.fileVersion>2?' · merged settings':(state.deepCompleted?' · deeper pass':(deepCount?' draft · '+deepCount+'/24 deeper choices':' · first pass')));
+    $('#responseVersionTag').textContent=versionLabel+(state.fileVersion>2?' · merged settings':(state.deepCompleted?' · deeper pass':(deepCount?' draft · '+deepCount+'/'+(questions.length-INITIAL_COUNT)+' deeper choices':' · first pass')));
     $('#calibratedLabel').textContent=versionLabel+(deepCount&&!state.deepCompleted&&state.fileVersion===2?' draft':'');
   }
   function renderVersionDiff(){
@@ -1610,16 +1581,24 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
     persist();
     var deepCount=deepProgressCount();
     if(deepCount>0 && state.fileVersion<2) state.fileVersion=2;
-    $('#agentOutput').textContent=fileText('agent');
-    $('#voiceOutput').textContent=fileText('voice');
+    var at=fileText('agent'), vt=fileText('voice');
+    $('#agentOutput').textContent=at; $('#voiceOutput').textContent=vt;
+    var ab=$('#agentBudget'), vb=$('#voiceBudget');
+    if(ab){ ab.textContent=at.length+' / 1,500'; ab.classList.toggle('over',at.length>1500); }
+    if(vb){ vb.textContent=vt.length+' / 1,500'; vb.classList.toggle('over',vt.length>1500); }
     $('#finishTitle').textContent=state.deepCompleted?'See what the deeper pass changed.':(deepCount?'Your settings are already taking shape.':'See your settings at work.');
-    $('#finishCopy').textContent=state.deepCompleted?'The same prompt now carries more of your cadence and judgment. The version diff shows exactly what the deeper questions added.':(deepCount?'You answered '+deepCount+' of 24 deeper questions. Those answers are already reflected in your settings, and you can pick up where you left off.':'The same prompt, answered twice. The difference on the right comes from the choices you just made.');
-    $('#deepBtn').textContent=state.deepCompleted?'Deeper pass complete':(deepCount?'Continue the deeper pass →':'Start the deeper pass →');
-    $('#deepBtn').disabled=state.deepCompleted;
+    $('#finishCopy').textContent=state.deepCompleted?'The same prompt now carries more of your cadence and judgment. The version diff shows exactly what the deeper questions added.':(deepCount?'You answered '+deepCount+' of '+(questions.length-INITIAL_COUNT)+' deeper questions. Those answers are already reflected in your settings, and you can pick up where you left off.':'The same prompt, answered twice. The difference on the right comes from the choices you just made.');
     renderPro(); renderFunnel();
-    var dn=$('#deepNote');
-    if(state.deepCompleted){ dn.innerHTML=isPro()?'This deeper version is ready to combine with the compact summaries from your other AIs.':'This deeper version is ready &mdash; <a href="#/upgrade">go Pro</a> to combine it with compact summaries from your other AIs.'; }
-    else dn.textContent=deepCount?('Your '+deepCount+' answers are already included. Finish whenever you have enough.'):'Your partial progress is useful. Finish whenever you have enough.';
+    (function(){
+      var btn=$('#deepBtn'), title=$('#deepTitle'), note=$('#deepNote'); if(!btn||!title||!note) return;
+      var cap=isPro()?questions.length:INITIAL_COUNT+8, total=cap-INITIAL_COUNT;
+      var doneAll=deepCount>=(questions.length-INITIAL_COUNT);
+      if(doneAll){ title.textContent='Deeper pass complete'; note.textContent='All '+(questions.length-INITIAL_COUNT)+' exercises answered.'; btn.disabled=true; return; }
+      btn.disabled=false;
+      if(deepCount>=total && !isPro()){ title.textContent='Refine — 8 of 8 free done'; note.textContent='Unlock the other '+(questions.length-cap)+' with Pro.'; return; }
+      title.textContent='Refine — free';
+      note.textContent=deepCount?('Continue — '+deepCount+' of '+total+' so far.'):'8 more quick exercises.';
+    })();
     $('#versionHeading').textContent=state.deepCompleted?'What changed?':'What has changed so far?';
     renderComparison();
     renderVersionDiff();
@@ -1825,9 +1804,10 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
   $('#startBtn').addEventListener('click',function(){ state.index=0; state.scope=INITIAL_COUNT; state.deepCompleted=false; state.answers={}; state.lines=[]; state.importedLines=[]; state.suppressedTexts=[]; state.mergeItems=[]; state.fileVersion=1; state.v0Lines=[]; state.diffFilter='all'; state.diffExpanded=false; state.scenario='build'; resetImporter(); try{localStorage.removeItem('pv1'); localStorage.removeItem('pv-versions');}catch(e){} window.__savedState=null; var rb=$('#resumeBanner'); if(rb) rb.hidden=true; $('#promptDetails').classList.remove('open'); $('#togglePromptDetails').setAttribute('aria-expanded','false'); $('#togglePromptDetails').textContent='View prompt'; renderQuestion(); renderLive(false); go('#/interview'); });
   $('#reviewDraftBtn').addEventListener('click',function(){ renderReview(); go('#/review'); });
   $('#deepBtn').addEventListener('click',function(){
-    if(state.deepCompleted) return;
+    var cap=isPro()?questions.length:INITIAL_COUNT+8;
+    if(deepProgressCount()>=cap-INITIAL_COUNT){ if(!isPro()) go('#/upgrade'); return; }
     if(!state.v0Lines.length) state.v0Lines=state.lines.map(function(l){return {id:l.id,text:l.text,bucket:l.bucket};});
-    state.scope=questions.length;
+    state.scope=cap; state.deepCompleted=false;
     var nextUnanswered=questions.slice(INITIAL_COUNT).findIndex(function(q){ return !answerReady(q); });
     state.index=nextUnanswered===-1?INITIAL_COUNT:INITIAL_COUNT+nextUnanswered;
     renderQuestion(); renderLive(false); go('#/interview');
@@ -1855,9 +1835,6 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
   });
   $('#copyPatternPrompt').addEventListener('click',function(){
     copyText($('#patternPrompt').textContent).then(function(){toast('Handoff prompt copied');}).catch(function(){toast('Copy unavailable — select the prompt instead');});
-  });
-  $('#copyCombinedBtn').addEventListener('click',function(){
-    copyText(fileText('agent')+'\n\n---\n\n'+fileText('voice')).then(function(){toast('Combined file copied — paste it into custom instructions');}).catch(function(){toast('Copy unavailable — select the text instead');});
   });
   $('#analyzeDigestBtn').addEventListener('click',function(){
     var text=$('#digestInput').value.trim();
@@ -1910,7 +1887,31 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
   });
   $('#importAnotherBtn').addEventListener('click',function(){ resetImporter(); $('#digestInput').focus(); });
   document.querySelectorAll('[data-copy]').forEach(function(btn){btn.addEventListener('click',function(){ var text=fileText(btn.dataset.copy); copyText(text).then(function(){toast(btn.dataset.copy+'.md copied');}).catch(function(){toast('Copy unavailable — select the text instead');});});});
-  document.querySelectorAll('[data-setup-copy]').forEach(function(btn){btn.addEventListener('click',function(){ var kind=btn.dataset.setupCopy; var text=kind==='compact'?compactText():combinedText(); copyText(text).then(function(){toast((kind==='compact'?'Compact':'Combined')+' file copied ('+text.length+' chars)');}).catch(function(){toast('Copy unavailable — select the text instead');});});});
+  document.querySelectorAll('[data-setup-copy]').forEach(function(btn){btn.addEventListener('click',function(){ var text=fileText(btn.dataset.setupCopy); copyText(text).then(function(){toast(btn.dataset.setupCopy+'.md copied ('+text.length+' chars)');}).catch(function(){toast('Copy unavailable — select the text instead');});});});
+  var DESTS={
+    chatgpt:{path:'Profile \u2192 Settings \u2192 Personalization \u2192 Custom instructions',copy:'Two boxes, 1,500 characters each on every plan. Paste agent.md into \u201cWhat would you like ChatGPT to know about you?\u201d and voice.md into \u201cHow would you like ChatGPT to respond?\u201d. Both fit.'},
+    claude:{path:'Settings \u2192 Profile',copy:'No published character cap \u2014 paste both files, one after the other. For a single project, use that Project\u2019s instructions instead.'},
+    gemini:{path:'Settings \u2192 Saved info',copy:'Add each file as its own saved entry. If an entry will not save, use a Gem \u2014 instructions take about 4,000 characters.'},
+    code:{path:'CLAUDE.md \u00b7 AGENTS.md \u00b7 project rules',copy:'Paste both files into your project\u2019s instruction file. No size limit to worry about.'},
+    other:{path:'No instruction box?',copy:'Paste both files as the first message of a new chat \u2014 or as the system prompt if you are calling an API.'}
+  };
+  function selectDest(k){ var d=DESTS[k]||DESTS.chatgpt;
+    document.querySelectorAll('[data-dest]').forEach(function(b){ b.classList.toggle('active',b.dataset.dest===k); });
+    var p=$('#destPath'), c=$('#destCopy'); if(p) p.textContent=d.path; if(c) c.textContent=d.copy;
+  }
+  document.querySelectorAll('[data-dest]').forEach(function(b){ b.addEventListener('click',function(){ selectDest(b.dataset.dest); }); });
+  selectDest('chatgpt');
+  function updateDestBudget(){
+    var el=$('#destBudget'); if(!el) return;
+    var a=fileText('agent').length, v=fileText('voice').length, over=Math.max(a,v)-1500;
+    if(over<=0){ el.innerHTML='agent.md \u00b7 '+a+' chars &mdash; voice.md \u00b7 '+v+' chars. Both fit every box.'; el.classList.remove('over'); }
+    else { var which=a>v?'agent.md':'voice.md'; el.innerHTML=which+' is '+Math.max(a,v)+' chars \u2014 '+over+' over what every box takes. <a href="#/review">Trim lines</a> to fit everywhere.'; el.classList.add('over'); }
+  }
+  function selectFileTab(which){
+    document.querySelectorAll('[data-filetab]').forEach(function(t){ var on=t.dataset.filetab===which; t.classList.toggle('active',on); t.setAttribute('aria-selected',on); });
+    document.querySelectorAll('[data-filepanel]').forEach(function(pp){ var on=pp.dataset.filepanel===which; pp.hidden=!on; });
+  }
+  document.querySelectorAll('[data-filetab]').forEach(function(t){ t.addEventListener('click',function(){ selectFileTab(t.dataset.filetab); }); });
   document.querySelectorAll('[data-download]').forEach(function(btn){btn.addEventListener('click',function(){download(btn.dataset.download,fileText(btn.dataset.download));});});
   function loadSaved(){ try{ var raw=localStorage.getItem('pv1'); if(!raw) return null; var s=JSON.parse(raw); return (s&&s.lines&&s.lines.length)?s:null; }catch(e){ return null; } }
   function resumeSaved(){
@@ -1934,24 +1935,16 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
     else { el.innerHTML='Have a voice already? <a href="#/login">Log in</a> or <a href="#/signup">create an account</a>.'; }
   }
   function afterAuth(){ renderAuthNav(); renderReturning(); if(!resumeSaved()) go('#/account'); }
-  function combinedText(){ return fileText('agent')+'\n\n---\n\n'+fileText('voice'); }
-  function compactText(){
-    var max=1400, out='', lines=combinedText().split('\n');
-    for(var i=0;i<lines.length;i++){ var nl=lines[i]+'\n'; if(out.length+nl.length>max) break; out+=nl; }
-    return out.replace(/\s+$/,'');
-  }
-  function renderSetup(){ var el=$('#setupSize'); if(el){ var n=combinedText().length; el.textContent='about '+Math.round(n/100)*100; } }
   function isPro(){ try{ return localStorage.getItem('pv-pro')==='1'; }catch(e){ return false; } }
   function renderPro(){
-    var pro=isPro();
-    var locked=$('#proLocked'), unlocked=$('#proUnlocked');
-    if(locked) locked.hidden=pro;
-    if(unlocked) unlocked.hidden=!pro;
+    var pro=isPro(), cta=$('#proCta'); if(!cta) return;
+    cta.setAttribute('href',pro?'#/import':'#/upgrade');
+    var t=$('#proTitle'); if(t) t.textContent=pro?'Pro — import':'Go Pro — $10 once';
+    var n=$('#proNote'); if(n) n.textContent=pro?'Import a summary from your other AIs.':'Extraction prompt + MCP early access.';
   }
   function renderFunnel(){
     var cta=$('#updateCta'); if(!cta) return;
-    if(getUser()){ cta.setAttribute('href','#/account'); cta.innerHTML='View your account &rarr;'; }
-    else { cta.setAttribute('href','#/signup'); cta.innerHTML='Create an account &rarr;'; }
+    cta.setAttribute('href',getUser()?'#/account':'#/signup');
   }
   function getUser(){ try{ return JSON.parse(localStorage.getItem('pv-user')||'null'); }catch(e){ return null; } }
   function setUser(u){ try{ localStorage.setItem('pv-user',JSON.stringify(u)); }catch(e){} renderAuthNav(); }
@@ -1982,7 +1975,7 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
   $('#googleLoginBtn').addEventListener('click',function(){ setUser({name:'Google User',email:'you@gmail.com'}); afterAuth(); });
   $('#googleSignupBtn').addEventListener('click',function(){ setUser({name:'Google User',email:'you@gmail.com'}); afterAuth(); });
   $('#signOutBtn').addEventListener('click',function(){ try{ localStorage.removeItem('pv-user'); }catch(e){} renderAuthNav(); go('#/'); });
-  $('#upgradeForm').addEventListener('submit',function(e){ e.preventDefault(); try{ localStorage.setItem('pv-pro','1'); }catch(err){} renderAuthNav(); renderPro(); go('#/settings'); toast('Pro unlocked — welcome in'); });
+  $('#upgradeForm').addEventListener('submit',function(e){ e.preventDefault(); try{ localStorage.setItem('pv-pro','1'); }catch(err){} renderAuthNav(); renderPro(); go('#/import'); toast('Pro unlocked — welcome in'); });
   (function restoreSaved(){
     var saved=null;
     try{ saved=JSON.parse(localStorage.getItem('pv1')||'null'); }catch(e){}

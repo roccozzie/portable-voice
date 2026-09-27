@@ -28,6 +28,17 @@ pair, with a paste-and-merge loop for importing pattern digests.
 Privacy note: the page scans pasted digests for personal details in the
 browser *before* anything is sent to `/api/merge`.
 
+## Product rules
+
+- **1,500 characters per file.** Each generated file is budgeted to fit every
+  paste box out of the box (ChatGPT Free: 1,500/box × 2). The settings page
+  shows a per-file budget meter; the setup page reports both sizes and, when
+  a file runs over, points at review to trim lines.
+- **8 + 8 free.** The interview (8) and the deeper pass's first 8 exercises
+  are free; the remaining 16 deeper exercises unlock with Pro.
+- **Pro ($10 once):** full deeper pass, the extraction prompt + digest
+  importer (`#/import`), and MCP early access.
+
 ## Deploy
 
 Push to `main` → Vercel auto-deploys (GitHub App installed with repo access).
