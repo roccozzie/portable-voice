@@ -34,8 +34,8 @@ The two files:
 Every proposed line must EARN its place: it must change how a new AI behaves with this user. Cut anything true of almost any user ("be helpful", "be accurate"). Cut description; keep only behavior-correcting instructions. Write each line as an instruction to a future assistant, in the file's existing voice. Distill: ten digest bullets should become two or three file lines, not ten.
 
 Routing:
-- Interaction preferences, Decision patterns, When to ask vs. act, Corrections, Frustrations → bucket "agent"
-- Working context, Voice and style → bucket "voice"
+- Working context, Interaction preferences, Decision patterns, When to ask vs. act, Corrections, Frustrations → bucket "agent"
+- Voice and style → bucket "voice"
 - Tentative section → bucket "tentative", type "tentative", choice "hold"
 
 For each digest bullet decide:

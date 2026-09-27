@@ -42,7 +42,7 @@
       }
     }
     * { box-sizing:border-box; }
-    html { background:var(--paper); color:var(--ink); }
+    html { background:var(--paper); color:var(--ink); scroll-padding-top:84px; }
     body { margin:0; min-height:100vh; font-family:"IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background:var(--paper); color:var(--ink); }
     button, input, textarea { font:inherit; color:inherit; }
     button { cursor:pointer; }
@@ -179,10 +179,6 @@
     .demo-prompt { position:relative; padding:22px 24px 26px; font-size:clamp(15px,1.6vw,19px); line-height:1.55; max-width:850px; }
     .demo-prompt strong { display:flex; align-items:center; gap:8px; margin-bottom:10px; font-size:10px; color:var(--muted); font-weight:500; }
     .demo-prompt strong::before { content:""; width:8px; height:8px; background:var(--ink); }
-    .prompt-branch { display:grid; grid-template-columns:1fr 1fr; height:26px; border-top:1px solid var(--ink); }
-    .prompt-branch span { position:relative; }
-    .prompt-branch span:first-child { border-right:1px solid var(--ink); }
-    .prompt-branch span::after { content:""; position:absolute; left:50%; top:0; width:1px; height:26px; background:var(--ink); }
     .response-grid { display:grid; grid-template-columns:1fr 1fr; border-top:1px solid var(--ink); }
     .response-panel { min-width:0; padding:0 22px 24px; }
     .response-panel + .response-panel { border-left:1px solid var(--ink); }
@@ -319,7 +315,9 @@
     .pro-features strong { font-size:13px; }
     .pro-features span { color:var(--muted); font-size:11px; line-height:1.6; }
     .pro-features .soon-tag { margin-left:6px; }
-    .card-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .card-row { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:14px; }
+    .card-row > label { min-width:0; }
+    .card-row input { width:100%; box-sizing:border-box; }
     .upgrade-shell h2 { line-height:1.05; }
     .setup-shell { max-width:720px; margin:0 auto; padding:64px 28px 90px; }
     .setup-shell h2 { margin:0 0 8px; font-size:clamp(28px,4vw,44px); font-weight:500; letter-spacing:-.04em; }
@@ -457,7 +455,6 @@
       .merge-footer, .merge-done { align-items:flex-start; flex-direction:column; }
       .flow-steps > li { grid-template-columns:34px 1fr; gap:12px; }
       .prompt-box { border-left:0; border-top:1px solid var(--ink); }
-      .prompt-branch { display:none; }
       .response-grid { grid-template-columns:1fr; }
       .response-panel { padding:0 18px 22px; }
       .response-label { margin:0 -18px 18px; }
@@ -471,6 +468,8 @@
     }
     @media (max-width:480px) {
       h1 { font-size:39px; }
+      .conversation { padding:22px 18px 24px; }
+      .progress-row { margin-bottom:24px; }
       .intro { padding:24px 16px 50px; }
       .file-body { padding:18px; }
       .line-item { grid-template-columns:24px 1fr 34px; }
@@ -570,7 +569,6 @@ Direct, curious, and willing to find the surprising connection.
         </div>
         <div class="comparison-stage">
           <div class="demo-prompt"><strong>SAME PROMPT TO BOTH</strong><span id="demoPromptText">I’ve got three good product directions and two weeks. How should I decide what to build?</span></div>
-          <div class="prompt-branch" aria-hidden="true"><span></span><span></span></div>
           <div class="response-grid">
             <article class="response-panel">
               <div class="response-label"><strong>PLAIN AI</strong><span>no settings</span></div>
@@ -626,7 +624,7 @@ Direct, curious, and willing to find the surprising connection.
         <a class="next-row" href="#/setup"><span class="next-row-text"><strong>Use them</strong><em>Get the files into your AIs.</em></span><span class="next-row-arrow" aria-hidden="true">&rarr;</span></a>
         <button class="next-row" id="deepBtn" type="button"><span class="next-row-text"><strong id="deepTitle">Refine &mdash; free</strong><em id="deepNote">8 more quick exercises.</em></span><span class="next-row-arrow" aria-hidden="true">&rarr;</span></button>
         <a class="next-row" id="updateCta" href="#/signup"><span class="next-row-text"><strong>Stay updated &mdash; free</strong><em>One account, every version.</em></span><span class="next-row-arrow" aria-hidden="true">&rarr;</span></a>
-        <a class="next-row" id="proCta" href="#/upgrade"><span class="next-row-text"><strong id="proTitle">Go Pro &mdash; $10 once</strong><em id="proNote">Extraction prompt + MCP early access.</em></span><span class="next-row-arrow" aria-hidden="true">&rarr;</span></a>
+        <a class="next-row" id="proCta" href="#/upgrade"><span class="next-row-text"><strong id="proTitle">Go Pro &mdash; $10 once</strong><em id="proNote">Import from your other AIs + first in line for MCP.</em></span><span class="next-row-arrow" aria-hidden="true">&rarr;</span></a>
       </section>
 <p class="privacy-rule"><strong>Built-in boundary:</strong> personal identifiers and secrets never belong in these files. Useful context is generalized before it reaches either one.</p>
     </main>
@@ -650,9 +648,9 @@ Direct, curious, and willing to find the surprising connection.
   <section class="screen" id="signupScreen">
     <main class="auth-shell">
       <div class="auth-card">
-        <div class="index">Sync prototype</div>
+        <div class="index">Prototype account</div>
         <h2>Create your account</h2>
-        <p class="auth-sub">Keeps every version of your settings together in this browser. Real cross-device sync is coming.</p>
+        <p class="auth-sub">Keeps every version of your settings together in this browser. Nothing leaves this browser.</p>
         <form id="signupForm">
           <label>Name<input type="text" name="name" required autocomplete="name" placeholder="Ada"></label>
           <label>Email<input type="email" name="email" required autocomplete="email" placeholder="you@example.com"></label>
@@ -682,7 +680,7 @@ Direct, curious, and willing to find the surprising connection.
         <div class="setup-actions"><button type="button" data-setup-copy="agent">Copy agent.md</button><button type="button" data-setup-copy="voice">Copy voice.md</button></div>
         <p class="dest-budget" id="destBudget"></p>
       </div>
-      <p class="setup-fine">MCP access is coming for Pro members &mdash; <a href="#/upgrade">$10 once</a>.</p>
+      <p class="setup-fine">MCP access is on the roadmap for Pro members &mdash; <a href="#/upgrade">$10 once</a>.</p>
       <p class="auth-switch"><a href="#/settings">&larr; Back to my settings</a></p>
     </main>
   </section>
@@ -753,7 +751,7 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
           </section>
 <div class="mcp-block">
               <h5>Connect via MCP <span class="soon-tag">Early access</span></h5>
-              <p>Pro members get the hosted MCP endpoint first &mdash; your settings, readable by Claude Desktop, Cursor, and any MCP client, always your latest version. The one-line setup lands here when it ships.</p>
+              <p>On the roadmap: a hosted MCP endpoint &mdash; your settings readable by Claude Desktop, Cursor, and any MCP client, always the latest version. Pro members get first access when it ships.</p>
             </div>
       <p class="auth-switch"><a href="#/settings">&larr; Back to my settings</a></p>
     </main>
@@ -762,12 +760,12 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
     <main class="auth-shell upgrade-shell">
       <div class="auth-card">
         <div class="index">Portable Voice Pro</div>
-        <h2>$10 once.<br>Yours forever.</h2>
+        <h2>$10 once.</h2>
         <p class="auth-sub">No subscription, no renewal. One payment unlocks:</p>
         <ul class="pro-features">
           <li><div><strong>The copy/paste extraction prompt</strong><span>Turn years of ChatGPT and Claude history into a compact pattern summary, then merge it line by line with full review.</span></div></li>
-          <li><div><strong>MCP access</strong> <span class="soon-tag">Early access</span><span>Your settings served to Claude Desktop, Cursor, and any MCP client &mdash; always your latest version.</span></div></li>
-          <li><div><strong>Everything free stays free</strong><span>The interview, both files, version history, and your account cost nothing, forever.</span></div></li>
+          <li><div><strong>MCP early access</strong> <span class="soon-tag">Coming soon</span><span>A hosted endpoint for Claude Desktop and Cursor is on the roadmap &mdash; Pro members get first access when it ships.</span></div></li>
+          <li><div><strong>Free stays free</strong><span>The interview, both files, and version history cost nothing.</span></div></li>
         </ul>
         <form id="upgradeForm">
           <label>Name on card<input type="text" name="ccname" autocomplete="cc-name" placeholder="Ada Lovelace"></label>
@@ -788,7 +786,7 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
       <div class="index">Your account</div>
       <h2 id="accountName">&nbsp;</h2>
       <p class="auth-sub" id="accountEmail">&nbsp;</p>
-      <p class="prototype-note">Prototype account &mdash; stored only in this browser. Real sync is coming.</p>
+      <p class="prototype-note">Prototype account &mdash; stored only in this browser. Nothing leaves this browser.</p>
       <p class="plan-row">Plan: <strong id="accountPlan">Free</strong><a href="#/upgrade" id="accountUpgrade">Upgrade to Pro &mdash; $10</a></p>
       <div class="account-versions-head"><h3>Your versions</h3><span>Restoring replaces your current files.</span></div>
       <div id="versionList"></div>
@@ -1249,6 +1247,7 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
   }
   function advance(){
     var q=questions[state.index]; if(!answerReady(q)) return;
+    persist();
     renderLive(true);
     if(state.index<state.scope-1){ state.index++; renderQuestion(); }
     else if(state.scope===INITIAL_COUNT){
@@ -1256,7 +1255,7 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
       state.v0Lines=state.lines.map(function(l){ return {id:l.id,text:l.text,bucket:l.bucket}; });
       renderFinish(); go('#/settings');
     }
-    else { state.deepCompleted=true; collectLines(); renderReview(); go('#/review'); }
+    else { state.deepCompleted=true; collectLines(); if(state.fileVersion<2) state.fileVersion=2; renderReview(); go('#/review'); }
   }
 
   function renderReview(){
@@ -1700,19 +1699,23 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
     return !!axisA && axisA===axisB && (negA!==negB || similarity(a,b)>.22);
   }
   async function refineMergeWithAPI(digest){
-    // Server-side merge intelligence. Returns null when the API is not
-    // configured (or unreachable) — the caller falls back to prepareMerge.
+    // Server-side merge intelligence. Returns {items} on success,
+    // {items:null} when the API is not configured, and
+    // {items:null,apiError:true} when the API errored (broken key or
+    // unreachable) — the caller falls back to prepareMerge either way.
     // The digest was PII-scanned in the browser before this call.
     try{
       var ctrl=new AbortController();
       var timer=setTimeout(function(){ctrl.abort();},15000);
       var resp=await fetch('/api/merge',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({digest:digest,agent:fileText('agent'),voice:fileText('voice')}),signal:ctrl.signal});
       clearTimeout(timer);
-      if(!resp.ok) return null;
+      if(!resp.ok) return {items:null,apiError:true};
       var data=await resp.json();
-      if(!data||!data.configured||!Array.isArray(data.items)||!data.items.length) return null;
+      if(data&&data.configured===false) return {items:null};
+      if(!data||!Array.isArray(data.items)) return {items:null,apiError:true};
+      if(!data.items.length) return {items:null};
       var now=Date.now();
-      return data.items.map(function(item,i){
+      var out=data.items.map(function(item,i){
         var sec=String(item.section||'');
         if(HEADING_ORDER.indexOf(sec)===-1){
           var dk=sec.toLowerCase();
@@ -1720,7 +1723,8 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
         }
         return {id:'m'+now+i,section:sec,bucket:(item.bucket==='agent'||item.bucket==='voice')?item.bucket:'tentative',evidence:item.evidence==='stated'?'stated':'observed',strength:item.strength==='strong'?'strong':'moderate',text:normalizeVoice(String(item.text||'').trim()),examples:(Array.isArray(item.examples)?item.examples:[]).map(function(x){return normalizeVoice(String(x).trim()).slice(0,220);}).filter(function(x){return x;}),type:['add','conflict','duplicate','tentative'].indexOf(item.type)===-1?'add':item.type,choice:String(item.choice||'reject'),match:item.match?{text:String(item.match.text||item.match)}:null};
       }).filter(function(item){return item.text;});
-    }catch(e){ return null; }
+      return {items:out};
+    }catch(e){ return {items:null,apiError:true}; }
   }
   function parseDigest(text){
     var route={
@@ -1768,7 +1772,11 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
     var conflicts=items.filter(function(x){return x.type==='conflict';});
     var duplicates=items.filter(function(x){return x.type==='duplicate';});
     var tentative=items.filter(function(x){return x.type==='tentative';});
-    $('#mergeSummary').innerHTML='<span>'+adds.length+' new · '+conflicts.length+' possible conflict'+(conflicts.length===1?'':'s')+'</span><span>'+duplicates.length+' repeat'+(duplicates.length===1?'':'s')+' skipped · '+tentative.length+' tentative held aside</span>';
+    var pendingAdds=adds.filter(function(x){return !x.resolved;}).length, pendingConf=conflicts.filter(function(x){return !x.resolved;}).length;
+    $('#mergeSummary').innerHTML=(pendingAdds+pendingConf===0
+      ? '<span>All reviewed \u2713</span>'
+      : '<span>'+pendingAdds+' new \u00b7 '+pendingConf+' possible conflict'+(pendingConf===1?'':'s')+'</span>')
+      +'<span>'+duplicates.length+' repeat'+(duplicates.length===1?'':'s')+' skipped \u00b7 '+tentative.length+' tentative held aside</span>';
     var html='';
     if(adds.length){ html+='<section class="merge-group"><h5>NEW LINES</h5>'+adds.map(function(item){ return mergeRowHTML(item); }).join('')+'</section>'; }
     if(conflicts.length){ html+='<section class="merge-group"><h5>NEEDS YOUR CALL</h5>'+conflicts.map(function(item){ return mergeRowHTML(item); }).join('')+'</section>'; }
@@ -1904,7 +1912,9 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
         $('#editDigestBtn').addEventListener('click',function(){ $('#importInputStep').hidden=false; $('#importStatus').className='import-status'; $('#digestInput').focus(); });
         return;
       }
-      var apiItems=await refineMergeWithAPI(text);
+      var apiRes=await refineMergeWithAPI(text);
+      var apiItems=apiRes&&apiRes.items;
+      if(apiRes&&apiRes.apiError) toast('Online merge unavailable \u2014 matched on this device instead.');
       state.mergeItems=(apiItems&&apiItems.length)?apiItems:prepareMerge(parsed);
       $('#importStatus').className='import-status';
       $('#mergeReview').className='merge-review show';
@@ -1937,9 +1947,9 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
   document.querySelectorAll('[data-copy]').forEach(function(btn){btn.addEventListener('click',function(){ var text=fileText(btn.dataset.copy); copyText(text).then(function(){toast(btn.dataset.copy+'.md copied');}).catch(function(){toast('Copy unavailable — select the text instead');});});});
   document.querySelectorAll('[data-setup-copy]').forEach(function(btn){btn.addEventListener('click',function(){ var text=fileText(btn.dataset.setupCopy); copyText(text).then(function(){toast(btn.dataset.setupCopy+'.md copied ('+text.length+' chars)');}).catch(function(){toast('Copy unavailable — select the text instead');});});});
   var DESTS={
-    chatgpt:{path:'Profile \u2192 Settings \u2192 Personalization \u2192 Custom instructions',copy:'Two boxes, 1,500 characters each on every plan. Paste agent.md into \u201cWhat would you like ChatGPT to know about you?\u201d and voice.md into \u201cHow would you like ChatGPT to respond?\u201d. Both fit.'},
-    claude:{path:'Settings \u2192 Profile',copy:'No published character cap \u2014 paste both files, one after the other. For a single project, use that Project\u2019s instructions instead.'},
-    gemini:{path:'Settings \u2192 Saved info',copy:'Add each file as its own saved entry. If an entry will not save, use a Gem \u2014 instructions take about 4,000 characters.'},
+    chatgpt:{path:'Profile \u2192 Settings \u2192 Personalization \u2192 Custom instructions',copy:'Two boxes, 1,500 characters each on the free plan (more on paid plans). Turn \u201cEnable customization\u201d on, paste agent.md into \u201cWhat would you like ChatGPT to know about you?\u201d and voice.md into \u201cHow would you like ChatGPT to respond?\u201d, then save. Both fit.'},
+    claude:{path:'Settings \u2192 Profile',copy:'Look for the field \u201cWhat personal preferences should Claude consider in responses?\u201d (it may sit under General instead). Paste both files, one after the other. No published character cap. For a single project, use that Project\u2019s instructions instead.'},
+    gemini:{path:'Settings & help \u2192 Settings \u2192 Instructions for Gemini',copy:'Add each file as its own entry with Add. Gemini rewords entries when it saves them, so expect a paraphrase of your words, not the exact text.'},
     code:{path:'CLAUDE.md \u00b7 AGENTS.md \u00b7 project rules',copy:'Paste both files into your project\u2019s instruction file. No size limit to worry about.'},
     other:{path:'No instruction box?',copy:'Paste both files as the first message of a new chat \u2014 or as the system prompt if you are calling an API.'}
   };
@@ -1962,15 +1972,37 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
   }
   document.querySelectorAll('[data-filetab]').forEach(function(t){ t.addEventListener('click',function(){ selectFileTab(t.dataset.filetab); }); });
   document.querySelectorAll('[data-download]').forEach(function(btn){btn.addEventListener('click',function(){download(btn.dataset.download,fileText(btn.dataset.download));});});
-  function loadSaved(){ try{ var raw=localStorage.getItem('pv1'); if(!raw) return null; var s=JSON.parse(raw); return (s&&s.lines&&s.lines.length)?s:null; }catch(e){ return null; } }
+  function loadSaved(){ try{ var raw=localStorage.getItem('pv1'); if(!raw) return null; var s=JSON.parse(raw); var hasLines=s&&s.lines&&s.lines.length, hasAnswers=s&&s.answers&&Object.keys(s.answers).length; return (hasLines||hasAnswers)?s:null; }catch(e){ return null; } }
+  function savedScope(idx){ return idx<INITIAL_COUNT?INITIAL_COUNT:(isPro()?questions.length:INITIAL_COUNT+8); }
+  function isMidInterview(s){
+    if(!s||s.deepCompleted) return false;
+    var ans=s.answers||{}; if(!Object.keys(ans).length) return false;
+    // Mid-interview means some question within scope is still unanswered —
+    // sitting on the last question is not the same as having answered it.
+    var idx=s.index||0, scope=savedScope(idx);
+    for(var i=0;i<scope&&i<questions.length;i++){
+      var q=questions[i], a=ans[q.key];
+      var ready=q.type==='text'?!!(a&&a.trim()):q.type==='choice'?(typeof a==='number'):(Array.isArray(a)&&a.length>0);
+      if(!ready) return true;
+    }
+    return false;
+  }
   function resumeSaved(){
     var s=loadSaved()||window.__savedState;
-    if(!s||!s.lines||!s.lines.length) return false;
-    ['lines','answers','v0Lines','importedLines'].forEach(function(k){ state[k]=s[k]||[]; });
+    if(!s) return false;
+    var hasLines=s.lines&&s.lines.length;
+    if(!hasLines&&!(s.answers&&Object.keys(s.answers).length)) return false;
+    ['lines','answers','v0Lines','importedLines'].forEach(function(k){ state[k]=s[k]||(k==='answers'?{}:[]); });
     state.fileVersion=s.fileVersion||1; state.deepCompleted=!!s.deepCompleted; state.index=s.index||0; state.scenario=s.scenario||'build';
     state.suppressedTexts=[]; state.mergeItems=[]; state.diffFilter='all'; state.diffExpanded=false;
     resetImporter();
     window.__savedState=null; var rb=$('#resumeBanner'); if(rb) rb.hidden=true;
+    if(isMidInterview(s)){
+      // Pick up on the next unanswered question.
+      state.scope=savedScope(state.index);
+      if(state.index>=state.scope) state.index=state.scope-1;
+      renderQuestion(); renderLive(false); go('#/interview'); return true;
+    }
     renderFinish(); go('#/settings'); return true;
   }
   function renderReturning(){
@@ -1980,7 +2012,7 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
       el.innerHTML='Welcome back, '+escapeHTML(u.name||u.email)+' &mdash; <button type="button" class="linklike" id="returningGo">jump straight to your settings &rarr;</button>';
       $('#returningGo').addEventListener('click',function(){ resumeSaved(); });
     }
-    else if(saved){ el.innerHTML='Your voice is waiting &mdash; <a href="#/login">log in</a> to pick up where you left off.'; }
+    else if(saved){ el.innerHTML='Your voice is waiting &mdash; <button type="button" class="linklike" id="returningGo">jump straight to your settings &rarr;</button>'; $('#returningGo').addEventListener('click',function(){ resumeSaved(); }); }
     else { el.innerHTML='Have a voice already? <a href="#/login">Log in</a> or <a href="#/signup">create an account</a>.'; }
   }
   function afterAuth(){ renderAuthNav(); renderReturning(); if(!resumeSaved()) go('#/account'); }
@@ -2028,11 +2060,12 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
   (function restoreSaved(){
     var saved=null;
     try{ saved=JSON.parse(localStorage.getItem('pv1')||'null'); }catch(e){}
-    if(!saved||!saved.lines||!saved.lines.length) return;
+    var hasLines=saved&&saved.lines&&saved.lines.length, hasAnswers=saved&&saved.answers&&Object.keys(saved.answers).length;
+    if(!hasLines&&!hasAnswers) return;
     window.__savedState=saved;
     var banner=$('#resumeBanner'); if(!banner) return;
     banner.hidden=false;
-    var meta=(saved.fileVersion?('v0.'+saved.fileVersion+' \u00b7 '):'')+saved.lines.length+' lines';
+    var meta=isMidInterview(saved)?'interview in progress':((saved.fileVersion?('v0.'+saved.fileVersion+' \u00b7 '):'')+saved.lines.length+' lines');
     if(saved.ts){ var d=new Date(saved.ts); meta+=' \u00b7 saved '+d.toLocaleDateString()+' '+d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}); }
     $('#resumeMeta').textContent=meta;
   })();
