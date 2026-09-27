@@ -1,0 +1,1533 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <link rel="icon" href="data:," />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <title>Your AI Voice</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --paper:#fff;
+      --ink:#0b0b0b;
+      --muted:#666;
+      --faint:#a3a3a3;
+      --line:#d6d6d6;
+      --soft:#f3f3f1;
+      --select:#e7ff6b;
+      --red:#d92d20;
+      --red-bg:#fff0ee;
+      --green:#176b3a;
+      --green-bg:#eaf8ef;
+      --shadow:#0 3px 0 var(--ink);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --paper:#0c0c0c;
+        --ink:#f4f4ef;
+        --muted:#aaa;
+        --faint:#747474;
+        --line:#424242;
+        --soft:#191919;
+        --select:#b4d900;
+        --red:#ff766e;
+        --red-bg:#2b1615;
+        --green:#79d99f;
+        --green-bg:#11281a;
+        --shadow:#0 3px 0 var(--ink);
+      }
+    }
+    * { box-sizing:border-box; }
+    html { background:var(--paper); color:var(--ink); }
+    body { margin:0; min-height:100vh; font-family:"IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background:var(--paper); color:var(--ink); }
+    button, input, textarea { font:inherit; color:inherit; }
+    button { cursor:pointer; }
+    button:focus-visible, input:focus-visible, textarea:focus-visible { outline:3px solid var(--select); outline-offset:2px; }
+    .screen { display:none; min-height:100vh; }
+    .screen.active { display:block; }
+
+    .intro { max-width:1180px; margin:0 auto; padding:clamp(28px,5vw,70px) clamp(18px,4vw,54px); }
+    .intro-grid { min-height:calc(100vh - 140px); display:grid; grid-template-columns:minmax(0, .85fr) minmax(360px, 1.15fr); gap:clamp(34px,7vw,96px); align-items:center; }
+    .index { color:var(--muted); font-size:12px; margin-bottom:28px; }
+    h1 { margin:0 0 24px; max-width:660px; font-size:clamp(36px,4.8vw,68px); font-weight:500; line-height:1; letter-spacing:-.05em; }
+    .lede { max-width:590px; font-size:clamp(15px,1.7vw,19px); line-height:1.6; margin:0 0 34px; color:var(--muted); }
+    .primary { border:2px solid var(--ink); background:var(--ink); color:var(--paper); padding:14px 18px; font-weight:600; min-height:48px; box-shadow:var(--shadow); }
+    .primary:hover { transform:translateY(2px); box-shadow:none; }
+    .fine { margin-top:16px; color:var(--muted); font-size:12px; line-height:1.5; }
+    .file-window { border:2px solid var(--ink); background:var(--paper); min-height:500px; display:flex; flex-direction:column; }
+    .file-bar { min-height:45px; border-bottom:1px solid var(--ink); display:flex; align-items:center; justify-content:space-between; padding:0 14px; font-size:12px; }
+    .file-dot { display:inline-block; width:9px; height:9px; background:var(--ink); margin-right:9px; }
+    .file-body { padding:24px; line-height:1.7; font-size:clamp(12px,1.2vw,15px); flex:1; white-space:pre-wrap; }
+    .syntax { color:var(--faint); }
+    .cursor { display:inline-block; width:9px; height:1.15em; background:var(--ink); vertical-align:-.15em; animation:blink 1s steps(1) infinite; }
+    @keyframes blink { 50% { opacity:0; } }
+
+    .work-shell { min-height:100vh; display:grid; grid-template-columns:minmax(360px, 43%) 1fr; }
+    .conversation { padding:clamp(24px,5vw,70px); border-right:1px solid var(--ink); display:flex; flex-direction:column; min-height:100vh; }
+    .progress-row { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; color:var(--muted); font-size:12px; margin-bottom:56px; }
+    .progress-meta { min-width:0; flex:1; }
+    .progress-meta-line { display:flex; justify-content:space-between; gap:16px; }
+    .progress-track { height:3px; background:var(--line); margin-top:10px; }
+    .exit-deep { flex:0 0 auto; border:1px solid var(--ink); background:var(--paper); padding:8px 10px; text-align:left; line-height:1.2; }
+    .exit-deep strong, .exit-deep span { display:block; }
+    .exit-deep strong { font-size:10px; font-weight:600; color:var(--ink); }
+    .exit-deep span { margin-top:3px; font-size:9px; color:var(--muted); }
+    .exit-deep:hover { background:var(--ink); }
+    .exit-deep:hover strong, .exit-deep:hover span { color:var(--paper); }
+    .progress-fill { height:100%; background:var(--ink); width:0; transition:width .3s ease; }
+    .question-wrap { flex:1; display:flex; flex-direction:column; justify-content:center; max-width:620px; }
+    .question-count { font-size:12px; color:var(--muted); margin-bottom:18px; }
+    .question { font-size:clamp(25px,3vw,42px); letter-spacing:-.035em; line-height:1.15; font-weight:500; margin:0 0 14px; }
+    .prompt-note { margin:0 0 28px; color:var(--muted); line-height:1.55; font-size:14px; max-width:560px; }
+    .choices { display:grid; gap:10px; }
+    .choice { width:100%; background:var(--paper); border:1px solid var(--ink); text-align:left; padding:15px 16px; line-height:1.45; min-height:54px; transition:background .12s; }
+    .choice:hover { background:var(--soft); }
+    .choice.selected { background:var(--select); color:#090909; border-width:2px; padding:14px 15px; }
+    .choice b { display:block; font-weight:600; margin-bottom:3px; }
+    .choice span { color:var(--muted); font-size:12px; }
+    .choice.selected span { color:#252525; }
+    .text-answer { width:100%; border:none; border-bottom:2px solid var(--ink); background:transparent; border-radius:0; padding:14px 0; font-size:clamp(19px,2.5vw,28px); resize:none; min-height:65px; }
+    .text-answer::placeholder { color:var(--faint); }
+    .question-actions { display:flex; align-items:center; justify-content:space-between; gap:18px; margin-top:28px; }
+    .back { border:0; background:transparent; padding:12px 0; color:var(--muted); }
+    .next { border:1px solid var(--ink); background:var(--ink); color:var(--paper); padding:12px 18px; font-weight:600; min-width:120px; }
+    .next:disabled { opacity:.35; cursor:not-allowed; }
+    .live-file { min-width:0; background:var(--soft); min-height:100vh; display:flex; flex-direction:column; }
+    .live-head { padding:18px 24px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; font-size:12px; position:sticky; top:0; background:var(--soft); z-index:2; }
+    .live-head span:last-child { color:var(--muted); }
+    .markdown { padding:clamp(24px,4vw,56px); font-size:clamp(13px,1.35vw,16px); line-height:1.75; white-space:pre-wrap; overflow-wrap:anywhere; }
+    .md-heading { font-weight:600; }
+    .md-comment { color:var(--faint); }
+    .new-line { animation:flash 1s ease; }
+    @keyframes flash { 0% { background:var(--select); color:#090909; } 100% { background:transparent; } }
+
+    .review-shell, .finish-shell { max-width:1240px; margin:0 auto; padding:clamp(26px,5vw,68px) clamp(16px,4vw,48px) 80px; }
+    .review-head, .finish-head { display:flex; align-items:flex-end; justify-content:space-between; gap:24px; border-bottom:2px solid var(--ink); padding-bottom:22px; margin-bottom:28px; }
+    .review-head h2, .finish-head h2 { margin:0; font-size:clamp(28px,4.6vw,58px); letter-spacing:-.045em; line-height:1; font-weight:500; }
+    .review-head p, .finish-head p { margin:0; color:var(--muted); font-size:13px; line-height:1.5; max-width:430px; }
+    .section-label { font-size:12px; color:var(--muted); margin:28px 0 10px; }
+    .line-list { border-top:1px solid var(--ink); }
+    .line-item { min-height:62px; border-bottom:1px solid var(--line); display:grid; grid-template-columns:34px 1fr auto; align-items:center; gap:10px; padding:10px 0; }
+    .line-num { color:var(--faint); font-size:11px; text-align:right; }
+    .line-text { padding:8px; line-height:1.5; border:1px solid transparent; }
+    .line-text:hover { border-color:var(--line); }
+    .line-text[contenteditable="true"] { border-color:var(--ink); background:var(--paper); }
+    .icon-btn { border:0; background:transparent; color:var(--muted); width:36px; height:36px; }
+    .icon-btn:hover { color:var(--red); }
+    .add-row { display:flex; gap:10px; margin-top:14px; }
+    .add-row input { flex:1; min-width:0; border:1px solid var(--ink); background:var(--paper); padding:12px; }
+    .add-row button { border:1px solid var(--ink); background:var(--paper); padding:10px 16px; }
+    .suggestions { margin:46px 0; }
+    .suggestion { border-top:1px solid var(--ink); padding:18px 0; display:grid; grid-template-columns:72px 1fr auto; gap:16px; align-items:start; }
+    .suggestion:last-child { border-bottom:1px solid var(--ink); }
+    .diff-label { font-size:11px; color:var(--muted); padding-top:4px; }
+    .diff-body { line-height:1.6; font-size:13px; }
+    .minus { background:var(--red-bg); color:var(--red); text-decoration:line-through; padding:2px 4px; }
+    .plus { background:var(--green-bg); color:var(--green); padding:2px 4px; }
+    .diff-actions { display:flex; gap:7px; }
+    .diff-actions button { border:1px solid var(--ink); background:var(--paper); padding:8px 10px; font-size:11px; }
+    .diff-actions .accept { background:var(--ink); color:var(--paper); }
+    .review-footer { display:flex; justify-content:flex-end; margin-top:30px; }
+
+    .split-files { display:grid; grid-template-columns:1fr 1fr; border:1px solid var(--ink); }
+    .output-file { min-width:0; }
+    .output-file + .output-file { border-left:1px solid var(--ink); }
+    .output-head { padding:14px 16px; border-bottom:1px solid var(--ink); display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .output-head strong { font-size:14px; }
+    .output-head strong small { display:block; margin-top:4px; color:var(--muted); font-size:9px; font-weight:400; }
+    .privacy-tag { font-size:10px; border:1px solid var(--ink); padding:3px 6px; }
+    .output-body { margin:0; padding:22px; min-height:310px; white-space:pre-wrap; overflow-wrap:anywhere; font:13px/1.7 "IBM Plex Mono", monospace; }
+    .file-actions { padding:14px 16px; border-top:1px solid var(--line); display:flex; gap:8px; }
+    .file-actions button { flex:1; border:1px solid var(--ink); background:var(--paper); padding:10px; font-size:12px; }
+    .file-actions button:hover { background:var(--ink); color:var(--paper); }
+    .export-hook { margin-top:42px; border-top:2px solid var(--ink); padding-top:24px; display:grid; grid-template-columns:.8fr 1.2fr; gap:36px; }
+    .export-hook h3 { font-size:clamp(22px,3vw,36px); letter-spacing:-.035em; line-height:1.2; font-weight:500; margin:0; }
+    .export-hook p { margin:0 0 15px; line-height:1.6; color:var(--muted); font-size:13px; }
+    .steps { border-top:1px solid var(--line); }
+    .step { padding:12px 0; border-bottom:1px solid var(--line); font-size:12px; line-height:1.5; }
+    .toast { position:fixed; left:50%; bottom:22px; transform:translateX(-50%); background:var(--ink); color:var(--paper); padding:12px 18px; font-size:12px; opacity:0; pointer-events:none; transition:opacity .2s; z-index:20; }
+    .toast.show { opacity:1; }
+    .flow-grid { margin-top:42px; border-top:2px solid var(--ink); display:grid; grid-template-columns:1fr 1fr; }
+    .flow-step { padding:24px 0; }
+    .flow-step + .flow-step { border-left:1px solid var(--ink); padding-left:28px; }
+    .flow-number { color:var(--muted); font-size:11px; margin-bottom:12px; }
+    .flow-step h3 { margin:0 0 10px; font-size:clamp(19px,2.4vw,28px); font-weight:500; letter-spacing:-.03em; }
+    .flow-step p { color:var(--muted); font-size:13px; line-height:1.6; margin:0 0 16px; }
+    .flow-step button { border:1px solid var(--ink); background:var(--paper); padding:11px 14px; font-size:12px; }
+    .flow-step button:hover { background:var(--ink); color:var(--paper); }
+    .flow-step button:disabled { opacity:.45; cursor:default; background:var(--paper); color:var(--ink); }
+    .prototype-note { display:block; color:var(--faint); font-size:10px; line-height:1.5; margin-top:10px; max-width:390px; }
+    .privacy-rule { margin:24px 0 0; padding:14px 0; border-top:1px solid var(--line); color:var(--muted); font-size:11px; line-height:1.6; }
+    .phase-mark { display:inline-block; padding:3px 6px; border:1px solid var(--ink); color:var(--ink); margin-left:8px; }
+    .review-note { color:var(--muted); font-size:11px; line-height:1.55; margin-top:12px; }
+    .finish-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:16px; }
+    .finish-actions button { border:1px solid var(--ink); background:var(--paper); padding:10px 14px; font-size:12px; }
+    .proof { margin:0 0 46px; }
+    .proof-title { display:flex; align-items:flex-end; justify-content:space-between; gap:24px; padding:0 0 18px; }
+    .scenario-switcher { display:flex; flex-wrap:wrap; gap:8px; padding:12px 0 16px; border-top:1px solid var(--line); }
+    .scenario-switcher button { border:1px solid var(--ink); background:var(--paper); padding:9px 12px; font-size:11px; }
+    .scenario-switcher button[aria-pressed="true"] { background:var(--ink); color:var(--paper); }
+    .proof-title h3 { margin:0; max-width:700px; font-size:clamp(22px,3vw,38px); font-weight:500; letter-spacing:-.04em; line-height:1.08; }
+    .proof-title span { color:var(--muted); font-size:11px; white-space:nowrap; }
+    .comparison-stage { border:2px solid var(--ink); background:var(--paper); }
+    .demo-prompt { position:relative; padding:22px 24px 26px; font-size:clamp(15px,1.6vw,19px); line-height:1.55; max-width:850px; }
+    .demo-prompt strong { display:flex; align-items:center; gap:8px; margin-bottom:10px; font-size:10px; color:var(--muted); font-weight:500; }
+    .demo-prompt strong::before { content:""; width:8px; height:8px; background:var(--ink); }
+    .prompt-branch { display:grid; grid-template-columns:1fr 1fr; height:26px; border-top:1px solid var(--ink); }
+    .prompt-branch span { position:relative; }
+    .prompt-branch span:first-child { border-right:1px solid var(--ink); }
+    .prompt-branch span::after { content:""; position:absolute; left:50%; top:0; width:1px; height:26px; background:var(--ink); }
+    .response-grid { display:grid; grid-template-columns:1fr 1fr; border-top:1px solid var(--ink); }
+    .response-panel { min-width:0; padding:0 22px 24px; }
+    .response-panel + .response-panel { border-left:1px solid var(--ink); }
+    .response-panel.fitted { background:var(--soft); }
+    .response-label { display:flex; justify-content:space-between; gap:10px; align-items:center; margin:0 -22px 20px; padding:12px 18px; border-bottom:1px solid var(--ink); font-size:10px; color:var(--muted); }
+    .response-panel.fitted .response-label { background:var(--select); color:#222; }
+    .response-label strong { color:var(--ink); font-size:12px; font-weight:600; }
+    .response-copy { font:13px/1.72 "IBM Plex Mono", monospace; }
+    .response-copy p { position:relative; margin:0 0 14px; }
+    .response-copy p:last-child { margin-bottom:0; }
+    .response-copy.baseline { color:var(--muted); }
+    .calibrated-point { padding-left:30px; transition:background .15s ease; }
+    .point-number { position:absolute; left:0; top:.08em; display:grid; place-items:center; width:20px; height:20px; border:1px solid var(--ink); border-radius:50%; background:var(--paper); color:var(--ink); font-size:9px; font-weight:600; }
+    .calibrated-point.is-linked { background:var(--select); color:#090909; }
+    .file-bridge { border-top:2px solid var(--ink); display:grid; grid-template-columns:.78fr 1fr 1fr; }
+    .file-bridge-intro, .file-bridge-item { padding:16px 18px; }
+    .file-bridge-item { border-left:1px solid var(--ink); }
+    .file-bridge-intro { font-size:12px; line-height:1.5; font-weight:600; }
+    .file-bridge-item strong { display:block; font-size:12px; margin-bottom:5px; }
+    .file-bridge-item span { display:block; color:var(--muted); font-size:10px; line-height:1.5; }
+    .file-bridge-item.voice { background:var(--soft); }
+    .trace-guide { border-top:1px solid var(--ink); padding:20px 22px 12px; }
+    .trace-head { display:flex; align-items:flex-end; justify-content:space-between; gap:24px; padding-bottom:14px; border-bottom:1px solid var(--ink); }
+    .trace-kicker { color:var(--muted); font-size:10px; margin-bottom:5px; }
+    .trace-head strong { display:block; font-size:15px; }
+    .trace-head p { margin:0; max-width:470px; color:var(--muted); font-size:10px; line-height:1.55; }
+    .rule-traces { display:grid; grid-template-columns:1fr 1fr; column-gap:24px; }
+    .rule-trace { appearance:none; width:100%; display:grid; grid-template-columns:26px 1fr; gap:10px; align-items:start; padding:12px 0; border:0; border-bottom:1px solid var(--line); background:transparent; color:var(--muted); font:10px/1.5 "IBM Plex Mono", monospace; text-align:left; }
+    .rule-source { display:block; color:var(--ink); font-size:9px; font-weight:600; margin-bottom:3px; }
+    .rule-trace:hover, .rule-trace:focus-visible { color:var(--ink); }
+    .rule-trace b { display:grid; place-items:center; width:20px; height:20px; border:1px solid var(--ink); border-radius:50%; color:var(--ink); font-size:9px; font-weight:600; }
+    .rule-trace.is-linked { color:var(--ink); }
+    .rule-trace.is-linked b { background:var(--select); color:#090909; }
+    .version-diff { margin:46px 0; border-top:2px solid var(--ink); }
+    .version-head { display:flex; align-items:flex-end; justify-content:space-between; gap:20px; padding:18px 0; }
+    .version-head h3 { margin:0 0 6px; font-size:clamp(20px,2.8vw,34px); font-weight:500; letter-spacing:-.035em; }
+    .version-head p { margin:0; color:var(--muted); font-size:12px; line-height:1.5; }
+    .version-controls { display:flex; gap:8px; flex-wrap:wrap; }
+    .version-controls select { border:1px solid var(--ink); border-radius:0; background:var(--paper); padding:10px 30px 10px 10px; font:11px "IBM Plex Mono", monospace; }
+    .diff-summary { display:flex; justify-content:space-between; gap:16px; padding:12px 0; border-top:1px solid var(--ink); border-bottom:1px solid var(--ink); font-size:11px; color:var(--muted); }
+    .version-lines { border-bottom:1px solid var(--ink); }
+    .version-line { display:grid; grid-template-columns:84px 20px 1fr; gap:8px; padding:10px 8px; border-bottom:1px solid var(--line); font-size:11px; line-height:1.55; }
+    .version-line:last-child { border-bottom:0; }
+    .version-file { color:var(--muted); }
+    .version-sign { color:var(--green); font-weight:600; }
+    .version-sign.removed { color:var(--red); }
+    .show-diff { margin-top:12px; border:0; border-bottom:1px solid var(--ink); background:transparent; padding:6px 0; font-size:11px; }
+    .files-label { margin:42px 0 10px; color:var(--muted); font-size:11px; }
+    .next-route { margin-top:48px; border-top:3px solid var(--ink); }
+    .next-route-head { display:grid; grid-template-columns:.75fr 1.25fr; gap:36px; padding:24px 0 26px; border-bottom:1px solid var(--ink); }
+    .next-route-head h3 { margin:0; font-size:clamp(24px,3.4vw,42px); line-height:1.05; letter-spacing:-.04em; font-weight:500; }
+    .next-route-head p { margin:0; align-self:end; color:var(--muted); font-size:13px; line-height:1.65; max-width:600px; }
+    .next-sequence { display:grid; grid-template-columns:1fr 1fr; }
+    .next-step { padding:24px 0 26px; }
+    .next-step + .next-step { border-left:1px solid var(--ink); padding-left:28px; }
+    .next-step .flow-number { margin-bottom:14px; }
+    .next-step h4 { margin:0 0 10px; font-size:clamp(19px,2.2vw,27px); font-weight:500; letter-spacing:-.03em; }
+    .next-step p { color:var(--muted); font-size:12px; line-height:1.65; margin:0 0 16px; max-width:520px; }
+    .account-action { display:flex; align-items:center; flex-wrap:wrap; gap:10px; }
+    .account-action button, .prompt-actions button, .deep-resume button { border:1px solid var(--ink); background:var(--paper); padding:11px 14px; font-size:11px; }
+    .account-action button:hover, .prompt-actions button:hover, .deep-resume button:hover { background:var(--ink); color:var(--paper); }
+    .account-action span { color:var(--faint); font-size:9px; }
+    .provider-list { display:flex; flex-wrap:wrap; gap:7px; margin-top:14px; }
+    .provider-list span { border:1px solid var(--line); padding:6px 8px; font-size:9px; }
+    .prompt-gate { border-top:1px solid var(--ink); border-bottom:1px solid var(--ink); }
+    .prompt-gate-bar { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:13px 0; font-size:10px; }
+    .prompt-gate-bar strong { font-size:11px; }
+    .prompt-gate-bar span { color:var(--muted); }
+    .prompt-preview { display:none; border-top:1px solid var(--ink); }
+    .prompt-preview.open { display:block; }
+    .prompt-card-summary { display:flex; align-items:center; justify-content:space-between; gap:24px; padding:18px 0; }
+    .prompt-preview-note { min-width:0; }
+    .prompt-preview-note strong { display:block; margin-bottom:5px; font-size:14px; }
+    .prompt-preview-note p { color:var(--muted); margin:0; font-size:10px; line-height:1.55; }
+    .prompt-card-actions { display:flex; flex:0 0 auto; gap:8px; }
+    .prompt-card-actions button { border:1px solid var(--ink); background:var(--paper); padding:10px 13px; font-size:10px; }
+    .prompt-card-actions button:first-child { background:var(--ink); color:var(--paper); }
+    .prompt-card-actions button:hover { background:var(--ink); color:var(--paper); }
+    .prompt-box { display:none; border-top:1px solid var(--ink); background:var(--soft); padding:20px 22px; }
+    .prompt-box.open { display:block; }
+    .prompt-box pre { margin:0; white-space:pre-wrap; overflow-wrap:anywhere; font:11px/1.65 "IBM Plex Mono", monospace; }
+    .import-flow { display:none; border-top:2px solid var(--ink); padding:24px 0 0; }
+    .prompt-preview.open + .import-flow { display:block; }
+    .import-head { display:grid; grid-template-columns:.75fr 1.25fr; gap:36px; align-items:start; margin-bottom:18px; }
+    .import-head h4 { margin:0; font-size:clamp(18px,2.2vw,27px); font-weight:500; letter-spacing:-.03em; }
+    .import-head p { margin:0; color:var(--muted); font-size:11px; line-height:1.65; }
+    .digest-input { width:100%; min-height:210px; resize:vertical; border:1px solid var(--ink); background:var(--paper); padding:16px; font:11px/1.65 "IBM Plex Mono", monospace; }
+    .import-actions { display:flex; justify-content:space-between; align-items:center; gap:14px; padding:12px 0 22px; }
+    .import-actions span { color:var(--muted); font-size:9px; line-height:1.5; }
+    .import-actions button, .merge-footer button, .import-reset { border:1px solid var(--ink); background:var(--paper); padding:11px 14px; font-size:11px; }
+    .import-actions button:hover, .merge-footer button:hover, .import-reset:hover { background:var(--ink); color:var(--paper); }
+    .import-actions button:disabled { opacity:.4; cursor:default; }
+    .import-status { display:none; border-top:1px solid var(--ink); padding:18px 0; font-size:12px; }
+    .import-status.show { display:block; }
+    .scan-line { display:flex; align-items:center; gap:10px; }
+    .scan-pulse { width:10px; height:10px; background:var(--ink); animation:blink .7s steps(1) infinite; }
+    .privacy-block { border:1px solid var(--red); background:var(--red-bg); color:var(--red); padding:16px; line-height:1.6; }
+    .privacy-block strong { display:block; margin-bottom:6px; }
+    .merge-review { display:none; border-top:1px solid var(--ink); }
+    .merge-review.show { display:block; }
+    .merge-summary { display:flex; justify-content:space-between; gap:16px; padding:16px 0; color:var(--muted); font-size:10px; border-bottom:1px solid var(--ink); }
+    .merge-group { border-bottom:1px solid var(--ink); }
+    .merge-group h5 { margin:0; padding:14px 0 10px; font-size:11px; font-weight:600; }
+    .merge-row { display:grid; grid-template-columns:110px 1fr auto; gap:16px; align-items:start; padding:14px 0; border-top:1px solid var(--line); }
+    .merge-meta { font-size:9px; color:var(--muted); line-height:1.55; }
+    .merge-meta strong { display:block; color:var(--ink); margin-bottom:4px; }
+    .confidence { display:inline-block; margin-top:6px; border:1px solid var(--line); padding:3px 5px; color:var(--ink); }
+    .merge-copy { font-size:11px; line-height:1.6; }
+    .merge-copy .existing { display:block; margin-bottom:8px; padding:9px 10px; background:var(--red-bg); color:var(--red); }
+    .merge-copy .incoming { display:block; padding:9px 10px; background:var(--green-bg); color:var(--green); }
+    .merge-choice { display:flex; gap:6px; }
+    .merge-choice button { border:1px solid var(--ink); background:var(--paper); padding:8px 9px; font-size:9px; white-space:nowrap; }
+    .merge-choice button.selected { background:var(--ink); color:var(--paper); }
+    .held-list, .skipped-list { margin:0; padding:0 0 14px 18px; color:var(--muted); font-size:10px; line-height:1.6; }
+    .merge-footer { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:18px 0 24px; }
+    .merge-footer span { color:var(--muted); font-size:10px; }
+    .merge-footer button { background:var(--ink); color:var(--paper); font-weight:600; }
+    .merge-footer button:disabled { opacity:.4; cursor:default; }
+    .merge-done { display:none; border-top:1px solid var(--ink); padding:20px 0 24px; }
+    .merge-done.show { display:flex; align-items:center; justify-content:space-between; gap:16px; }
+    .merge-done strong { display:block; margin-bottom:5px; font-size:13px; }
+    .merge-done span { color:var(--muted); font-size:10px; }
+    .deep-resume { display:grid; grid-template-columns:.75fr 1.25fr; gap:36px; align-items:center; padding:24px 0; border-bottom:1px solid var(--ink); }
+    .deep-resume strong { font-size:14px; }
+    .deep-resume p { color:var(--muted); font-size:11px; line-height:1.6; margin:5px 0 0; }
+    .deep-resume > div:last-child { display:flex; justify-content:flex-end; align-items:center; gap:12px; flex-wrap:wrap; }
+    .deep-resume .prototype-note { margin:0; max-width:360px; }
+
+    @media (max-width:800px) {
+      .intro-grid { grid-template-columns:1fr; align-items:start; min-height:auto; }
+      .file-window { min-height:380px; }
+      .work-shell { grid-template-columns:1fr; }
+      .conversation { min-height:auto; border-right:0; border-bottom:1px solid var(--ink); padding:26px 18px 32px; }
+      .progress-row { margin-bottom:34px; }
+      .question-wrap { justify-content:flex-start; }
+      .live-file { min-height:42vh; }
+      .live-head { position:static; padding:14px 18px; }
+      .markdown { padding:22px 18px 42px; }
+      .review-head, .finish-head { align-items:flex-start; flex-direction:column; }
+      .suggestion { grid-template-columns:54px 1fr; }
+      .diff-actions { grid-column:2; }
+      .split-files { grid-template-columns:1fr; }
+      .output-file + .output-file { border-left:0; border-top:1px solid var(--ink); }
+      .export-hook { grid-template-columns:1fr; gap:20px; }
+      .flow-grid { grid-template-columns:1fr; }
+      .flow-step + .flow-step { border-left:0; border-top:1px solid var(--line); padding-left:0; }
+      .proof-title, .version-head { align-items:flex-start; flex-direction:column; }
+      .proof-title span { white-space:normal; }
+      .scenario-switcher button { flex:1 1 100%; }
+      .file-bridge { grid-template-columns:1fr; }
+      .file-bridge-item { border-left:0; border-top:1px solid var(--ink); }
+      .next-route-head, .deep-resume, .import-head { grid-template-columns:1fr; gap:18px; }
+      .prompt-card-summary { align-items:flex-start; flex-direction:column; }
+      .prompt-card-actions { width:100%; }
+      .prompt-card-actions button { flex:1; }
+      .merge-row { grid-template-columns:1fr; gap:9px; }
+      .merge-choice { flex-wrap:wrap; }
+      .merge-footer, .merge-done { align-items:flex-start; flex-direction:column; }
+      .next-sequence { grid-template-columns:1fr; }
+      .next-step + .next-step { border-left:0; border-top:1px solid var(--ink); padding-left:0; }
+      .prompt-preview-note { padding-right:0; }
+      .prompt-box { border-left:0; border-top:1px solid var(--ink); }
+      .deep-resume > div:last-child { justify-content:flex-start; }
+      .prompt-branch { display:none; }
+      .response-grid { grid-template-columns:1fr; }
+      .response-panel { padding:0 18px 22px; }
+      .response-label { margin:0 -18px 18px; }
+      .response-panel + .response-panel { border-left:0; border-top:2px solid var(--ink); }
+      .trace-head { align-items:flex-start; flex-direction:column; gap:8px; }
+      .rule-traces { grid-template-columns:1fr; }
+      .demo-prompt { padding:19px 18px 22px; }
+      .version-line { grid-template-columns:72px 16px minmax(0,1fr); padding-left:0; padding-right:0; }
+      .version-controls { width:100%; }
+      .version-controls select { flex:1; min-width:0; }
+    }
+    @media (max-width:480px) {
+      h1 { font-size:39px; }
+      .intro { padding:24px 16px 50px; }
+      .file-body { padding:18px; }
+      .line-item { grid-template-columns:24px 1fr 34px; }
+      .add-row { flex-direction:column; }
+      .question-actions { margin-top:22px; }
+    }
+    @media (prefers-reduced-motion:reduce) { *, *::before, *::after { animation:none!important; transition:none!important; scroll-behavior:auto!important; } }
+  </style>
+</head>
+<body>
+  <section class="screen active" id="introScreen">
+    <main class="intro">
+      <div class="intro-grid">
+        <div>
+          <div class="index">Start here · 8 revealing choices</div>
+          <h1>Teach any AI how to work with you.</h1>
+          <p class="lede">So every AI you use feels like yours. Answer eight quick questions to create portable settings for how it communicates, makes decisions, and works with you.</p>
+          <button class="primary" id="startBtn">Start →</button>
+          <div class="fine">No account for the first draft. No names, addresses, credentials, or identifying details are asked for or written.</div>
+        </div>
+        <div class="file-window" aria-label="Preview of a voice markdown file">
+          <div class="file-bar"><span><i class="file-dot"></i>voice.md</span><span>draft</span></div>
+          <div class="file-body"><span class="syntax"># How to work with me</span>
+
+- Give me a point of view, not a neutral pile of options.
+- Name the live tension instead of smoothing it away.
+- Make assumptions visible when the brief is incomplete.
+- Prefer a sharp synthesis to an exhaustive recap.
+
+<span class="syntax"># Working texture</span>
+
+Direct, curious, and willing to find the surprising connection.
+
+<span class="cursor" aria-hidden="true"></span></div>
+        </div>
+      </div>
+    </main>
+  </section>
+
+  <section class="screen" id="interviewScreen">
+    <main class="work-shell">
+      <section class="conversation">
+        <div class="progress-row">
+          <div class="progress-meta">
+            <div class="progress-meta-line"><span id="progressText">01 / 08</span><span id="progressLabel">first pass</span></div>
+            <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+          </div>
+          <button class="exit-deep" id="exitDeepBtn" type="button" hidden><strong>Finish here</strong><span>Partial is useful</span></button>
+        </div>
+        <div class="question-wrap" id="questionWrap"></div>
+      </section>
+      <aside class="live-file" aria-live="polite">
+        <div class="live-head"><span>voice.md</span><span id="lineCount">0 lines written</span></div>
+        <div class="markdown" id="liveMarkdown"></div>
+      </aside>
+    </main>
+  </section>
+
+  <section class="screen" id="reviewScreen">
+    <main class="review-shell">
+      <header class="review-head">
+        <h2 id="reviewTitle">Make it sound true.</h2>
+        <p id="reviewCopy">Click any line to sharpen it. Delete what doesn't belong. This draft turns your choices into patterns; your edits make them accurate.</p>
+      </header>
+      <div class="section-label">YOUR DRAFT — CLICK A LINE TO EDIT</div>
+      <div class="line-list" id="lineList"></div>
+      <p class="privacy-rule">This file is for patterns, not identity. The product never asks for names, addresses, account details, credentials, health specifics, or identifying family details.</p>
+      <section class="suggestions">
+        <div class="section-label">2 PROPOSED REFINEMENTS</div>
+        <div id="suggestionList"></div>
+      </section>
+      <div class="review-footer"><button class="primary" id="splitBtn">See my settings at work →</button></div>
+    </main>
+  </section>
+
+  <section class="screen" id="finishScreen">
+    <main class="finish-shell">
+      <header class="finish-head">
+        <h2 id="finishTitle">See your file at work.</h2>
+        <p id="finishCopy">The same prompt, answered twice. The difference on the right comes from the lines you just made.</p>
+      </header>
+      <section class="proof" aria-labelledby="proofHeading">
+        <div class="proof-title"><h3 id="proofHeading">Same question. Your settings change the answer.</h3><span id="responseVersionTag">v0.1 · first pass</span></div>
+        <div class="scenario-switcher" aria-label="Choose a prompt to compare">
+          <button type="button" data-scenario="build" aria-pressed="true">making something</button>
+          <button type="button" data-scenario="personal" aria-pressed="false">a personal decision</button>
+          <button type="button" data-scenario="explain" aria-pressed="false">understanding an idea</button>
+        </div>
+        <div class="comparison-stage">
+          <div class="demo-prompt"><strong>SAME PROMPT TO BOTH</strong><span id="demoPromptText">I’ve got three good product directions and two weeks. How should I decide what to build?</span></div>
+          <div class="prompt-branch" aria-hidden="true"><span></span><span></span></div>
+          <div class="response-grid">
+            <article class="response-panel">
+              <div class="response-label"><strong>PLAIN AI</strong><span>no settings</span></div>
+              <div class="response-copy baseline" id="baselineResponse"></div>
+            </article>
+            <article class="response-panel fitted">
+              <div class="response-label"><strong>WITH YOUR SETTINGS</strong><span id="calibratedLabel">v0.1</span></div>
+              <div class="response-copy" id="calibratedResponse"></div>
+            </article>
+          </div>
+          <div class="file-bridge" aria-label="How your settings shape the answer">
+            <div class="file-bridge-intro">Your settings have two parts. One guides the thinking; one guides the writing.</div>
+            <div class="file-bridge-item"><strong>How it works · agent.md</strong><span>Judgment, decisions, and collaboration.</span></div>
+            <div class="file-bridge-item voice"><strong>How it sounds · voice.md</strong><span>Tone, phrasing, and structure.</span></div>
+          </div>
+          <div class="trace-guide">
+            <div class="trace-head">
+              <div><div class="trace-kicker">LINES USED FOR THIS ANSWER</div><strong>These are the settings behind the response.</strong></div>
+              <p>Each number connects one line in a file to the part of the answer it changed.</p>
+            </div>
+            <div class="rule-traces" id="appliedRules" aria-label="Rules from your file used in the answer"></div>
+          </div>
+        </div>
+      </section>
+      <section class="version-diff" id="versionDiffSection" hidden aria-labelledby="versionHeading">
+        <div class="version-head">
+          <div><h3 id="versionHeading">What changed?</h3><p>See exactly what the deeper questions added to your communication settings.</p></div>
+          <div class="version-controls">
+            <select id="previousVersion" aria-label="Previous version"><option value="v01">v0.1 · first pass</option></select>
+            <select id="diffFilter" aria-label="Filter changes by file"><option value="all">both files</option><option value="agent">agent.md</option><option value="voice">voice.md</option></select>
+          </div>
+        </div>
+        <div class="diff-summary"><span>v0.1 → v0.2</span><span id="diffCount"></span></div>
+        <div class="version-lines" id="versionLines"></div>
+        <button class="show-diff" id="showDiffBtn" type="button"></button>
+      </section>
+      <div class="files-label">YOUR SETTINGS, IN TWO SIMPLE PARTS</div>
+      <div class="split-files">
+        <article class="output-file">
+          <div class="output-head"><strong>How it works<small>agent.md</small></strong><span class="privacy-tag">PUBLIC</span></div>
+          <pre class="output-body" id="agentOutput"></pre>
+          <div class="file-actions"><button type="button" data-copy="agent">copy</button><button type="button" data-download="agent">download</button></div>
+        </article>
+        <article class="output-file">
+          <div class="output-head"><strong>How it sounds<small>voice.md</small></strong><span class="privacy-tag">PRIVATE</span></div>
+          <pre class="output-body" id="voiceOutput"></pre>
+          <div class="file-actions"><button type="button" data-copy="voice">copy</button><button type="button" data-download="voice">download</button></div>
+        </article>
+      </div>
+      <div class="finish-actions"><button id="reviewDraftBtn">Tune the draft</button></div>
+      <section class="next-route" aria-labelledby="nextRouteHeading">
+        <header class="next-route-head">
+          <h3 id="nextRouteHeading">Take the same settings to every AI you use.</h3>
+          <p>Ask a chat you already use for a compact summary of your communication and decision patterns — not a transcript. Review every line before it shapes either file.</p>
+        </header>
+        <div class="next-sequence">
+          <article class="next-step">
+            <div class="flow-number">01 · CREATE YOUR ACCOUNT</div>
+            <h4>Give your voice settings a home.</h4>
+            <p>Your account keeps every version together, so summaries from ChatGPT, Claude, and future questions sharpen one consistent way of working across tools.</p>
+            <div class="account-action"><button type="button" id="previewGateBtn">Preview the account handoff →</button><span>Account creation isn’t connected in this prototype.</span></div>
+          </article>
+          <article class="next-step">
+            <div class="flow-number">02 · ASK EACH AI FOR THE PATTERNS</div>
+            <h4>Copy one focused prompt.</h4>
+            <p>Paste it into a long-running chat or project with enough prior context. It pulls out repeated working patterns only; you review the result before import.</p>
+            <div class="provider-list" aria-label="Use where prior context is available"><span>ChatGPT</span><span>Claude</span><span>Gemini</span><span>other chats</span></div>
+          </article>
+        </div>
+        <div class="prompt-gate" id="promptGate">
+          <div class="prompt-gate-bar"><strong>ACCOUNT GATE</strong><span id="gateStatus">The handoff prompt appears here after sign-in.</span></div>
+          <div class="prompt-preview" id="promptPreview">
+            <div class="prompt-card-summary">
+              <div class="prompt-preview-note"><strong>One compact pattern summary, not a data export.</strong><p>Copy it now. Open it only if you want to read the exact instructions first.</p></div>
+              <div class="prompt-card-actions"><button type="button" id="copyPatternPrompt">Copy prompt</button><button type="button" id="togglePromptDetails" aria-expanded="false">View prompt</button></div>
+            </div>
+            <div class="prompt-box" id="promptDetails">
+              <pre id="patternPrompt">Review as much of our past conversation history as you can access and build a profile of how I want AI to communicate and work with me. This profile will be handed to other AI tools, so it must be portable, specific, and free of personal information.
+
+WHAT TO CAPTURE
+Look for two kinds of evidence:
+- Stated: things I explicitly asked for, chose, or corrected (e.g., asking for shorter answers, picking one option over others, telling you to just do it).
+- Observed: patterns in my behavior that reveal preferences I never said out loud. Examples: what I skip or ignore, when I rephrase or re-ask, which drafts I accept on the first pass versus rework, when I push back, when I abandon a thread, how my own messages are written, and how my requests change once I trust the direction.
+
+Cover: answer structure and length; depth by task type; tone and register; how I make decisions and what I weigh; when to ask versus act; how I handle disagreement, being wrong, and being told I'm wrong; what makes me lose patience; how I want options, recommendations, and tradeoffs presented; how I want technical concepts explained; repeated style choices in my own writing.
+
+EVIDENCE RULES
+- Include a preference only if it shows up in at least 3 separate conversations, or I stated it explicitly and never contradicted it. Everything else goes under Tentative.
+- Tag every bullet [Stated] or [Observed], and (strong) or (moderate).
+- If a preference changed over time, give the current one and briefly note the shift.
+- If a preference depends on context (brainstorming vs. execution, work vs. personal, writing vs. building), say so instead of averaging it into something vague.
+- Cut anything true of almost any user ("likes clear answers"). If a bullet wouldn't change how a new AI behaves, drop it.
+- Write each bullet as an instruction to a future assistant ("Lead with the recommendation, then the reasoning"), not as a description of me.
+
+EXAMPLES
+For the most important preferences, add a short Do / Don't example pair. Examples must be invented to illustrate the pattern. Never quote or closely mirror real conversation content, and never reuse a real topic if it reveals anything personal.
+
+PRIVACY
+Generalized working context is useful and allowed, e.g., "business-side, not an engineer; builds software by directing AI" or "runs many projects in parallel." Do not include or allow inference of: names, employers, companies, clients, locations, relationships, family, health, finances, credentials, accounts, specific projects, events, or dates. Before finishing, reread the output and remove anything that could identify me or anyone I know, even indirectly.
+
+OUTPUT FORMAT
+Use exactly these headings, in this order, and write nothing outside them:
+# Working context — 2–4 generalized, non-identifying bullets that explain the preferences below
+# Interaction preferences
+# Voice and style
+# Decision patterns
+# When to ask vs. act
+# Corrections I've made — repeated fixes, generalized
+# Things that frustrate me
+# Tentative
+# Evidence coverage — 1–2 lines on how much history you could review and any gaps
+
+Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples over many generic ones.</pre>
+            </div>
+          </div>
+          <section class="import-flow" id="importFlow" aria-labelledby="importHeading">
+            <div class="import-head">
+              <h4 id="importHeading">Paste the summary back here.</h4>
+              <p>Before anything reaches your files, the page checks for personal details, sorts each section, skips repeats, and flags anything that conflicts with your current settings.</p>
+            </div>
+            <div id="importInputStep">
+              <textarea class="digest-input" id="digestInput" spellcheck="false" placeholder="# Working context
+- [Observed] (strong) …
+
+# Interaction preferences
+- [Stated] (strong) …"></textarea>
+              <div class="import-actions"><span>The fixed headings and evidence tags make the merge reviewable.</span><button type="button" id="analyzeDigestBtn">Check and compare →</button></div>
+            </div>
+            <div class="import-status" id="importStatus" role="status"></div>
+            <div class="merge-review" id="mergeReview">
+              <div class="merge-summary" id="mergeSummary"></div>
+              <div id="mergeRows"></div>
+              <div class="merge-footer"><span>Nothing changes until you merge the choices above.</span><button type="button" id="mergeDigestBtn">Merge accepted changes</button></div>
+            </div>
+            <div class="merge-done" id="mergeDone"><div><strong id="mergeDoneTitle"></strong><span id="mergeDoneCopy"></span></div><button type="button" class="import-reset" id="importAnotherBtn">Import another summary</button></div>
+          </section>
+        </div>
+        <div class="deep-resume" id="deepStep">
+          <div><strong>Go deeper for as long as it stays useful.</strong><p>Twenty-four quick choices tune cadence, structure, tone, and judgment. You can finish at any point — every answer makes your settings more precise.</p></div>
+          <div><button id="deepBtn">Start the deeper pass →</button><span class="prototype-note" id="deepNote">Your partial progress is useful. Finish whenever you have enough.</span></div>
+        </div>
+      </section>
+      <p class="privacy-rule"><strong>Built-in boundary:</strong> personal identifiers and secrets never belong in these files. Useful context is generalized before it reaches either one.</p>
+    </main>
+  </section>
+  <div class="toast" id="toast" role="status"></div>
+
+<script>
+(function(){
+  var questions = [
+    {
+      key:'opening', phase:'first pass', label:'trust', type:'choice',
+      title:'An answer can be right and still feel off. Which opening would you trust?',
+      note:'Same answer. Different first move.',
+      options:[
+        {title:'“Here’s the move.”', desc:'Take a position, then explain why.', lines:[{text:'Lead with a considered point of view, then expose the reasoning behind it.',bucket:'agent'},{text:'Confidence works best when it is paired with visible judgment.',bucket:'voice'}]},
+        {title:'“Here’s what’s really going on.”', desc:'Get underneath the question first.', lines:[{text:'Start by reframing the problem when the surface question hides the real one.',bucket:'agent'},{text:'A useful synthesis matters more than a fast answer.',bucket:'voice'}]},
+        {title:'“There are two things pulling against each other.”', desc:'Show me the tradeoff before you pick a side.', lines:[{text:'Name the central tension before resolving it.',bucket:'agent'},{text:'Do not manufacture certainty by flattening a real tradeoff.',bucket:'voice'}]}
+      ]
+    },
+    {
+      key:'ambiguity', phase:'first pass', label:'when something’s missing', type:'choice',
+      title:'You left out a detail. What should the AI do?',
+      note:'It matters, but getting it wrong wouldn’t cause any real harm.',
+      options:[
+        {title:'Go with the most likely meaning', desc:'Keep moving, but say what it’s assuming.', lines:[{text:'When intent is probably clear, proceed on the likeliest reading and state the assumption.',bucket:'agent'}]},
+        {title:'Ask one good question', desc:'Ask only if the answer would really change things.', lines:[{text:'When context is missing, ask the single clarifying question with the most leverage.',bucket:'agent'}]},
+        {title:'Give me both versions', desc:'Show how the answer changes either way.', lines:[{text:'When two interpretations are plausible, answer both briefly instead of blocking on clarification.',bucket:'agent'}]}
+      ]
+    },
+    {
+      key:'uncertainty', phase:'first pass', label:'when you’re not sure', type:'choice',
+      title:'You have to decide before you know everything. What helps most?',
+      note:'You don’t need fake certainty. You need a useful way forward.',
+      options:[
+        {title:'Tell me how sure you are', desc:'Give me your best read and how strongly you believe it.', lines:[{text:'Calibrate claims explicitly; distinguish a strong conclusion from a working guess.',bucket:'agent'}]},
+        {title:'Tell me what would change your mind', desc:'Name the new fact that would flip the answer.', lines:[{text:'For uncertain recommendations, name the evidence that would reverse the decision.',bucket:'agent'},{text:'I value beliefs that come with a clear path to revision.',bucket:'voice'}]},
+        {title:'Show me what happens if we’re wrong', desc:'Compare the cost of each mistake.', lines:[{text:'Frame uncertainty through asymmetric downside, not probability alone.',bucket:'agent'},{text:'A decision is clearer when the cost of each mistake is visible.',bucket:'voice'}]}
+      ]
+    },
+    {
+      key:'ideas', phase:'first pass', label:'ideas', type:'choice',
+      title:'You’ve got a promising idea. How far should the AI take it?',
+      note:'Pick the one that feels exciting, not exhausting.',
+      options:[
+        {title:'Make it real', desc:'Start with the version you could actually try.', lines:[{text:'Turn promising ideas into a concrete first version before expanding them.',bucket:'agent'},{text:'Novelty becomes interesting when it can survive contact with reality.',bucket:'voice'}]},
+        {title:'Push it one step further', desc:'Go beyond the obvious, but keep the core intact.', lines:[{text:'After the obvious answer, look for one non-obvious extension that strengthens the core.',bucket:'agent'},{text:'I like ideas with a sharp edge, not novelty for its own sake.',bucket:'voice'}]},
+        {title:'Try the weird version', desc:'Let it get strange before you narrow it down.', lines:[{text:'In early ideation, widen the possibility space before applying constraints.',bucket:'agent'},{text:'I am comfortable entertaining a strange idea before deciding whether it is useful.',bucket:'voice'}]}
+      ]
+    },
+    {
+      key:'dissent', phase:'first pass', label:'when you disagree', type:'choice',
+      title:'You and the AI see it differently. What should it do?',
+      note:'You don’t want a yes-man or an argument for argument’s sake.',
+      options:[
+        {title:'Push back once, clearly', desc:'Make the best case, then respect my call.', lines:[{text:'When disagreeing, make the strongest countercase once, then follow my decision.',bucket:'agent'}]},
+        {title:'Figure out what we’re each assuming', desc:'Check that before arguing about the answer.', lines:[{text:'Resolve disagreement by surfacing the premise underneath it.',bucket:'agent'},{text:'I respond better to examined assumptions than repeated assertions.',bucket:'voice'}]},
+        {title:'Show me what happens next', desc:'Skip the debate and make the real-world effect clear.', lines:[{text:'When pushing back, make the consequence vivid rather than merely stating disagreement.',bucket:'agent'}]}
+      ]
+    },
+    {
+      key:'intelligence', phase:'first pass', label:'what feels smart', type:'choice',
+      title:'What makes an answer feel genuinely smart to you?',
+      note:'Pick the thing you notice first.',
+      options:[
+        {title:'It makes a mess feel clear', desc:'A lot of information becomes one simple shape.', lines:[{text:'Prefer sharp synthesis over exhaustive recap.',bucket:'agent'},{text:'Clarity means finding the structure, not removing the nuance.',bucket:'voice'}]},
+        {title:'It spots the bigger pattern', desc:'It connects this moment to something larger.', lines:[{text:'Surface recurring patterns and explain why they matter now.',bucket:'agent'},{text:'I value pattern recognition that changes how the situation is understood.',bucket:'voice'}]},
+        {title:'It helps me make the next move', desc:'The insight actually changes what I do.', lines:[{text:'Convert analysis into a consequential next move.',bucket:'agent'},{text:'A strong answer should change what happens next.',bucket:'voice'}]},
+        {title:'It makes a surprising connection', desc:'Two different ideas suddenly make each other clearer.', lines:[{text:'Look for cross-domain connections when they sharpen the answer.',bucket:'agent'},{text:'Surprise is valuable when it produces recognition, not spectacle.',bucket:'voice'}]}
+      ]
+    },
+    {
+      key:'attention', phase:'first pass', label:'updates', type:'choice',
+      title:'When should the AI interrupt you?',
+      note:'Think about a task that takes an afternoon, not ten seconds.',
+      options:[
+        {title:'Only when it’s done', desc:'Silence is fine while the work is moving.', lines:[{text:'For longer work, report the result rather than narrating routine progress.',bucket:'agent'}]},
+        {title:'Only when it really needs me', desc:'Interrupt if my answer would change what happens.', lines:[{text:'Interrupt ongoing work only for a decision, blocker, or material change in risk.',bucket:'agent'}]},
+        {title:'Give me quick check-ins', desc:'A short update helps me steer.', lines:[{text:'For longer work, share brief checkpoints that expose direction without adding ceremony.',bucket:'agent'}]}
+      ]
+    },
+    {
+      key:'brave', phase:'first pass', label:'what matters', type:'choice',
+      title:'Which line feels the most like you?',
+      note:'Pick the one you’d want every AI to use consistently.',
+      options:[
+        {title:'“I want a point of view, not a neutral pile of options.”', desc:'Making a call is part of the job.', lines:[{text:'Do not hide behind neutrality when the evidence supports a point of view.',bucket:'agent'},{text:'I would rather react to a real recommendation than sort an undifferentiated menu.',bucket:'voice'}]},
+        {title:'“I want the real tradeoff, not fake certainty.”', desc:'It’s okay to leave some things unresolved.', lines:[{text:'Preserve unresolved tension when resolving it would be dishonest.',bucket:'agent'},{text:'I prefer an honest ambiguity to a clean but brittle answer.',bucket:'voice'}]},
+        {title:'“I want sharp ideas, not polished generalities.”', desc:'Specific thinking beats smooth language.', lines:[{text:'Favor specific, textured thinking over polished generalities.',bucket:'agent'},{text:'I notice when language is smooth but the thought underneath is generic.',bucket:'voice'}]},
+        {title:'“I want momentum, not more reading.”', desc:'The answer should help me move.', lines:[{text:'End with the smallest useful move that advances the work.',bucket:'agent'},{text:'I value momentum more than completeness when the next step is reversible.',bucket:'voice'}]}
+      ]
+    },
+    {
+      key:'cadence', phase:'voice exercises', label:'01 · how it sounds', type:'choice',
+      title:'Pick the sentence you’d actually send.',
+      note:'Don’t overthink it. Choose by ear.',
+      options:[
+        {title:'“I think this is the move. It’s not perfect, but it’s the clearest bet.”', desc:'Careful, with the one caveat that matters.', lines:[{text:'Make the call in plain language, then preserve the one caveat that matters.',bucket:'voice'}]},
+        {title:'“This is the move — clear upside, manageable downside.”', desc:'Short and decisive.', lines:[{text:'Use compressed, decisive sentences that make the tradeoff legible.',bucket:'voice'}]},
+        {title:'“My read: this is the move. Here’s why.”', desc:'Conversational, then clear.', lines:[{text:'Use a conversational lead-in, then make the reasoning easy to follow.',bucket:'voice'}]}
+      ]
+    },
+    {
+      key:'badnews', phase:'voice exercises', label:'02 · saying no', type:'choice',
+      title:'The answer’s no. Which version sounds right?',
+      note:'Pick the one you’d least want to rewrite.',
+      options:[
+        {title:'“No — that constraint makes this a dead end.”', desc:'Direct, with the reason attached.', lines:[{text:'Deliver bad news directly and attach the reason in the same breath.',bucket:'voice'}]},
+        {title:'“I wouldn’t do that. The better route is…”', desc:'Move quickly to the better option.', lines:[{text:'When rejecting a path, pivot quickly to the stronger alternative.',bucket:'voice'}]},
+        {title:'“That works only if X is true. Right now, it isn’t.”', desc:'Let the reason do the work.', lines:[{text:'Express disagreement through the condition that fails, not a blunt verdict alone.',bucket:'voice'}]}
+      ]
+    },
+    {
+      key:'uncertainline', phase:'voice exercises', label:'03 · when you’re not sure', type:'choice',
+      title:'Which sounds most like you when you’re unsure?',
+      note:'Same doubt. Different way of saying it.',
+      options:[
+        {title:'“My best read is X, but I don’t have much to go on.”', desc:'Give a view and be clear about its limits.', lines:[{text:'Hold a point of view under uncertainty, while naming the strength of the evidence.',bucket:'voice'}]},
+        {title:'“I’d treat X as the best guess for now, not the final answer.”', desc:'Leave room to change your mind.', lines:[{text:'Frame uncertain conclusions as working theories that can be revised.',bucket:'voice'}]},
+        {title:'“I don’t know yet. X is what would settle it.”', desc:'Say what would help you know.', lines:[{text:'When the answer is unknown, name the signal that would resolve it.',bucket:'voice'}]}
+      ]
+    },
+    {
+      key:'praise', phase:'voice exercises', label:'04 · praise', type:'choice',
+      title:'Someone brings you a strong idea. What do you say first?',
+      note:'Pick the praise that feels useful, not just polite.',
+      options:[
+        {title:'“The best part is how it flips the usual idea.”', desc:'Name exactly what works.', lines:[{text:'Make praise specific by naming the mechanism or choice that works.',bucket:'voice'}]},
+        {title:'“Yes. Keep that — that’s the idea.”', desc:'Short and emphatic.', lines:[{text:'When something genuinely lands, respond with concise, emphatic recognition.',bucket:'voice'}]},
+        {title:'“This has legs. The next test is whether…”', desc:'Say it works, then help move it forward.', lines:[{text:'Pair encouragement with the next question that can strengthen the idea.',bucket:'voice'}]}
+      ]
+    },
+    {
+      key:'trim', phase:'voice exercises', label:'05 · editing', type:'choice',
+      title:'Which edit improves this sentence?',
+      note:'Original: “It is important to note that there are several potential ways we could approach this.”',
+      options:[
+        {title:'“There are three ways to approach this.”', desc:'Remove the runway.', lines:[{text:'Cut throat-clearing; start where the substance begins.',bucket:'voice'}]},
+        {title:'“Three routes are worth considering.”', desc:'Compact, slightly editorial.', lines:[{text:'Prefer compact editorial phrasing over generic explanatory setup.',bucket:'voice'}]},
+        {title:'“The choice is between speed, control, and reach.”', desc:'Replace the menu with the structure.', lines:[{text:'Compress lists into the underlying structure when that reveals more.',bucket:'voice'}]}
+      ]
+    },
+    {
+      key:'texture', phase:'voice exercises', label:'06 · word choice', type:'choice',
+      title:'Which line sounds best to you?',
+      note:'Go by feel, not just meaning.',
+      options:[
+        {title:'“The idea is sound, but the edges are still soft.”', desc:'Use one simple image.', lines:[{text:'Use light metaphor when it gives an abstract judgment a shape.',bucket:'voice'}]},
+        {title:'“The idea is sound, but the argument needs to be tighter.”', desc:'Say it plainly.', lines:[{text:'Prefer exact analytical language to decorative phrasing.',bucket:'voice'}]},
+        {title:'“The idea works. The argument doesn’t — yet.”', desc:'Use rhythm and contrast.', lines:[{text:'Use rhythm and contrast to sharpen a distinction without adding length.',bucket:'voice'}]}
+      ]
+    },
+    {
+      key:'hedge', phase:'voice exercises', label:'07 · how direct', type:'choice',
+      title:'You have a strong view, but you’re not certain. How do you say it?',
+      note:'Pick how direct you want to be.',
+      options:[
+        {title:'“I think the strongest option is A.”', desc:'Leave a little room for doubt.', lines:[{text:'Use light hedging only when it accurately marks judgment rather than fact.',bucket:'voice'}]},
+        {title:'“The strongest option is A.”', desc:'Say the answer cleanly.', lines:[{text:'State supported conclusions cleanly; do not dilute them with reflexive hedging.',bucket:'voice'}]},
+        {title:'“Choose A. Revisit only if X changes.”', desc:'Make the call and say what would change it.', lines:[{text:'Pair firm recommendations with the condition that would change them.',bucket:'voice'}]}
+      ]
+    },
+    {
+      key:'warmth', phase:'voice exercises', label:'08 · warmth', type:'choice',
+      title:'A personal plan falls apart. Pick the opening.',
+      note:'Human, without drifting into therapy voice.',
+      options:[
+        {title:'“That’s frustrating. Let’s sort the part you can still control.”', desc:'Acknowledge, then help.', lines:[{text:'For personal setbacks, acknowledge the feeling once and move toward agency.',bucket:'voice'}]},
+        {title:'“Okay. The plan changed; the goal didn’t.”', desc:'Steady and forward-looking.', lines:[{text:'Meet setbacks with steady, forward-looking language rather than consolation.',bucket:'voice'}]},
+        {title:'“Before we fix it: what part of this matters most now?”', desc:'Make room before acting.', lines:[{text:'When stakes are personal, ask what matters now before rushing into repair.',bucket:'voice'}]}
+      ]
+    },
+    {
+      key:'challenge', phase:'voice exercises', label:'09 · pushback', type:'choice',
+      title:'You think the whole idea starts from the wrong place. What do you say?',
+      note:'Pick the version that would actually make you listen.',
+      options:[
+        {title:'“I think we’re assuming too much here.”', desc:'Question the starting point.', lines:[{text:'Challenge premises in direct, non-combative language.',bucket:'voice'}]},
+        {title:'“Before we make this better, I’d check whether it needs to exist.”', desc:'Don’t spend time solving the wrong problem.', lines:[{text:'When the frame may be wrong, pause execution and test the premise first.',bucket:'agent'}]},
+        {title:'“This fixes the obvious problem and may make the real one worse.”', desc:'Show what could happen next.', lines:[{text:'Make pushback persuasive by showing the downstream consequence.',bucket:'voice'}]}
+      ]
+    },
+    {
+      key:'analogy', phase:'voice exercises', label:'10 · comparisons', type:'choice',
+      title:'What should a good comparison do?',
+      note:'Pick the line you’d keep.',
+      options:[
+        {title:'“It’s less a library than a compass: useful because it changes direction.”', desc:'Help me see the whole thing differently.', lines:[{text:'Use analogies to change the mental model, not merely decorate the explanation.',bucket:'voice'}]},
+        {title:'“Think of it like version control for judgment.”', desc:'Make a tricky idea click faster.', lines:[{text:'Use compact analogies when they explain a mechanism faster than exposition.',bucket:'voice'}]},
+        {title:'Skip the comparison. Just explain how it works.', desc:'Be exact and direct.', lines:[{text:'Do not force analogies when the mechanism is already clear in literal language.',bucket:'voice'}]}
+      ]
+    },
+    {
+      key:'humor', phase:'voice exercises', label:'11 · humor', type:'choice',
+      title:'Where does humor belong?',
+      note:'Choose the amount that sounds natural.',
+      options:[
+        {title:'A dry aside when it sharpens the point.', desc:'Useful, occasional, never the main event.', lines:[{text:'Use occasional dry humor when it sharpens the observation.',bucket:'voice'}]},
+        {title:'In casual moments, not serious analysis.', desc:'Keep the registers separate.', lines:[{text:'Keep analytical work straight; reserve humor for genuinely casual moments.',bucket:'voice'}]},
+        {title:'Almost nowhere. Clarity is enough.', desc:'No need to perform personality.', lines:[{text:'Do not add humor for charm; let clarity carry the voice.',bucket:'voice'}]}
+      ]
+    },
+    {
+      key:'jargon', phase:'voice exercises', label:'12 · technical language', type:'choice',
+      title:'A technical term would help here. What should the AI do?',
+      note:'Pick the version that feels natural.',
+      options:[
+        {title:'Use it, then explain it in a few words.', desc:'Keep the useful term without slowing me down.', lines:[{text:'Use useful technical language, then define it briefly in place.',bucket:'voice'}]},
+        {title:'Say it in plain English.', desc:'The idea matters more than the label.', lines:[{text:'Translate jargon into plain language unless the term itself carries precision.',bucket:'voice'}]},
+        {title:'Just use it.', desc:'Don’t explain what’s already clear from context.', lines:[{text:'Do not over-explain domain language when the context makes it clear.',bucket:'voice'}]}
+      ]
+    },
+    {
+      key:'openingline', phase:'voice exercises', label:'13 · openings', type:'choice',
+      title:'How should a long answer start?',
+      note:'Pick what you want in the first two seconds.',
+      options:[
+        {title:'With the answer.', desc:'“The short answer: yes.”', lines:[{text:'Open long answers with the conclusion.',bucket:'voice'}]},
+        {title:'With the setup.', desc:'“There are two separate questions here.”', lines:[{text:'Open long answers by naming the structure when it changes how the conclusion lands.',bucket:'voice'}]},
+        {title:'With the tradeoff.', desc:'“Speed helps here, until it starts erasing signal.”', lines:[{text:'Open long answers with the central tension when the tradeoff is the point.',bucket:'voice'}]}
+      ]
+    },
+    {
+      key:'paragraphs', phase:'voice exercises', label:'14 · how it looks', type:'choice',
+      title:'What makes a longer answer easy to read?',
+      note:'Pick the layout you naturally trust.',
+      options:[
+        {title:'Short paragraphs, not many bullets.', desc:'One clean line of thought.', lines:[{text:'Prefer short paragraphs; use bullets only when the content is genuinely parallel.',bucket:'voice'}]},
+        {title:'Headings and short lists.', desc:'Easy to scan and come back to.', lines:[{text:'Structure substantial answers with informative headings and compact lists.',bucket:'voice'}]},
+        {title:'Regular paragraphs when the flow matters.', desc:'Let the argument build.', lines:[{text:'Use continuous prose when an argument depends on sequence and accumulation.',bucket:'voice'}]}
+      ]
+    },
+    {
+      key:'example', phase:'voice exercises', label:'15 · examples', type:'choice',
+      title:'One example makes the idea click. Which one?',
+      note:'Choose how examples should earn their space.',
+      options:[
+        {title:'The smallest concrete example.', desc:'Just enough to ground the claim.', lines:[{text:'Use the smallest concrete example that makes an abstract point hold.',bucket:'voice'}]},
+        {title:'The edge case.', desc:'Test whether the rule survives pressure.', lines:[{text:'Use edge cases to expose the boundary of a claim.',bucket:'voice'}]},
+        {title:'The familiar analogy.', desc:'Connect new material to a known pattern.', lines:[{text:'Ground new ideas in familiar patterns when that speeds understanding.',bucket:'voice'}]}
+      ]
+    },
+    {
+      key:'choicewidth', phase:'voice exercises', label:'16 · choices', type:'choice',
+      title:'You ask “what should I do?” What kind of answer do you want?',
+      note:'How many choices feel helpful instead of like homework?',
+      options:[
+        {title:'“Do A. It wins because…”', desc:'Give me one recommendation.', lines:[{text:'Recommend one path by default and explain why it wins.',bucket:'agent'}]},
+        {title:'“Do A. If X changes, switch to B.”', desc:'Give me one path and one backup.', lines:[{text:'Give a lead recommendation and one conditional fallback.',bucket:'agent'}]},
+        {title:'“A, B, and C could work. I’d choose B.”', desc:'Show me a few options, then make the call.', lines:[{text:'Show a small set of meaningful options, then choose among them.',bucket:'agent'}]}
+      ]
+    },
+    {
+      key:'nextmove', phase:'voice exercises', label:'17 · endings', type:'choice',
+      title:'Pick the ending that feels complete.',
+      note:'No generic “let me know” closers.',
+      options:[
+        {title:'End on the decision.', desc:'The answer has already done the work.', lines:[{text:'End cleanly once the decision is clear; do not append an empty offer to help.',bucket:'voice'}]},
+        {title:'End on the smallest useful action.', desc:'Turn the thought into movement.', lines:[{text:'End with the smallest specific move that advances the work.',bucket:'voice'}]},
+        {title:'End on the unresolved question.', desc:'Leave the productive tension visible.', lines:[{text:'When no action is needed, end on the question that deserves continued thought.',bucket:'voice'}]}
+      ]
+    },
+    {
+      key:'correction', phase:'voice exercises', label:'18 · getting it right', type:'choice',
+      title:'The AI gets it wrong. Which response works best?',
+      note:'Pick the one that wins your trust back fastest.',
+      options:[
+        {title:'“You’re right. Better version:”', desc:'A quick nod, then the fix.', lines:[{text:'After a miss, acknowledge it briefly and lead with the corrected work.',bucket:'voice'}]},
+        {title:'“I read X as Y. You meant Z.”', desc:'Show what changed.', lines:[{text:'After a correction, name the mistaken reading and the updated one in a single line.',bucket:'voice'}]},
+        {title:'Just replace the answer.', desc:'No fuss.', lines:[{text:'When the correction is obvious, replace the answer without an apology monologue.',bucket:'voice'}]}
+      ]
+    },
+    {
+      key:'abstraction', phase:'voice exercises', label:'19 · explaining things', type:'choice',
+      title:'What’s the easiest way into a new idea?',
+      note:'Pick the order that helps it click.',
+      options:[
+        {title:'The big idea, then an example.', desc:'Tell me the rule, then make it real.', lines:[{text:'Explain unfamiliar ideas from principle to concrete example.',bucket:'agent'}]},
+        {title:'An example, then the big idea.', desc:'Show me first, then name the pattern.', lines:[{text:'Explain unfamiliar ideas through a concrete case before naming the principle.',bucket:'agent'}]},
+        {title:'Show me what it is — and what it isn’t.', desc:'Use the difference to make it clear.', lines:[{text:'Use contrasts and counterexamples to define conceptual boundaries.',bucket:'agent'}]}
+      ]
+    },
+    {
+      key:'source', phase:'voice exercises', label:'20 · backing it up', type:'choice',
+      title:'Something needs backing up. What do you want to see?',
+      note:'Pick what would convince you.',
+      options:[
+        {title:'The original source.', desc:'Show me where it came from.', lines:[{text:'For factual claims, privilege primary evidence and make provenance visible.',bucket:'agent'}]},
+        {title:'How it works.', desc:'Walk me through why the claim should be true.', lines:[{text:'Support recommendations with the causal chain, not citation volume alone.',bucket:'agent'}]},
+        {title:'A way to test it.', desc:'Show me how we could find out.', lines:[{text:'When evidence is inconclusive, propose the smallest test that can distinguish the options.',bucket:'agent'}]}
+      ]
+    },
+    {
+      key:'scope', phase:'voice exercises', label:'21 · staying focused', type:'choice',
+      title:'The idea keeps getting bigger. What should the AI say?',
+      note:'Pick the one that keeps the main thing clear.',
+      options:[
+        {title:'“Does this make the core product better?”', desc:'Bring it back to what matters.', lines:[{text:'Test expansions against whether they strengthen the core outcome.',bucket:'agent'}]},
+        {title:'“Interesting, but separate.”', desc:'Keep the idea without cramming it in.', lines:[{text:'Preserve promising adjacent ideas without folding them into the current scope.',bucket:'agent'}]},
+        {title:'“Follow it once, then decide.”', desc:'Take one quick detour, then make the call.', lines:[{text:'Allow one bounded exploration of an adjacent idea, then explicitly decide whether it belongs.',bucket:'agent'}]}
+      ]
+    },
+    {
+      key:'momentum', phase:'voice exercises', label:'22 · getting unstuck', type:'choice',
+      title:'You keep thinking instead of moving. What gets you unstuck?',
+      note:'Pick the nudge that would actually work on you.',
+      options:[
+        {title:'“What’s the smallest move we can undo?”', desc:'Make taking action feel cheap.', lines:[{text:'When analysis stalls, identify the smallest reversible move.',bucket:'agent'}]},
+        {title:'“What would we do if we had to decide today?”', desc:'Make a call for now.', lines:[{text:'Use a time-bounded provisional decision to break unproductive analysis.',bucket:'agent'}]},
+        {title:'“What don’t we know that could actually change the answer?”', desc:'Separate what matters from what’s just interesting.', lines:[{text:'Before researching further, identify which unknowns could change the decision.',bucket:'agent'}]}
+      ]
+    },
+    {
+      key:'learning', phase:'voice exercises', label:'23 · spotting patterns', type:'choice',
+      title:'One edit might show a preference. What should the system do?',
+      note:'It should learn without making a rule out of one moment.',
+      options:[
+        {title:'Suggest a rule.', desc:'You approve it before it sticks.', lines:[{text:'When an edit suggests a durable preference, propose the generalized rule for review.',bucket:'agent'}]},
+        {title:'Wait to see it again.', desc:'One example is a clue, not a rule.', lines:[{text:'Require repeated evidence before turning a situational edit into a standing rule.',bucket:'agent'}]},
+        {title:'Save the example, not the rule.', desc:'Let more moments show the pattern.', lines:[{text:'Keep ambiguous edits as examples until a reliable generalization emerges.',bucket:'agent'}]}
+      ]
+    },
+    {
+      key:'signature', phase:'voice exercises', label:'24 · last one', type:'choice',
+      title:'Which line sounds the most like you?',
+      note:'Last one. Pick by gut.',
+      options:[
+        {title:'“The pattern is the value; the specifics are the risk.”', desc:'A big idea in one clean line.', lines:[{text:'I like language that makes a principle stick through a clean contrast.',bucket:'voice'}]},
+        {title:'“If it can’t change the next move, it’s probably not the insight.”', desc:'An idea only matters if it changes something.', lines:[{text:'I trust insights that change the next move, not observations that merely sound smart.',bucket:'voice'}]},
+        {title:'“Keep the tension. Lose the fog.”', desc:'Short, punchy, and direct.', lines:[{text:'I like concise language that preserves nuance while removing ambiguity.',bucket:'voice'}]},
+        {title:'“Show me the edge, then show me what survives it.”', desc:'Push the idea, then see if it holds up.', lines:[{text:'I am drawn to bold ideas that can survive a serious pressure test.',bucket:'voice'}]}
+      ]
+    }
+  ];
+
+  var INITIAL_COUNT = 8;
+  var state = { index:0, scope:INITIAL_COUNT, deepCompleted:false, answers:{}, lines:[], importedLines:[], suppressedTexts:[], v0Lines:[], diffFilter:'all', diffExpanded:false, scenario:'build', gatePreview:false, mergeItems:[], fileVersion:1 };
+  var $ = function(s){ return document.querySelector(s); };
+  var screens = {intro:$('#introScreen'), interview:$('#interviewScreen'), review:$('#reviewScreen'), finish:$('#finishScreen')};
+
+  function show(name){
+    Object.keys(screens).forEach(function(k){ screens[k].classList.toggle('active', k===name); });
+    window.scrollTo(0,0);
+  }
+  function escapeHTML(s){ return String(s).replace(/[&<>'"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c];}); }
+  function sanitizeLine(s){
+    return String(s)
+      .replace(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi,'[email removed]')
+      .replace(/\b(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]\d{3}[-.\s]\d{4}\b/g,'[phone removed]')
+      .replace(/\b\d{3}-\d{2}-\d{4}\b/g,'[identifier removed]')
+      .replace(/\b(?:\d[ -]*?){13,19}\b/g,'[account detail removed]')
+      .replace(/\b\d{1,5}\s+[A-Za-z0-9.'-]+(?:\s+[A-Za-z0-9.'-]+){0,4}\s+(?:Street|St|Road|Rd|Avenue|Ave|Boulevard|Blvd|Lane|Ln|Drive|Dr|Court|Ct|Circle|Cir|Way)\b/gi,'[address removed]');
+  }
+  function collectLines(){
+    var all=[];
+    questions.forEach(function(q){
+      var a=state.answers[q.key];
+      if(a===undefined || a===null || a==='' || (Array.isArray(a)&&!a.length)) return;
+      if(q.type==='text') all=all.concat(q.makeLines(a));
+      else if(q.type==='choice') all=all.concat(q.options[a].lines);
+      else a.forEach(function(i){ all=all.concat(q.options[i].lines); });
+    });
+    state.lines=all.map(function(l,i){ return {id:'l'+i,text:l.text,bucket:l.bucket}; }).filter(function(l){ return (state.suppressedTexts||[]).indexOf(l.text)===-1; }).concat(state.importedLines||[]);
+    return state.lines;
+  }
+  function renderLive(flash){
+    var lines=collectLines();
+    var html='<span class="md-heading"># How to work with me</span>\n\n';
+    if(!lines.length) html+='<span class="md-comment">// Your answers will become rules here.</span>';
+    lines.forEach(function(l,i){ html+='<span class="'+(flash&&i===lines.length-1?'new-line':'')+'">- '+escapeHTML(l.text)+'</span>\n'; });
+    $('#liveMarkdown').innerHTML=html;
+    $('#lineCount').textContent=lines.length+' line'+(lines.length===1?'':'s')+' written';
+  }
+  function answerReady(q){
+    var a=state.answers[q.key];
+    if(q.type==='text') return !!(a&&a.trim());
+    if(q.type==='choice') return typeof a==='number';
+    return Array.isArray(a)&&a.length>0;
+  }
+  function deepProgressCount(){
+    return questions.slice(INITIAL_COUNT).filter(function(q){ return answerReady(q); }).length;
+  }
+  function renderQuestion(){
+    var q=questions[state.index];
+    var phaseStart=state.scope===INITIAL_COUNT?0:INITIAL_COUNT;
+    var phaseTotal=state.scope===INITIAL_COUNT?INITIAL_COUNT:questions.length-INITIAL_COUNT;
+    var phaseIndex=state.index-phaseStart+1;
+    $('#progressText').textContent=String(phaseIndex).padStart(2,'0')+' / '+String(phaseTotal).padStart(2,'0');
+    $('#progressLabel').innerHTML=escapeHTML(q.phase)+' <span class="phase-mark">'+(state.scope===INITIAL_COUNT?'v0':'deeper')+'</span>';
+    $('#progressFill').style.width=(phaseIndex/phaseTotal*100)+'%';
+    $('#exitDeepBtn').hidden=state.scope===INITIAL_COUNT;
+    $('#exitDeepBtn').querySelector('span').textContent=deepProgressCount()+' of 24 saved';
+    var body='<div class="question-count">'+escapeHTML(q.label)+'</div><h2 class="question">'+escapeHTML(q.title)+'</h2><p class="prompt-note">'+escapeHTML(q.note)+'</p>';
+    if(q.type==='text'){
+      body+='<textarea rows="1" class="text-answer" id="textAnswer" placeholder="'+escapeHTML(q.placeholder)+'">'+escapeHTML(state.answers[q.key]||'')+'</textarea>';
+    } else {
+      body+='<div class="choices">';
+      q.options.forEach(function(o,i){
+        var chosen=q.type==='choice'?state.answers[q.key]===i:(state.answers[q.key]||[]).indexOf(i)>-1;
+        body+='<button class="choice '+(chosen?'selected':'')+'" data-choice="'+i+'"><b>'+escapeHTML(o.title)+'</b>'+(o.desc?'<span>'+escapeHTML(o.desc)+'</span>':'')+'</button>';
+      });
+      body+='</div>';
+    }
+    var atPhaseEnd=state.index===state.scope-1;
+    body+='<div class="question-actions"><button class="back" id="backBtn">'+(state.index===0?'start over':'← back')+'</button><button class="next" id="nextBtn" '+(answerReady(q)?'':'disabled')+'>'+(atPhaseEnd?(state.scope===INITIAL_COUNT?'Build my files →':'Review the deeper file →'):'next →')+'</button></div>';
+    $('#questionWrap').innerHTML=body;
+    if(q.type==='text'){
+      var input=$('#textAnswer'); input.focus();
+      input.addEventListener('input',function(){ state.answers[q.key]=input.value; $('#nextBtn').disabled=!answerReady(q); renderLive(false); });
+      input.addEventListener('keydown',function(e){ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); if(answerReady(q)) advance(); } });
+    } else {
+      document.querySelectorAll('[data-choice]').forEach(function(btn){ btn.addEventListener('click',function(){
+        var idx=Number(btn.dataset.choice);
+        if(q.type==='choice') state.answers[q.key]=idx;
+        else {
+          var arr=state.answers[q.key]||[]; var at=arr.indexOf(idx);
+          if(at>-1) arr.splice(at,1); else arr.push(idx);
+          state.answers[q.key]=arr;
+        }
+        renderQuestion(); renderLive(true);
+      }); });
+    }
+    $('#backBtn').addEventListener('click',function(){
+      if(state.index===0){ state.answers={}; state.scope=INITIAL_COUNT; renderLive(false); show('intro'); }
+      else if(state.scope>INITIAL_COUNT && state.index===INITIAL_COUNT){ renderFinish(); show('finish'); }
+      else { state.index--; renderQuestion(); renderLive(false); }
+    });
+    $('#nextBtn').addEventListener('click',advance);
+  }
+  function advance(){
+    var q=questions[state.index]; if(!answerReady(q)) return;
+    renderLive(true);
+    if(state.index<state.scope-1){ state.index++; renderQuestion(); }
+    else if(state.scope===INITIAL_COUNT){
+      collectLines();
+      state.v0Lines=state.lines.map(function(l){ return {id:l.id,text:l.text,bucket:l.bucket}; });
+      renderFinish(); show('finish');
+    }
+    else { state.deepCompleted=true; collectLines(); renderReview(); show('review'); }
+  }
+
+  function renderReview(){
+    var list=$('#lineList');
+    list.innerHTML=state.lines.map(function(l,i){ return '<div class="line-item" data-id="'+l.id+'"><span class="line-num">'+String(i+1).padStart(2,'0')+'</span><div class="line-text" contenteditable="true" spellcheck="true">'+escapeHTML(l.text)+'</div><button class="icon-btn" aria-label="Delete line">×</button></div>'; }).join('');
+    list.querySelectorAll('.line-item').forEach(function(row){
+      var id=row.dataset.id, text=row.querySelector('.line-text');
+      text.addEventListener('blur',function(){
+        var line=state.lines.find(function(x){return x.id===id;});
+        if(line){
+          var cleaned=sanitizeLine(text.textContent.trim());
+          line.text=cleaned;
+          text.textContent=cleaned;
+        }
+      });
+      row.querySelector('.icon-btn').addEventListener('click',function(){ state.lines=state.lines.filter(function(x){return x.id!==id;}); renderReview(); });
+    });
+    renderSuggestions();
+  }
+  function renderSuggestions(){
+    var suggestions=[
+      {id:'s1',bucket:'agent', oldText:'Give me a useful answer.', newText:'Preserve the live tension, then take a position strong enough for me to react to.'},
+      {id:'s2',bucket:'voice', oldText:'I like good ideas.', newText:'I value surprise when it creates recognition — not novelty for its own sake.'}
+    ];
+    var host=$('#suggestionList');
+    host.innerHTML=suggestions.map(function(s,i){return '<div class="suggestion" data-suggestion="'+s.id+'"><div class="diff-label">PROPOSAL '+(i+1)+'</div><div class="diff-body"><div><span class="minus">- '+escapeHTML(s.oldText)+'</span></div><div><span class="plus">+ '+escapeHTML(s.newText)+'</span></div></div><div class="diff-actions"><button class="accept">accept</button><button class="reject">reject</button></div></div>';}).join('');
+    host.querySelectorAll('.suggestion').forEach(function(row,i){
+      row.querySelector('.accept').addEventListener('click',function(){
+        var s=suggestions[i];
+        var replacement=-1;
+        if(s.id==='s1') replacement=state.lines.findIndex(function(l){ return l.bucket==='agent' && (l.text.indexOf('Name the central tension')===0 || l.text.indexOf('Do not hide behind neutrality')===0); });
+        if(s.id==='s2') replacement=state.lines.findIndex(function(l){ return l.bucket==='voice' && (l.text.indexOf('Surprise is valuable')===0 || l.text.indexOf('I like ideas with a sharp edge')===0); });
+        if(replacement>-1) state.lines[replacement].text=s.newText;
+        else state.lines.push({id:'refine'+Date.now()+i,text:s.newText,bucket:s.bucket});
+        row.remove(); toast('Suggestion accepted');
+      });
+      row.querySelector('.reject').addEventListener('click',function(){ row.remove(); toast('Suggestion rejected'); });
+    });
+  }
+  function addLine(){
+    var input=$('#customLine'), text=input.value.trim(); if(!text) return;
+    state.lines.push({id:'custom'+Date.now(),text:text,bucket:'voice'}); input.value=''; renderReview();
+  }
+  function fileText(bucket){
+    var title=bucket==='agent'?'# How to work with me':'# How to communicate with me';
+    var intro=bucket==='agent'?'\n\nUse these choices to guide judgment, decisions, and collaboration.':'\n\nUse these choices to guide tone, phrasing, and structure.';
+    var lines=state.lines.filter(function(l){return l.bucket===bucket&&l.text;});
+    return title+'\n\nVersion: v0.'+state.fileVersion+intro+'\n\n'+(lines.length?lines.map(function(l){return '- '+l.text;}).join('\n'):'- No patterns captured yet.')+'\n';
+  }
+  function answerIndex(key){ return typeof state.answers[key]==='number'?state.answers[key]:0; }
+  function chosenLine(key,bucket){
+    var q=questions.find(function(item){ return item.key===key; });
+    var i=answerIndex(key);
+    var lines=q && q.options[i] ? q.options[i].lines : [];
+    var line=lines.find(function(item){ return item.bucket===bucket; }) || lines[0] || {text:'',bucket:bucket||'agent'};
+    return line;
+  }
+  function renderComparison(){
+    var opening=answerIndex('opening');
+    var ambiguity=answerIndex('ambiguity');
+    var uncertainty=answerIndex('uncertainty');
+    var idea=answerIndex('ideas');
+    var brave=answerIndex('brave');
+    var scenario;
+
+    if(state.scenario==='personal'){
+      scenario={
+        prompt:'My week is packed, I’m dropping balls, and I can’t do everything. Help me decide what to cut.',
+        baseline:[
+          'Start by listing your commitments and ranking them by urgency and importance.',
+          'Consider delegating what you can, postponing lower-priority items, and making time for rest. Be realistic about what you can accomplish; it’s okay to say no.'
+        ],
+        fitted:[
+          [
+            'Cut the commitment that looks useful but doesn’t change the week. Protect anything with a real consequence — and one thing that gives you energy back.',
+            'The real problem isn’t time. It’s that everything is being treated like it deserves the same kind of yes.',
+            'You’re balancing responsibility against recovery. Don’t let the urgent-looking work erase the thing that keeps the week livable.'
+          ][opening],
+          [
+            'I’m assuming none of these are health or family emergencies. If they are, they move to the top and the rest gets simpler.',
+            'Ask one question: which commitment would still matter if nobody noticed you skipped it? Keep that one.',
+            'If the pressure is mostly deadlines, cut scope. If it’s mostly people, reset expectations before you cancel.'
+          ][ambiguity],
+          [
+            'My best read: the low-consequence obligation is the first to go. You can add it back next week if the space doesn’t help.',
+            'Change the call only if dropping something creates a consequence you can’t repair later.',
+            'The bigger mistake isn’t disappointing someone once. It’s carrying so much that you do the important things badly.'
+          ][uncertainty],
+          [
+            'Make three columns: must happen, can slip, should disappear. Delete one thing from the third column today.',
+            'Find the recurring pattern: what keeps making the list because it sounds responsible, not because it matters? Cut one instance of that.',
+            'Cancel one thing cleanly, then see what the extra space makes possible.'
+          ][Math.min(idea,2)]+' '+[
+            'Make a call you can reverse. Don’t spend tonight building a perfect system for an overloaded week.',
+            'Keep the tradeoff visible: a fuller calendar is buying less attention for everything on it.',
+            'Be specific. “Do less” is advice; one canceled commitment is a decision.',
+            'Before bed, send the one message that creates the most room tomorrow.'
+          ][brave]
+        ],
+        trace:[['opening','agent'],['ambiguity','agent'],['uncertainty','voice'],['brave','voice']]
+      };
+    } else if(state.scenario==='explain'){
+      scenario={
+        prompt:'Explain why AI agents can seem smart and still fail at long, multi-step tasks.',
+        baseline:[
+          'AI agents can struggle with long tasks because they need to maintain context, plan multiple steps, use tools correctly, and recover from errors.',
+          'Even if the model performs well on each individual step, small mistakes can accumulate. Better planning, state tracking, verification, and human oversight can improve reliability.'
+        ],
+        fitted:[
+          [
+            'They usually don’t fail because any single step is too hard. They fail because a small mistake early on quietly changes every step after it.',
+            'The useful distinction is intelligence versus reliability. An agent can reason well in the moment and still be bad at carrying a goal across time.',
+            'Long tasks trade speed for control: every new step creates another place where context can drift, a tool can misfire, or a bad assumption can survive.'
+          ][opening],
+          [
+            'I’m assuming “agent” means a model planning and using tools, not a fixed automation. Fixed workflows fail differently — they’re brittle, but easier to inspect.',
+            'The key question is whether the agent checks its own work. If it can’t compare the result with the goal, errors just keep moving forward.',
+            'There are two common cases: the plan is wrong, or the plan is fine and execution drifts. The fix depends on which one you have.'
+          ][ambiguity],
+          [
+            'A good mental model is compound interest in reverse: 95% reliability per step becomes about 60% across ten dependent steps.',
+            'What would change this? Shorter loops, explicit checks, and the ability to restart from a known-good point.',
+            'The costly failure isn’t one bad tool call. It’s an agent that sounds confident enough that nobody notices the task has gone off course.'
+          ][uncertainty],
+          [
+            'So judge agents by recovery, not just first-pass cleverness.',
+            'That same pattern shows up in teams: local competence doesn’t guarantee the handoffs will hold.',
+            'The practical test is simple: give it a task with checkpoints and see whether it can catch its own drift.',
+            'The surprising part is that stronger reasoning can hide weaker process. Fluency makes the failure harder to see.'
+          ][brave]
+        ],
+        trace:[['opening','agent'],['ambiguity','agent'],['uncertainty','voice'],['brave','voice']]
+      };
+    } else {
+      scenario={
+        prompt:'I’ve got three good product directions and two weeks. How should I decide what to build?',
+        baseline:[
+          'Consider evaluating each direction based on market demand, feasibility, strategic alignment, and potential impact.',
+          'You could create a scoring matrix, talk to prospective users, and choose the option with the strongest overall balance. It may also help to stay flexible as you learn more.'
+        ],
+        fitted:[
+          [
+            'Build the one you can put in front of real users fastest.',
+            'The real question isn’t which idea sounds best. It’s which one can teach you something useful in two weeks.',
+            'You’re balancing belief in the idea against speed of learning. For now, favor speed of learning.'
+          ][opening],
+          [
+            'I’m assuming all three can be tested without a big build. If that’s wrong, drop any option that can’t reach users within the two weeks.',
+            'Ask one question first: what would you need to learn to rule each idea out? The idea with the clearest answer gets the slot.',
+            'If one idea already has a path to users, test that one. Otherwise, choose the smallest test that could prove an idea wrong.'
+          ][ambiguity],
+          [
+            'I’d call this a solid bet, not a sure thing. A real user giving up time, money, or an old habit is the signal to trust.',
+            'Change course if another idea can give you stronger evidence in the same two weeks.',
+            'The bigger risk isn’t choosing the wrong idea. It’s spending two weeks building something that teaches you nothing.'
+          ][uncertainty],
+          [
+            'Build the thinnest useful version and put it in front of five people. Watch what they do, not what they say they like.',
+            'Pick the idea that gets stronger with each new user, then test only the part that makes that advantage real.',
+            'Give each idea one day for its boldest version. Then commit to the one with the clearest reason to exist.'
+          ][idea]+' '+[
+            'Skip the big scorecard. Make a call you can reverse, and let real use change your mind.',
+            'You’re buying learning, not certainty.',
+            'Keep the test real: a real user, a real task, and a result that can fail.',
+            'Tomorrow, write the riskiest assumption under each idea. Test the cheapest one first.'
+          ][brave]
+        ],
+        trace:[['opening','agent'],['ambiguity','agent'],['uncertainty','voice'],['brave','voice']]
+      };
+    }
+
+    if(deepProgressCount()>0 && typeof state.answers.cadence==='number'){
+      var cadence=answerIndex('cadence');
+      if(cadence===0) scenario.fitted[0]+=' It’s not perfect, but it’s the clearest bet.';
+      if(cadence===2) scenario.fitted[0]='My read: '+scenario.fitted[0].charAt(0).toLowerCase()+scenario.fitted[0].slice(1);
+    }
+    if(state.deepCompleted){
+      scenario.trace=[['cadence','voice'],['trim','voice'],['nextmove','voice'],['learning','agent']];
+    }
+
+    $('#demoPromptText').textContent=scenario.prompt;
+    $('#baselineResponse').innerHTML=scenario.baseline.map(function(p){ return '<p>'+escapeHTML(p)+'</p>'; }).join('');
+    $('#calibratedResponse').innerHTML=scenario.fitted.map(function(p,i){ return '<p class="calibrated-point" data-link="'+i+'"><span class="point-number" aria-hidden="true">'+(i+1)+'</span>'+escapeHTML(p)+'</p>'; }).join('');
+    $('#appliedRules').innerHTML=scenario.trace.map(function(spec,i){
+      var line=chosenLine(spec[0],spec[1]);
+      return '<button type="button" class="rule-trace" data-link="'+i+'"><b>'+(i+1)+'</b><span><span class="rule-source">'+escapeHTML(line.bucket+'.md')+'</span>'+escapeHTML(line.text)+'</span></button>';
+    }).join('');
+    document.querySelectorAll('[data-scenario]').forEach(function(button){ button.setAttribute('aria-pressed',button.dataset.scenario===state.scenario?'true':'false'); });
+    function linkRule(index,on){
+      document.querySelectorAll('[data-link="'+index+'"]').forEach(function(el){ el.classList.toggle('is-linked',on); });
+    }
+    document.querySelectorAll('.rule-trace').forEach(function(rule){
+      var index=rule.dataset.link;
+      rule.addEventListener('mouseenter',function(){ linkRule(index,true); });
+      rule.addEventListener('mouseleave',function(){ linkRule(index,false); });
+      rule.addEventListener('focus',function(){ linkRule(index,true); });
+      rule.addEventListener('blur',function(){ linkRule(index,false); });
+    });
+    var deepCount=deepProgressCount();
+    var versionLabel='v0.'+state.fileVersion;
+    $('#responseVersionTag').textContent=versionLabel+(state.fileVersion>2?' · merged settings':(state.deepCompleted?' · deeper pass':(deepCount?' draft · '+deepCount+'/24 deeper choices':' · first pass')));
+    $('#calibratedLabel').textContent=versionLabel+(deepCount&&!state.deepCompleted&&state.fileVersion===2?' draft':'');
+  }
+  function renderVersionDiff(){
+    var section=$('#versionDiffSection');
+    section.hidden=deepProgressCount()===0;
+    if(deepProgressCount()===0) return;
+    var before=state.v0Lines||[];
+    var current=state.lines||[];
+    var additions=current.filter(function(l){ return !before.some(function(old){ return old.bucket===l.bucket && old.text===l.text; }); }).map(function(l){ return {type:'add',bucket:l.bucket,text:l.text}; });
+    var removals=before.filter(function(l){ return !current.some(function(now){ return now.bucket===l.bucket && now.text===l.text; }); }).map(function(l){ return {type:'remove',bucket:l.bucket,text:l.text}; });
+    var all=removals.concat(additions);
+    var filtered=all.filter(function(c){ return state.diffFilter==='all'||c.bucket===state.diffFilter; });
+    var visible=state.diffExpanded?filtered:filtered.slice(0,8);
+    $('#diffCount').textContent=additions.length+' addition'+(additions.length===1?'':'s')+(removals.length?' · '+removals.length+' removal'+(removals.length===1?'':'s'):'');
+    $('#versionLines').innerHTML=visible.length?visible.map(function(c){
+      return '<div class="version-line"><span class="version-file">'+escapeHTML(c.bucket+'.md')+'</span><span class="version-sign '+(c.type==='remove'?'removed':'')+'">'+(c.type==='add'?'+':'−')+'</span><span>'+escapeHTML(c.text)+'</span></div>';
+    }).join(''):'<div class="version-line"><span class="version-file">—</span><span></span><span>No changes in this file.</span></div>';
+    var button=$('#showDiffBtn');
+    button.hidden=filtered.length<=8;
+    button.textContent=state.diffExpanded?'show fewer changes':'show all '+filtered.length+' changes';
+  }
+  function renderFinish(){
+    var deepCount=deepProgressCount();
+    if(deepCount>0 && state.fileVersion<2) state.fileVersion=2;
+    $('#agentOutput').textContent=fileText('agent');
+    $('#voiceOutput').textContent=fileText('voice');
+    $('#finishTitle').textContent=state.deepCompleted?'See what the deeper pass changed.':(deepCount?'Your settings are already taking shape.':'See your settings at work.');
+    $('#finishCopy').textContent=state.deepCompleted?'The same prompt now carries more of your cadence and judgment. The version diff shows exactly what the deeper questions added.':(deepCount?'You answered '+deepCount+' of 24 deeper questions. Those answers are already reflected in your settings, and you can pick up where you left off.':'The same prompt, answered twice. The difference on the right comes from the choices you just made.');
+    $('#deepBtn').textContent=state.deepCompleted?'Deeper pass complete':(deepCount?'Continue the deeper pass →':'Start the deeper pass →');
+    $('#deepBtn').disabled=state.deepCompleted;
+    $('#deepNote').textContent=state.deepCompleted?'This deeper version is ready to combine with the compact summaries from your other AIs.':(deepCount?'Your '+deepCount+' answers are already included. Finish whenever you have enough.':'Your partial progress is useful. Finish whenever you have enough.');
+    $('#versionHeading').textContent=state.deepCompleted?'What changed?':'What has changed so far?';
+    renderComparison();
+    renderVersionDiff();
+  }
+  function scanDigestForPII(text){
+    var tests=[
+      ['email address',/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i],
+      ['phone number',/\b(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]\d{3}[-.\s]\d{4}\b/],
+      ['government identifier',/\b\d{3}-\d{2}-\d{4}\b/],
+      ['payment or account number',/\b(?:\d[ -]*?){13,19}\b/],
+      ['street address',/\b\d{1,5}\s+[A-Za-z0-9.'-]+(?:\s+[A-Za-z0-9.'-]+){0,4}\s+(?:Street|St|Road|Rd|Avenue|Ave|Boulevard|Blvd|Lane|Ln|Drive|Dr|Court|Ct|Circle|Cir|Way)\b/i],
+      ['credential or secret',/\b(?:password|passcode|api[_ -]?key|access[_ -]?token|secret|credential)\s*(?:is|:|=)\s*\S+/i],
+      ['account handle or URL',/(?:https?:\/\/\S+|@[A-Za-z0-9_]{3,})/i],
+      ['name or identity statement',/\b(?:my name is|i am named|call me)\s+[A-Z][A-Za-z'-]+/i],
+      ['employer or company',/\b(?:i work (?:at|for)|my employer is|our client is)\s+[A-Z][A-Za-z0-9&.' -]+/i],
+      ['specific location',/\b(?:i live in|i am based in|i'm based in|located in)\s+[A-Z][A-Za-z.' -]+/i],
+      ['specific date',/\b(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+\d{1,2}(?:,\s*\d{4})?\b/i]
+    ];
+    return tests.filter(function(test){ return test[1].test(text); }).map(function(test){ return test[0]; });
+  }
+  function normalizeImportText(text){
+    return text.toLowerCase().replace(/[^a-z0-9\s]/g,' ').replace(/\b(?:the|a|an|and|or|to|of|in|on|for|with|when|how|it|is|be|my|me|i|that|this)\b/g,' ').replace(/\s+/g,' ').trim();
+  }
+  function wordSet(text){ var out={}; normalizeImportText(text).split(' ').forEach(function(w){ if(w.length>2) out[w]=true; }); return out; }
+  function similarity(a,b){
+    var aa=wordSet(a), bb=wordSet(b), union={}, same=0;
+    Object.keys(aa).forEach(function(k){ union[k]=true; if(bb[k]) same++; });
+    Object.keys(bb).forEach(function(k){ union[k]=true; });
+    var total=Object.keys(union).length;
+    return total?same/total:0;
+  }
+  function preferenceAxis(text){
+    var axes=[
+      ['ask-act',/\bask|clarif|assum|proceed|act\b/i],
+      ['length',/\bshort|concise|brief|detail|depth|thorough|long\b/i],
+      ['options',/\boption|recommend|choice|menu|one path|fallback\b/i],
+      ['layout',/\bbullet|paragraph|heading|list|prose\b/i],
+      ['certainty',/\bhedg|certain|confidence|caveat|direct\b/i],
+      ['tone',/\bhumor|warm|casual|formal|blunt|empathet\b/i],
+      ['explanation',/\banalog|example|technical|jargon|plain language\b/i],
+      ['opening',/\bopen|start|lead|conclusion|answer first|setup\b/i]
+    ];
+    for(var i=0;i<axes.length;i++) if(axes[i][1].test(text)) return axes[i][0];
+    return '';
+  }
+  function isConflict(incoming,existing){
+    var a=normalizeImportText(incoming), b=normalizeImportText(existing);
+    var negA=/\b(?:do not|don't|never|avoid|skip|without)\b/i.test(incoming);
+    var negB=/\b(?:do not|don't|never|avoid|skip|without)\b/i.test(existing);
+    var axisA=preferenceAxis(incoming), axisB=preferenceAxis(existing);
+    return !!axisA && axisA===axisB && (negA!==negB || similarity(a,b)>.22);
+  }
+  async function refineMergeWithAPI(digest){
+    // Server-side merge intelligence. Returns null when the API is not
+    // configured (or unreachable) — the caller falls back to prepareMerge.
+    // The digest was PII-scanned in the browser before this call.
+    try{
+      var ctrl=new AbortController();
+      var timer=setTimeout(function(){ctrl.abort();},15000);
+      var resp=await fetch('/api/merge',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({digest:digest,agent:fileText('agent'),voice:fileText('voice')}),signal:ctrl.signal});
+      clearTimeout(timer);
+      if(!resp.ok) return null;
+      var data=await resp.json();
+      if(!data||!data.configured||!Array.isArray(data.items)||!data.items.length) return null;
+      var now=Date.now();
+      return data.items.map(function(item,i){
+        return {id:'m'+now+i,section:String(item.section||''),bucket:(item.bucket==='agent'||item.bucket==='voice')?item.bucket:'tentative',evidence:item.evidence==='stated'?'stated':'observed',strength:item.strength==='strong'?'strong':'moderate',text:String(item.text||'').trim(),type:['add','conflict','duplicate','tentative'].indexOf(item.type)===-1?'add':item.type,choice:String(item.choice||'reject'),match:item.match?{text:String(item.match.text||item.match)}:null};
+      }).filter(function(item){return item.text;});
+    }catch(e){ return null; }
+  }
+  function parseDigest(text){
+    var route={
+      'working context':'voice', 'interaction preferences':'agent', 'voice and style':'voice',
+      'decision patterns':'agent', 'when to ask vs. act':'agent', 'corrections i’ve made':'agent',
+      "corrections i've made":'agent', 'things that frustrate me':'agent', 'tentative':'tentative'
+    };
+    var current='', bullets=[], active=null;
+    text.split(/\r?\n/).forEach(function(raw){
+      var heading=raw.match(/^\s*#\s+(.+?)\s*$/);
+      if(heading){
+        var clean=heading[1].toLowerCase().split(/\s+[—–-]\s+/)[0].trim();
+        current=Object.prototype.hasOwnProperty.call(route,clean)?clean:'';
+        active=null; return;
+      }
+      if(!current) return;
+      var bullet=raw.match(/^\s*(?:[-*]|\d+[.)])\s+(?:\[(Stated|Observed)\]\s*)?(?:\((strong|moderate)\)\s*)?(.*)$/i);
+      if(bullet){
+        active={section:current,bucket:route[current],evidence:(bullet[1]||'Observed').toLowerCase(),strength:(bullet[2]||'moderate').toLowerCase(),text:(bullet[3]||'').trim()};
+        if(active.text) bullets.push(active);
+      } else if(active && raw.trim() && !/^\s*(?:Do|Don['’]t)\s*:/i.test(raw)) {
+        active.text+=' '+raw.trim();
+      }
+    });
+    return bullets;
+  }
+  function prepareMerge(items){
+    var existing=state.lines.slice();
+    return items.map(function(item,index){
+      item.id='m'+Date.now()+index;
+      item.choice=(item.evidence==='stated'||item.strength==='strong')?'incoming':'reject';
+      if(item.bucket==='tentative'){ item.type='tentative'; item.choice='hold'; return item; }
+      var ranked=existing.map(function(line){ return {line:line,score:similarity(item.text,line.text)}; }).sort(function(a,b){return b.score-a.score;});
+      if(ranked[0] && ranked[0].score>=.72){ item.type='duplicate'; item.choice='skip'; item.match=ranked[0].line; return item; }
+      var conflict=ranked.find(function(candidate){ return candidate.line.bucket===item.bucket && isConflict(item.text,candidate.line.text); });
+      if(conflict){ item.type='conflict'; item.choice='existing'; item.match=conflict.line; return item; }
+      item.type='add'; return item;
+    });
+  }
+  function renderMergeReview(){
+    var items=state.mergeItems;
+    var adds=items.filter(function(x){return x.type==='add';});
+    var conflicts=items.filter(function(x){return x.type==='conflict';});
+    var duplicates=items.filter(function(x){return x.type==='duplicate';});
+    var tentative=items.filter(function(x){return x.type==='tentative';});
+    $('#mergeSummary').innerHTML='<span>'+adds.length+' new · '+conflicts.length+' possible conflict'+(conflicts.length===1?'':'s')+'</span><span>'+duplicates.length+' repeat'+(duplicates.length===1?'':'s')+' skipped · '+tentative.length+' tentative held aside</span>';
+    var html='';
+    if(adds.length){ html+='<section class="merge-group"><h5>NEW LINES</h5>'+adds.map(function(item){ return mergeRowHTML(item); }).join('')+'</section>'; }
+    if(conflicts.length){ html+='<section class="merge-group"><h5>NEEDS YOUR CALL</h5>'+conflicts.map(function(item){ return mergeRowHTML(item); }).join('')+'</section>'; }
+    if(duplicates.length){ html+='<section class="merge-group"><h5>ALREADY COVERED — SKIPPED</h5><ul class="skipped-list">'+duplicates.map(function(item){ return '<li>'+escapeHTML(item.text)+'</li>'; }).join('')+'</ul></section>'; }
+    if(tentative.length){ html+='<section class="merge-group"><h5>TENTATIVE — HELD ASIDE</h5><ul class="held-list">'+tentative.map(function(item){ return '<li>'+escapeHTML(item.text)+'</li>'; }).join('')+'</ul></section>'; }
+    $('#mergeRows').innerHTML=html;
+    $('#mergeRows').querySelectorAll('[data-merge-choice]').forEach(function(button){
+      button.addEventListener('click',function(){
+        var item=state.mergeItems.find(function(x){return x.id===button.dataset.id;});
+        if(!item) return;
+        item.choice=button.dataset.mergeChoice;
+        renderMergeReview();
+      });
+    });
+    $('#mergeDigestBtn').disabled=!items.some(function(x){ return x.choice==='incoming'; });
+  }
+  function mergeRowHTML(item){
+    var meta='<div class="merge-meta"><strong>'+escapeHTML(item.bucket+'.md')+'</strong>'+escapeHTML(item.section)+'<br><span class="confidence">'+escapeHTML(item.evidence)+' · '+escapeHTML(item.strength)+'</span></div>';
+    if(item.type==='conflict'){
+      return '<div class="merge-row">'+meta+'<div class="merge-copy"><span class="existing">CURRENT · '+escapeHTML(item.match.text)+'</span><span class="incoming">IMPORT · '+escapeHTML(item.text)+'</span></div><div class="merge-choice"><button type="button" data-id="'+item.id+'" data-merge-choice="existing" class="'+(item.choice==='existing'?'selected':'')+'">keep current</button><button type="button" data-id="'+item.id+'" data-merge-choice="incoming" class="'+(item.choice==='incoming'?'selected':'')+'">use import</button></div></div>';
+    }
+    return '<div class="merge-row">'+meta+'<div class="merge-copy"><span class="incoming">+ '+escapeHTML(item.text)+'</span></div><div class="merge-choice"><button type="button" data-id="'+item.id+'" data-merge-choice="incoming" class="'+(item.choice==='incoming'?'selected':'')+'">accept</button><button type="button" data-id="'+item.id+'" data-merge-choice="reject" class="'+(item.choice==='reject'?'selected':'')+'">reject</button></div></div>';
+  }
+  function resetImporter(){
+    $('#importInputStep').hidden=false; $('#digestInput').value='';
+    $('#importStatus').className='import-status'; $('#importStatus').innerHTML='';
+    $('#mergeReview').className='merge-review'; $('#mergeDone').className='merge-done';
+    state.mergeItems=[];
+  }
+  function toast(msg){ var t=$('#toast'); t.textContent=msg; t.classList.add('show'); setTimeout(function(){t.classList.remove('show');},1600); }
+  function copyText(text){
+    if(navigator.clipboard && window.isSecureContext){
+      return navigator.clipboard.writeText(text).catch(function(){ return legacyCopy(text); });
+    }
+    return legacyCopy(text);
+  }
+  function legacyCopy(text){
+    return new Promise(function(resolve,reject){
+      var area=document.createElement('textarea');
+      area.value=text;
+      area.setAttribute('readonly','');
+      area.style.position='fixed'; area.style.left='-9999px'; area.style.top='0';
+      document.body.appendChild(area); area.select(); area.setSelectionRange(0,area.value.length);
+      try { if(document.execCommand('copy')) resolve(); else reject(new Error('copy failed')); }
+      catch(error){ reject(error); }
+      area.remove();
+    });
+  }
+  function download(name,text){
+    var blob=new Blob([text],{type:'text/markdown;charset=utf-8'});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');
+    a.href=url; a.download=name+'.md'; a.rel='noopener';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(url); },1000);
+    toast(name+'.md downloaded');
+  }
+
+  $('#startBtn').addEventListener('click',function(){ state.index=0; state.scope=INITIAL_COUNT; state.deepCompleted=false; state.answers={}; state.lines=[]; state.importedLines=[]; state.suppressedTexts=[]; state.mergeItems=[]; state.fileVersion=1; state.v0Lines=[]; state.diffFilter='all'; state.diffExpanded=false; state.scenario='build'; state.gatePreview=false; resetImporter(); $('#promptPreview').classList.remove('open'); $('#gateStatus').textContent='The handoff prompt appears here after sign-in.'; $('#previewGateBtn').textContent='Preview the account handoff →'; renderQuestion(); renderLive(false); show('interview'); });
+  $('#reviewDraftBtn').addEventListener('click',function(){ renderReview(); show('review'); });
+  $('#deepBtn').addEventListener('click',function(){
+    if(state.deepCompleted) return;
+    if(!state.v0Lines.length) state.v0Lines=state.lines.map(function(l){return {id:l.id,text:l.text,bucket:l.bucket};});
+    state.scope=questions.length;
+    var nextUnanswered=questions.slice(INITIAL_COUNT).findIndex(function(q){ return !answerReady(q); });
+    state.index=nextUnanswered===-1?INITIAL_COUNT:INITIAL_COUNT+nextUnanswered;
+    renderQuestion(); renderLive(false); show('interview');
+  });
+  $('#exitDeepBtn').addEventListener('click',function(){
+    collectLines();
+    renderFinish();
+    show('finish');
+  });
+  $('#splitBtn').addEventListener('click',function(){
+    if(document.activeElement && document.activeElement.classList.contains('line-text')) document.activeElement.blur();
+    if(!state.deepCompleted) state.v0Lines=state.lines.map(function(l){return {id:l.id,text:l.text,bucket:l.bucket};});
+    renderFinish(); show('finish');
+  });
+  $('#diffFilter').addEventListener('change',function(){ state.diffFilter=this.value; state.diffExpanded=false; renderVersionDiff(); });
+  $('#showDiffBtn').addEventListener('click',function(){ state.diffExpanded=!state.diffExpanded; renderVersionDiff(); });
+  document.querySelectorAll('[data-scenario]').forEach(function(button){ button.addEventListener('click',function(){ state.scenario=button.dataset.scenario; renderComparison(); }); });
+  $('#previewGateBtn').addEventListener('click',function(){
+    state.gatePreview=!state.gatePreview;
+    $('#promptPreview').classList.toggle('open',state.gatePreview);
+    $('#gateStatus').textContent=state.gatePreview?'Prototype preview — this unlocks after sign-in in the full product.':'The handoff prompt appears here after sign-in.';
+    $('#previewGateBtn').textContent=state.gatePreview?'Hide the handoff preview':'Preview the account handoff →';
+    if(!state.gatePreview){ $('#promptDetails').classList.remove('open'); $('#togglePromptDetails').setAttribute('aria-expanded','false'); $('#togglePromptDetails').textContent='View prompt'; }
+    if(state.gatePreview) $('#promptGate').scrollIntoView({behavior:'smooth',block:'start'});
+  });
+  $('#togglePromptDetails').addEventListener('click',function(){
+    var open=!$('#promptDetails').classList.contains('open');
+    $('#promptDetails').classList.toggle('open',open);
+    this.setAttribute('aria-expanded',open?'true':'false');
+    this.textContent=open?'Hide prompt':'View prompt';
+    if(open) $('#promptDetails').scrollIntoView({behavior:'smooth',block:'nearest'});
+  });
+  $('#copyPatternPrompt').addEventListener('click',function(){
+    copyText($('#patternPrompt').textContent).then(function(){toast('Handoff prompt copied');}).catch(function(){toast('Copy unavailable — select the prompt instead');});
+  });
+  $('#analyzeDigestBtn').addEventListener('click',function(){
+    var text=$('#digestInput').value.trim();
+    if(!text){ toast('Paste a summary first'); return; }
+    $('#importInputStep').hidden=true;
+    $('#mergeReview').className='merge-review'; $('#mergeDone').className='merge-done';
+    $('#importStatus').className='import-status show';
+    $('#importStatus').innerHTML='<div class="scan-line"><span class="scan-pulse"></span><span>Checking for personal details, then comparing every line…</span></div>';
+    setTimeout(async function(){
+      var findings=scanDigestForPII(text);
+      if(findings.length){
+        $('#importStatus').innerHTML='<div class="privacy-block"><strong>Nothing was imported.</strong>Possible personal information found: '+escapeHTML(findings.join(', '))+'. Remove those details from the summary, then try again.</div><button type="button" class="import-reset" id="editDigestBtn" style="margin-top:12px">Edit the pasted summary</button>';
+        $('#editDigestBtn').addEventListener('click',function(){ $('#importInputStep').hidden=false; $('#importStatus').className='import-status'; $('#digestInput').focus(); });
+        return;
+      }
+      var parsed=parseDigest(text);
+      if(!parsed.length){
+        $('#importStatus').innerHTML='<div class="privacy-block"><strong>No usable sections found.</strong>Paste the complete output with the fixed # headings and tagged bullets.</div><button type="button" class="import-reset" id="editDigestBtn" style="margin-top:12px">Edit the pasted summary</button>';
+        $('#editDigestBtn').addEventListener('click',function(){ $('#importInputStep').hidden=false; $('#importStatus').className='import-status'; $('#digestInput').focus(); });
+        return;
+      }
+      var apiItems=await refineMergeWithAPI(text);
+      state.mergeItems=(apiItems&&apiItems.length)?apiItems:prepareMerge(parsed);
+      $('#importStatus').className='import-status';
+      $('#mergeReview').className='merge-review show';
+      renderMergeReview();
+      $('#mergeReview').scrollIntoView({behavior:'smooth',block:'start'});
+    },650);
+  });
+  $('#mergeDigestBtn').addEventListener('click',function(){
+    var accepted=state.mergeItems.filter(function(item){ return item.choice==='incoming' && (item.type==='add'||item.type==='conflict'); });
+    if(!accepted.length) return;
+    accepted.forEach(function(item){
+      if(item.type==='conflict' && item.match){
+        state.suppressedTexts.push(item.match.text);
+        state.importedLines=state.importedLines.filter(function(line){ return line.text!==item.match.text; });
+      }
+      if(!state.importedLines.some(function(line){ return line.bucket===item.bucket && normalizeImportText(line.text)===normalizeImportText(item.text); })){
+        state.importedLines.push({id:'import'+Date.now()+Math.random(),text:sanitizeLine(item.text),bucket:item.bucket,source:item.evidence,strength:item.strength});
+      }
+    });
+    collectLines();
+    state.fileVersion+=1;
+    renderFinish();
+    $('#mergeReview').className='merge-review';
+    $('#mergeDoneTitle').textContent='Merged into v0.'+state.fileVersion+'.';
+    $('#mergeDoneCopy').textContent=accepted.length+' accepted change'+(accepted.length===1?'':'s')+' added. Repeats stayed out; tentative lines remain held aside.';
+    $('#mergeDone').className='merge-done show';
+    $('#mergeDone').scrollIntoView({behavior:'smooth',block:'center'});
+  });
+  $('#importAnotherBtn').addEventListener('click',function(){ resetImporter(); $('#digestInput').focus(); });
+  document.querySelectorAll('[data-copy]').forEach(function(btn){btn.addEventListener('click',function(){ var text=fileText(btn.dataset.copy); copyText(text).then(function(){toast(btn.dataset.copy+'.md copied');}).catch(function(){toast('Copy unavailable — select the text instead');});});});
+  document.querySelectorAll('[data-download]').forEach(function(btn){btn.addEventListener('click',function(){download(btn.dataset.download,fileText(btn.dataset.download));});});
+  renderLive(false);
+})();
+</script>
+</body>
+</html>
