@@ -291,6 +291,7 @@
     .merge-copy { font-size:11px; line-height:1.6; }
     .merge-copy .existing { display:block; margin-bottom:8px; padding:9px 10px; background:var(--red-bg); color:var(--red); }
     .merge-copy .incoming { display:block; padding:9px 10px; background:var(--green-bg); color:var(--green); }
+    .merge-copy .example { display:block; padding:5px 10px 5px 24px; font-size:10px; color:var(--muted); }
     .merge-choice { display:flex; gap:6px; }
     .merge-choice button { border:1px solid var(--ink); background:var(--paper); padding:8px 9px; font-size:9px; white-space:nowrap; }
     .merge-choice button.selected { background:var(--ink); color:var(--paper); }
@@ -643,7 +644,7 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
       note:'Pick the one that feels exciting, not exhausting.',
       options:[
         {title:'Make it real', desc:'Start with the version you could actually try.', lines:[{text:'Turn promising ideas into a concrete first version before expanding them.',bucket:'agent'},{text:'Novelty becomes interesting when it can survive contact with reality.',bucket:'voice'}]},
-        {title:'Push it one step further', desc:'Go beyond the obvious, but keep the core intact.', lines:[{text:'After the obvious answer, look for one non-obvious extension that strengthens the core.',bucket:'agent'},{text:'I like ideas with a sharp edge, not novelty for its own sake.',bucket:'voice'}]},
+        {title:'Push it one step further', desc:'Go beyond the obvious, but keep the core intact.', lines:[{text:'In strategy and analysis, look for one non-obvious extension that strengthens the core.',bucket:'agent'},{text:'I like ideas with a sharp edge, not novelty for its own sake.',bucket:'voice'}]},
         {title:'Try the weird version', desc:'Let it get strange before you narrow it down.', lines:[{text:'In early ideation, widen the possibility space before applying constraints.',bucket:'agent'},{text:'I am comfortable entertaining a strange idea before deciding whether it is useful.',bucket:'voice'}]}
       ]
     },
@@ -654,7 +655,7 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
       options:[
         {title:'Push back once, clearly', desc:'Make the best case, then respect my call.', lines:[{text:'When disagreeing, make the strongest countercase once, then follow my decision.',bucket:'agent'}]},
         {title:'Figure out what we’re each assuming', desc:'Check that before arguing about the answer.', lines:[{text:'Resolve disagreement by surfacing the premise underneath it.',bucket:'agent'},{text:'I respond better to examined assumptions than repeated assertions.',bucket:'voice'}]},
-        {title:'Show me what happens next', desc:'Skip the debate and make the real-world effect clear.', lines:[{text:'When pushing back, make the consequence vivid rather than merely stating disagreement.',bucket:'agent'}]}
+        {title:'Show me what happens next', desc:'Skip the debate and make the real-world effect clear.', lines:[{text:'When pushing back, make the consequence concrete rather than merely stating disagreement.',bucket:'agent'}]}
       ]
     },
     {
@@ -956,10 +957,10 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
       var a=state.answers[q.key];
       if(a===undefined || a===null || a==='' || (Array.isArray(a)&&!a.length)) return;
       if(q.type==='text') all=all.concat(q.makeLines(a));
-      else if(q.type==='choice') all=all.concat(q.options[a].lines);
-      else a.forEach(function(i){ all=all.concat(q.options[i].lines); });
+      else if(q.type==='choice') all=all.concat(q.options[a].lines.map(function(l){ return {text:l.text,bucket:l.bucket,section:QUESTION_SECTION[q.key]||'How to answer'}; }));
+      else a.forEach(function(i){ all=all.concat(q.options[i].lines.map(function(l){ return {text:l.text,bucket:l.bucket,section:QUESTION_SECTION[q.key]||'How to answer'}; })); });
     });
-    state.lines=all.map(function(l,i){ return {id:'l'+i,text:l.text,bucket:l.bucket}; }).filter(function(l){ return (state.suppressedTexts||[]).indexOf(l.text)===-1; }).concat(state.importedLines||[]);
+    state.lines=all.map(function(l,i){ return {id:'l'+i,text:l.text,bucket:l.bucket,section:l.section}; }).filter(function(l){ return (state.suppressedTexts||[]).indexOf(l.text)===-1; }).concat(state.importedLines||[]);
     return state.lines;
   }
   function renderLive(flash){
@@ -1079,11 +1080,69 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
     var input=$('#customLine'), text=input.value.trim(); if(!text) return;
     state.lines.push({id:'custom'+Date.now(),text:text,bucket:'voice'}); input.value=''; renderReview();
   }
+  var HEADING_ORDER=['Context','How to answer','Decisions','When to ask vs. act','Building','Writing','Voice and style'];
+  var DIGEST_SECTION_HEADING={
+    'working context':'Context','interaction preferences':'How to answer','voice and style':'Voice and style',
+    'decision patterns':'Decisions','when to ask vs. act':'When to ask vs. act',
+    'corrections i’ve made':'How to answer',"corrections i've made":'How to answer',
+    'things that frustrate me':'How to answer','tentative':'Voice and style'
+  };
+  var QUESTION_SECTION={
+    opening:'How to answer',ambiguity:'When to ask vs. act',uncertainty:'How to answer',ideas:'Building',
+    dissent:'How to answer',intelligence:'How to answer',attention:'When to ask vs. act',brave:'Decisions',
+    cadence:'Voice and style',badnews:'Voice and style',uncertainline:'Voice and style',praise:'Voice and style',
+    trim:'Writing',texture:'Voice and style',hedge:'Voice and style',warmth:'Voice and style',
+    challenge:'How to answer',analogy:'Writing',humor:'Voice and style',jargon:'Voice and style',
+    openingline:'Writing',paragraphs:'Writing',example:'Writing',choicewidth:'How to answer',
+    nextmove:'Writing',correction:'How to answer',abstraction:'Writing',source:'How to answer',
+    scope:'Building',momentum:'Building',learning:'Building',signature:'Voice and style'
+  };
+  function headingFor(l){
+    if(HEADING_ORDER.indexOf(l.section)>-1) return l.section;
+    var key=String(l.section||'').toLowerCase();
+    if(DIGEST_SECTION_HEADING[key]) return DIGEST_SECTION_HEADING[key];
+    return l.bucket==='voice'?'Voice and style':'How to answer';
+  }
+  function normalizeVoice(s){
+    // Digest lines often arrive third-person ("He corrects fast"). The file
+    // is titled "How to work with me", so rewrite to direct/first-person,
+    // fixing the verb agreement the pronoun swap breaks ("I corrects"→"I correct").
+    var t=String(s)
+      .replace(/^\s*he's\b/i,"I'm")
+      .replace(/^\s*he\b/i,'I')
+      .replace(/\bhe's\b/g,"I'm")
+      .replace(/\bhe\b/g,'I')
+      .replace(/\bhis\b/g,'my')
+      .replace(/\bhim\b/g,'me')
+      .replace(/\bhimself\b/g,'myself');
+    return t
+      .replace(/\bI has\b/g,'I have')
+      .replace(/\bI is\b/g,'I am')
+      .replace(/\bI does\b/g,'I do')
+      .replace(/\bI goes\b/g,'I go')
+      .replace(/\bI (\w+)sses\b/g,'I $1ss')
+      .replace(/\bI (\w+(?:ch|sh|x|z|o))es\b/g,'I $1')
+      .replace(/\bI (\w+)ies\b/g,'I $1y')
+      .replace(/\bI (\w*[^s])s\b/g,'I $1');
+  }
   function fileText(bucket){
     var title=bucket==='agent'?'# How to work with me':'# How to communicate with me';
     var intro=bucket==='agent'?'\n\nUse these choices to guide judgment, decisions, and collaboration.':'\n\nUse these choices to guide tone, phrasing, and structure.';
     var lines=state.lines.filter(function(l){return l.bucket===bucket&&l.text;});
-    return title+'\n\nVersion: v0.'+state.fileVersion+intro+'\n\n'+(lines.length?lines.map(function(l){return '- '+l.text;}).join('\n'):'- No patterns captured yet.')+'\n';
+    var groups={};
+    lines.forEach(function(l){ var h=headingFor(l); (groups[h]=groups[h]||[]).push(l); });
+    var out=title+'\n\nVersion: v0.'+state.fileVersion+intro+'\n';
+    var any=false;
+    HEADING_ORDER.forEach(function(h){
+      var g=groups[h]; if(!g||!g.length) return; any=true;
+      out+='\n## '+h+'\n\n';
+      g.forEach(function(l){
+        out+='- '+l.text+'\n';
+        (l.examples||[]).forEach(function(ex){ out+='  - '+ex+'\n'; });
+      });
+    });
+    if(!any) out+='\n- No patterns captured yet.\n';
+    return out;
   }
   function answerIndex(key){ return typeof state.answers[key]==='number'?state.answers[key]:0; }
   function chosenLine(key,bucket){
@@ -1334,13 +1393,18 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
       if(!data||!data.configured||!Array.isArray(data.items)||!data.items.length) return null;
       var now=Date.now();
       return data.items.map(function(item,i){
-        return {id:'m'+now+i,section:String(item.section||''),bucket:(item.bucket==='agent'||item.bucket==='voice')?item.bucket:'tentative',evidence:item.evidence==='stated'?'stated':'observed',strength:item.strength==='strong'?'strong':'moderate',text:String(item.text||'').trim(),type:['add','conflict','duplicate','tentative'].indexOf(item.type)===-1?'add':item.type,choice:String(item.choice||'reject'),match:item.match?{text:String(item.match.text||item.match)}:null};
+        var sec=String(item.section||'');
+        if(HEADING_ORDER.indexOf(sec)===-1){
+          var dk=sec.toLowerCase();
+          sec=DIGEST_SECTION_HEADING[dk]||(item.bucket==='voice'?'Voice and style':'How to answer');
+        }
+        return {id:'m'+now+i,section:sec,bucket:(item.bucket==='agent'||item.bucket==='voice')?item.bucket:'tentative',evidence:item.evidence==='stated'?'stated':'observed',strength:item.strength==='strong'?'strong':'moderate',text:normalizeVoice(String(item.text||'').trim()),examples:(Array.isArray(item.examples)?item.examples:[]).map(function(x){return normalizeVoice(String(x).trim()).slice(0,220);}).filter(function(x){return x;}),type:['add','conflict','duplicate','tentative'].indexOf(item.type)===-1?'add':item.type,choice:String(item.choice||'reject'),match:item.match?{text:String(item.match.text||item.match)}:null};
       }).filter(function(item){return item.text;});
     }catch(e){ return null; }
   }
   function parseDigest(text){
     var route={
-      'working context':'voice', 'interaction preferences':'agent', 'voice and style':'voice',
+      'working context':'agent', 'interaction preferences':'agent', 'voice and style':'voice',
       'decision patterns':'agent', 'when to ask vs. act':'agent', 'corrections i’ve made':'agent',
       "corrections i've made":'agent', 'things that frustrate me':'agent', 'tentative':'tentative'
     };
@@ -1355,10 +1419,12 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
       if(!current) return;
       var bullet=raw.match(/^\s*(?:[-*]|\d+[.)])\s+(?:\[(Stated|Observed)\]\s*)?(?:\((strong|moderate)\)\s*)?(.*)$/i);
       if(bullet){
-        active={section:current,bucket:route[current],evidence:(bullet[1]||'Observed').toLowerCase(),strength:(bullet[2]||'moderate').toLowerCase(),text:(bullet[3]||'').trim()};
+        active={section:current,bucket:route[current],evidence:(bullet[1]||'Observed').toLowerCase(),strength:(bullet[2]||'moderate').toLowerCase(),text:normalizeVoice((bullet[3]||'').trim()),examples:[]};
         if(active.text) bullets.push(active);
-      } else if(active && raw.trim() && !/^\s*(?:Do|Don['’]t)\s*:/i.test(raw)) {
-        active.text+=' '+raw.trim();
+      } else if(active && raw.trim()) {
+        var ex=raw.match(/^\s*(do|don['’]t)\s*:\s*(.+?)\s*$/i);
+        if(ex){ active.examples.push((/^don/i.test(ex[1])?"Don't":'Do')+': '+normalizeVoice(ex[2])); }
+        else { active.text+=' '+normalizeVoice(raw.trim()); }
       }
     });
     return bullets;
@@ -1401,10 +1467,11 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
   }
   function mergeRowHTML(item){
     var meta='<div class="merge-meta"><strong>'+escapeHTML(item.bucket+'.md')+'</strong>'+escapeHTML(item.section)+'<br><span class="confidence">'+escapeHTML(item.evidence)+' · '+escapeHTML(item.strength)+'</span></div>';
+    var exHtml=(item.examples||[]).map(function(ex){ return '<span class="example">↳ '+escapeHTML(ex)+'</span>'; }).join('');
     if(item.type==='conflict'){
-      return '<div class="merge-row">'+meta+'<div class="merge-copy"><span class="existing">CURRENT · '+escapeHTML(item.match.text)+'</span><span class="incoming">IMPORT · '+escapeHTML(item.text)+'</span></div><div class="merge-choice"><button type="button" data-id="'+item.id+'" data-merge-choice="existing" class="'+(item.choice==='existing'?'selected':'')+'">keep current</button><button type="button" data-id="'+item.id+'" data-merge-choice="incoming" class="'+(item.choice==='incoming'?'selected':'')+'">use import</button></div></div>';
+      return '<div class="merge-row">'+meta+'<div class="merge-copy"><span class="existing">CURRENT · '+escapeHTML(item.match.text)+'</span><span class="incoming">IMPORT · '+escapeHTML(item.text)+'</span>'+exHtml+'</div><div class="merge-choice"><button type="button" data-id="'+item.id+'" data-merge-choice="existing" class="'+(item.choice==='existing'?'selected':'')+'">keep current</button><button type="button" data-id="'+item.id+'" data-merge-choice="incoming" class="'+(item.choice==='incoming'?'selected':'')+'">use import</button></div></div>';
     }
-    return '<div class="merge-row">'+meta+'<div class="merge-copy"><span class="incoming">+ '+escapeHTML(item.text)+'</span></div><div class="merge-choice"><button type="button" data-id="'+item.id+'" data-merge-choice="incoming" class="'+(item.choice==='incoming'?'selected':'')+'">accept</button><button type="button" data-id="'+item.id+'" data-merge-choice="reject" class="'+(item.choice==='reject'?'selected':'')+'">reject</button></div></div>';
+    return '<div class="merge-row">'+meta+'<div class="merge-copy"><span class="incoming">+ '+escapeHTML(item.text)+'</span>'+exHtml+'</div><div class="merge-choice"><button type="button" data-id="'+item.id+'" data-merge-choice="incoming" class="'+(item.choice==='incoming'?'selected':'')+'">accept</button><button type="button" data-id="'+item.id+'" data-merge-choice="reject" class="'+(item.choice==='reject'?'selected':'')+'">reject</button></div></div>';
   }
   function resetImporter(){
     $('#importInputStep').hidden=false; $('#digestInput').value='';
@@ -1519,7 +1586,7 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
         state.importedLines=state.importedLines.filter(function(line){ return line.text!==item.match.text; });
       }
       if(!state.importedLines.some(function(line){ return line.bucket===item.bucket && normalizeImportText(line.text)===normalizeImportText(item.text); })){
-        state.importedLines.push({id:'import'+Date.now()+Math.random(),text:sanitizeLine(item.text),bucket:item.bucket,source:item.evidence,strength:item.strength});
+        state.importedLines.push({id:'import'+Date.now()+Math.random(),text:sanitizeLine(item.text),bucket:item.bucket,section:item.section,examples:item.examples||[],source:item.evidence,strength:item.strength});
       }
     });
     collectLines();

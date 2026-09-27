@@ -5,10 +5,13 @@
 //           then falls back to its built-in rule-based merge), or
 //           { configured: true, items: [...] } where each item matches the
 //           page's merge-item shape:
-//           { text, bucket: 'agent'|'voice'|'tentative', section, evidence:
-//             'stated'|'observed', strength: 'strong'|'moderate',
+//           { text, section (one of: Context, How to answer, Decisions,
+//             When to ask vs. act, Building, Writing, Voice and style),
+//             bucket: 'agent'|'voice'|'tentative',
+//             evidence: 'stated'|'observed', strength: 'strong'|'moderate',
 //             type: 'add'|'conflict'|'duplicate'|'tentative',
 //             choice: 'incoming'|'reject'|'existing'|'skip'|'hold',
+//             examples: [Do/Don't strings] (attached to their rule, never alone),
 //             match: <existing line text> (conflicts only) }
 //
 // Privacy: the page PII-scans the digest in the browser before calling this
@@ -40,6 +43,15 @@ For each digest bullet decide:
 
 Default choice: "incoming" for stated/strong adds, "reject" for moderate/observed adds the user should confirm.
 Never invent facts. Never repeat personal details — generalize (e.g. "toddler (1.5)" not names). Keep each line under 25 words.
+
+PACKAGING — the file is read by an agent, not a person:
+- Voice: every line must speak in the file's own voice — direct address ("you") or first-person ("I"), matching the title "How to work with me". Never third-person ("he/his/him"). Rewrite: "He corrects fast" → "I correct fast and expect you to keep up."
+- No evidence tags in line text: never emit [Stated]/[Observed] or (strong)/(moderate). Trust lives in the review UI; the file carries only instructions.
+- Sections: assign each item exactly one section, in this order: Context, How to answer, Decisions, When to ask vs. act, Building, Writing, Voice and style. Every item gets one. Put related rules adjacent (the interruption policy sits next to scope-confirmation, not three sections apart).
+- Examples: when the digest gives a Do/Don't pair, put it in the item's "examples" array so it renders as a sub-bullet under its rule. Never emit an example without its rule.
+- Corrections and frustrations must be rewritten as positive directives ("Split long deliverables into sections or files"), never incident labels ("Responses that cut off mid-output"). Dedupe: if two lines say the same thing ("Over-editing his writing" / "Rewrites that erase his voice"), keep the sharper one and drop the other.
+- Never drop a section: if the digest has Working context or Voice and style, that content must appear — those are often the strongest lines. Working context → section "Context".
+- Resolve tensions: scope conditional rules to their context ("In strategy and analysis, look for one non-obvious extension…"), prefer "concrete" over "vivid", and translate implementation advice into user terms ("Assume I don't read code; ask me about outcomes, not implementation").
 
 Return ONLY a JSON array of item objects. No prose, no code fences.`;
 
