@@ -19,7 +19,10 @@
 // below additionally instructs the model to generalize, never repeat.
 
 const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages';
-const MODEL = process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5';
+// Pinned snapshot for deterministic output; still the $1/$5 efficiency tier.
+// Override with ANTHROPIC_MODEL. Prompt caching (below) cuts the static
+// system prompt to cache-read rates on repeat calls.
+const MODEL = process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5-20251001';
 const MAX_TOKENS = 2000;
 
 const SYSTEM = `You merge a structured user digest into two behavior files. Be strict.
@@ -97,7 +100,8 @@ module.exports = async function handler(req, res) {
       body: JSON.stringify({
         model: MODEL,
         max_tokens: MAX_TOKENS,
-        system: SYSTEM,
+        temperature: 0.2,
+        system: [{ type: 'text', text: SYSTEM, cache_control: { type: 'ephemeral' } }],
         messages: [{ role: 'user', content: userContent }],
       }),
     });

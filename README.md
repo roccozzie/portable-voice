@@ -20,7 +20,8 @@ pair, with a paste-and-merge loop for importing pattern digests.
 1. Create an API key at console.anthropic.com (needs billing enabled).
 2. In the Vercel project: Settings → Environment Variables → add
    `ANTHROPIC_API_KEY` (and optionally `ANTHROPIC_MODEL` to pin a model ID;
-   defaults to `claude-haiku-4-5`).
+   defaults to the pinned `claude-haiku-4-5-20251001` snapshot — the $1/$5
+   efficiency tier, with prompt caching on the static system prompt).
 3. Redeploy. The "Check and compare" step will now try the server-side merge
    first (15s timeout) and fall back locally if it fails.
 
