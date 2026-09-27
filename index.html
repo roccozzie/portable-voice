@@ -116,6 +116,8 @@
     .line-text { padding:8px; line-height:1.5; border:1px solid transparent; }
     .line-text:hover { border-color:var(--line); }
     .line-text[contenteditable="true"] { border-color:var(--ink); background:var(--paper); }
+    .line-item.held-back { opacity:.55; }
+    .held-tag { font-size:9px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); border:1px solid var(--line); padding:2px 6px; white-space:nowrap; align-self:center; }
     .icon-btn { border:0; background:transparent; color:var(--muted); width:36px; height:36px; }
     .icon-btn:hover { color:var(--red); }
     .add-row { display:flex; gap:10px; margin-top:14px; }
@@ -1259,13 +1261,16 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
 
   function renderReview(){
     var list=$('#lineList');
-    list.innerHTML=state.lines.map(function(l,i){ return '<div class="line-item" data-id="'+l.id+'"><span class="line-num">'+String(i+1).padStart(2,'0')+'</span><div class="line-text" contenteditable="true" spellcheck="true">'+escapeHTML(l.text)+'</div><button class="icon-btn" aria-label="Delete line">×</button></div>'; }).join('');
+    var heldIds={};
+    ['agent','voice'].forEach(function(b){ var f=fileFit(b); Object.keys(f.heldIds).forEach(function(id){ heldIds[id]=true; }); });
+    list.innerHTML=state.lines.map(function(l,i){ return '<div class="line-item'+(heldIds[l.id]?' held-back':'')+'" data-id="'+l.id+'"><span class="line-num">'+String(i+1).padStart(2,'0')+'</span><div class="line-text" contenteditable="true" spellcheck="true">'+escapeHTML(l.text)+'</div>'+(heldIds[l.id]?'<span class="held-tag" title="Over the 1,500-character box limit, so this line is held back from the file. Edit it or delete another line to bring it back.">held back</span>':'')+'<button class="icon-btn" aria-label="Delete line">×</button></div>'; }).join('');
     list.querySelectorAll('.line-item').forEach(function(row){
       var id=row.dataset.id, text=row.querySelector('.line-text');
       text.addEventListener('blur',function(){
         var line=state.lines.find(function(x){return x.id===id;});
         if(line){
           var cleaned=sanitizeLine(text.textContent.trim());
+          if(cleaned!==line.text) line.handEdited=true;
           line.text=cleaned;
           text.textContent=cleaned;
         }
@@ -1287,7 +1292,7 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
         var replacement=-1;
         if(s.id==='s1') replacement=state.lines.findIndex(function(l){ return l.bucket==='agent' && (l.text.indexOf('Name the central tension')===0 || l.text.indexOf('Do not hide behind neutrality')===0); });
         if(s.id==='s2') replacement=state.lines.findIndex(function(l){ return l.bucket==='voice' && (l.text.indexOf('Surprise is valuable')===0 || l.text.indexOf('I like ideas with a sharp edge')===0); });
-        if(replacement>-1) state.lines[replacement].text=s.newText;
+        if(replacement>-1){ state.lines[replacement].text=s.newText; state.lines[replacement].handEdited=true; }
         else state.lines.push({id:'refine'+Date.now()+i,text:s.newText,bucket:s.bucket});
         row.remove(); toast('Suggestion accepted');
       });
@@ -1356,12 +1361,12 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
          .trim();
     return t;
   }
-  function fileText(bucket){
+  var FILE_BUDGET=1500;
+  function assembleFile(bucket){
     var title=bucket==='agent'?'# How to work with me':'# How to communicate with me';
     var intro=bucket==='agent'?'\n\nUse these choices to guide judgment, decisions, and collaboration.':'\n\nUse these choices to guide tone, phrasing, and structure.';
     var lines=state.lines.filter(function(l){return l.bucket===bucket&&l.text;});
-    var groups={};
-    var seen={};
+    var groups={}; var order=[]; var seen={};
     lines.forEach(function(l){
       // Normalize every line at output time: voice, tags, whitespace, and
       // exact duplicates collapsed within their section.
@@ -1372,21 +1377,63 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
       if(seen[key]) return;
       seen[key]=true;
       var examples=(l.examples||[]).map(function(ex){return cleanFileLine(ex);}).filter(function(x){return x;});
-      (groups[h]=groups[h]||[]).push({text:text,examples:examples});
+      if(!groups[h]){ groups[h]={heading:h,items:[]}; order.push(h); }
+      groups[h].items.push({id:l.id,text:text,examples:examples,keep:!!l.handEdited});
     });
-    var out=title+'\n\nVersion: v0.'+state.fileVersion+intro+'\n';
+    return {title:title,intro:intro,version:state.fileVersion,sections:order.map(function(h){return groups[h];})};
+  }
+  function renderAssembled(a){
+    var out=a.title+'\n\nVersion: v0.'+a.version+a.intro+'\n';
     var any=false;
-    HEADING_ORDER.forEach(function(h){
-      var g=groups[h]; if(!g||!g.length) return; any=true;
-      out+='\n## '+h+'\n\n';
-      g.forEach(function(l){
-        out+='- '+l.text+'\n';
-        (l.examples||[]).forEach(function(ex){ out+='  - '+ex+'\n'; });
+    a.sections.forEach(function(s){
+      if(!s.items.length) return; any=true;
+      out+='\n## '+s.heading+'\n\n';
+      s.items.forEach(function(it){
+        out+='- '+it.text+'\n';
+        it.examples.forEach(function(ex){ out+='  - '+ex+'\n'; });
       });
     });
     if(!any) out+='\n- No patterns captured yet.\n';
     return out;
   }
+  // Budget fit: a file can never exceed FILE_BUDGET characters. When the raw
+  // lines would, hold back the least distinctive ones first — highest word
+  // overlap with the lines kept, longest first on ties. Lines the user
+  // hand-edited are never held back.
+  function fitFile(a){
+    var pool=[];
+    a.sections.forEach(function(s){ s.items.forEach(function(it){ pool.push(it); }); });
+    var sets=pool.map(function(it){ return wordSet(it.text); });
+    function sim(i,j){
+      var aa=sets[i],bb=sets[j],same=0,total=0,seen={};
+      Object.keys(aa).forEach(function(k){ if(!seen[k]){seen[k]=1;total++;} if(bb[k]) same++; });
+      Object.keys(bb).forEach(function(k){ if(!seen[k]){seen[k]=1;total++;} });
+      return total?same/total:0;
+    }
+    function rendered(exclude){
+      var kept=a.sections.map(function(s){ return {heading:s.heading,items:s.items.filter(function(it){ return !exclude[it.id]; })}; });
+      return renderAssembled({title:a.title,intro:a.intro,version:a.version,sections:kept});
+    }
+    var exclude={};
+    var guard=pool.length+2;
+    while(rendered(exclude).length>FILE_BUDGET && guard-->0){
+      var idx=pool.map(function(p,i){return i;}).filter(function(i){ return !exclude[pool[i].id]; });
+      var droppable=idx.filter(function(i){ return !pool[i].keep; });
+      if(!droppable.length) droppable=idx;
+      if(!droppable.length) break;
+      var best=-1,bestScore=-1;
+      droppable.forEach(function(i){
+        var mx=0;
+        idx.forEach(function(j){ if(i===j) return; var s=sim(i,j); if(s>mx) mx=s; });
+        var score=mx+pool[i].text.length/100000;
+        if(score>bestScore){ bestScore=score; best=i; }
+      });
+      exclude[pool[best].id]=true;
+    }
+    return {text:rendered(exclude),held:Object.keys(exclude).length,heldIds:exclude};
+  }
+  function fileText(bucket){ return fitFile(assembleFile(bucket)).text; }
+  function fileFit(bucket){ return fitFile(assembleFile(bucket)); }
   function answerIndex(key){ return typeof state.answers[key]==='number'?state.answers[key]:0; }
   function chosenLine(key,bucket){
     var q=questions.find(function(item){ return item.key===key; });
@@ -1581,11 +1628,12 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
     persist();
     var deepCount=deepProgressCount();
     if(deepCount>0 && state.fileVersion<2) state.fileVersion=2;
-    var at=fileText('agent'), vt=fileText('voice');
+    var fa=fileFit('agent'), fv=fileFit('voice');
+    var at=fa.text, vt=fv.text;
     $('#agentOutput').textContent=at; $('#voiceOutput').textContent=vt;
     var ab=$('#agentBudget'), vb=$('#voiceBudget');
-    if(ab){ ab.textContent=at.length+' / 1,500'; ab.classList.toggle('over',at.length>1500); }
-    if(vb){ vb.textContent=vt.length+' / 1,500'; vb.classList.toggle('over',vt.length>1500); }
+    if(ab){ ab.textContent=at.length+' / 1,500'+(fa.held?' \u00b7 '+fa.held+' held back':''); ab.classList.toggle('over',at.length>1500); }
+    if(vb){ vb.textContent=vt.length+' / 1,500'+(fv.held?' \u00b7 '+fv.held+' held back':''); vb.classList.toggle('over',vt.length>1500); }
     $('#finishTitle').textContent=state.deepCompleted?'See what the deeper pass changed.':(deepCount?'Your settings are already taking shape.':'See your settings at work.');
     $('#finishCopy').textContent=state.deepCompleted?'The same prompt now carries more of your cadence and judgment. The version diff shows exactly what the deeper questions added.':(deepCount?'You answered '+deepCount+' of '+(questions.length-INITIAL_COUNT)+' deeper questions. Those answers are already reflected in your settings, and you can pick up where you left off.':'The same prompt, answered twice. The difference on the right comes from the choices you just made.');
     renderPro(); renderFunnel();
@@ -1745,7 +1793,7 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
       state.importedLines=state.importedLines.filter(function(line){ return line.text!==item.match.text; });
     }
     if(!state.importedLines.some(function(line){ return line.bucket===item.bucket && normalizeImportText(line.text)===normalizeImportText(item.text); })){
-      state.importedLines.push({id:'import'+Date.now()+Math.random(),text:sanitizeLine(item.text),bucket:item.bucket,section:item.section,examples:item.examples||[],source:item.evidence,strength:item.strength});
+      state.importedLines.push({id:'import'+Date.now()+Math.random(),text:sanitizeLine(item.text),bucket:item.bucket,section:item.section,examples:item.examples||[],source:item.evidence,strength:item.strength,handEdited:true});
     }
     collectLines();
     state.mergeImportedCount=(state.mergeImportedCount||0)+1;
@@ -1903,9 +1951,10 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
   selectDest('chatgpt');
   function updateDestBudget(){
     var el=$('#destBudget'); if(!el) return;
-    var a=fileText('agent').length, v=fileText('voice').length, over=Math.max(a,v)-1500;
-    if(over<=0){ el.innerHTML='agent.md \u00b7 '+a+' chars &mdash; voice.md \u00b7 '+v+' chars. Both fit every box.'; el.classList.remove('over'); }
-    else { var which=a>v?'agent.md':'voice.md'; el.innerHTML=which+' is '+Math.max(a,v)+' chars \u2014 '+over+' over what every box takes. <a href="#/review">Trim lines</a> to fit everywhere.'; el.classList.add('over'); }
+    var fa=fileFit('agent'), fv=fileFit('voice');
+    var heldTotal=fa.held+fv.held;
+    el.innerHTML='agent.md \u00b7 '+fa.text.length+' chars &mdash; voice.md \u00b7 '+fv.text.length+' chars. Both fit every box.'+(heldTotal?' ('+heldTotal+' line'+(heldTotal>1?'s':'')+' held back to fit.)':'');
+    el.classList.remove('over');
   }
   function selectFileTab(which){
     document.querySelectorAll('[data-filetab]').forEach(function(t){ var on=t.dataset.filetab===which; t.classList.toggle('active',on); t.setAttribute('aria-selected',on); });
