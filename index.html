@@ -260,6 +260,38 @@
     .resume-banner .row { display:flex; gap:8px; flex:0 0 auto; }
     .resume-banner .ghost { border:1px solid var(--line); background:transparent; padding:11px 14px; font-size:11px; }
     .save-state { color:var(--muted); font-size:10px; }
+    .topnav { position:sticky; top:0; z-index:50; display:flex; align-items:center; justify-content:space-between; padding:14px 28px; background:var(--paper); border-bottom:1px solid var(--line); }
+    .brand { font-weight:600; font-size:14px; letter-spacing:-.02em; text-decoration:none; color:var(--ink); }
+    #authNav a { font-size:11px; text-decoration:none; color:var(--ink); border:1px solid var(--ink); padding:9px 14px; }
+    #authNav a:hover { background:var(--ink); color:var(--paper); }
+    .auth-shell { max-width:520px; margin:0 auto; padding:72px 28px 90px; }
+    .auth-card h2 { margin:0 0 8px; font-size:clamp(28px,4vw,44px); font-weight:500; letter-spacing:-.04em; }
+    .auth-sub { color:var(--muted); font-size:12px; line-height:1.65; margin:0 0 26px; }
+    .auth-card form { display:grid; gap:14px; margin-bottom:12px; }
+    .auth-card label { display:grid; gap:7px; font-size:11px; font-weight:600; }
+    .auth-card input { border:1px solid var(--ink); background:var(--paper); padding:13px 14px; font-size:14px; font-family:inherit; color:var(--ink); }
+    .auth-card input:focus { outline:2px solid var(--ink); outline-offset:-2px; }
+    .auth-card .primary { border:0; background:var(--ink); color:var(--paper); padding:14px; font-size:13px; font-weight:600; cursor:pointer; }
+    .auth-card .primary:hover { opacity:.85; }
+    .auth-alt { width:100%; border:1px solid var(--ink); background:var(--paper); padding:13px; font-size:12px; cursor:pointer; }
+    .auth-alt:hover { background:var(--ink); color:var(--paper); }
+    .auth-switch { margin-top:22px; font-size:11px; color:var(--muted); }
+    .auth-switch a { color:var(--ink); }
+    .account-shell { max-width:720px; margin:0 auto; padding:64px 28px 90px; }
+    .account-shell h2 { margin:0 0 6px; font-size:clamp(28px,4vw,44px); font-weight:500; letter-spacing:-.04em; }
+    .account-shell .auth-sub { margin-bottom:8px; }
+    .account-versions-head { display:flex; align-items:baseline; justify-content:space-between; gap:16px; margin:38px 0 4px; }
+    .account-versions-head h3 { margin:0; font-size:18px; font-weight:600; letter-spacing:-.02em; }
+    .account-versions-head span { color:var(--faint); font-size:9px; }
+    .version-row { display:grid; grid-template-columns:1fr auto; gap:14px; align-items:center; padding:16px 0; border-bottom:1px solid var(--line); }
+    .version-row strong { display:block; font-size:13px; margin-bottom:3px; }
+    .version-row span { color:var(--muted); font-size:10px; }
+    .version-row button { border:1px solid var(--ink); background:var(--paper); padding:9px 13px; font-size:10px; cursor:pointer; }
+    .version-row button:hover { background:var(--ink); color:var(--paper); }
+    .version-empty { color:var(--muted); font-size:11px; padding:18px 0; }
+    .account-actions { display:flex; gap:10px; align-items:center; margin-top:28px; flex-wrap:wrap; }
+    .account-actions button { border:1px solid var(--line); background:transparent; padding:11px 14px; font-size:11px; cursor:pointer; }
+    a.flow-btn { text-decoration:none; display:inline-block; }
     .provider-list { display:flex; flex-wrap:wrap; gap:7px; margin-top:14px; }
     .provider-list span { border:1px solid var(--line); padding:6px 8px; font-size:9px; }
     .prompt-card-summary { display:flex; align-items:center; justify-content:space-between; gap:24px; padding:18px 0; }
@@ -371,6 +403,10 @@
   </style>
 </head>
 <body>
+  <header class="topnav">
+    <a class="brand" href="#/">Portable Voice</a>
+    <nav id="authNav" aria-label="Account"><a href="#/login">Log in</a></nav>
+  </header>
   <section class="screen active" id="introScreen">
     <main class="intro">
       <div class="intro-grid">
@@ -379,7 +415,7 @@
           <h1>Teach any AI how to work with you.</h1>
           <p class="lede">So every AI you use feels like yours. Answer eight quick questions to create portable settings for how it communicates, makes decisions, and works with you.</p>
           <button class="primary" id="startBtn">Start →</button>
-          <div class="fine">No account for the first draft. No names, addresses, credentials, or identifying details are asked for or written.</div>
+          <div class="fine">Accounts are a prototype &mdash; everything is stored in this browser. No names, addresses, credentials, or identifying details are asked for or written.</div>
           <div class="resume-banner" id="resumeBanner" hidden>
             <div><strong>Your settings are saved in this browser.</strong><span id="resumeMeta"></span></div>
             <div class="row"><button class="primary" id="resumeBtn" type="button">Resume &rarr;</button><button class="ghost" id="freshBtn" type="button">Start fresh</button></div>
@@ -612,12 +648,62 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
           <p>Twenty-four quick choices tune cadence, structure, tone, and judgment. Finish at any point &mdash; every answer makes your settings more precise.</p>
           <div class="flow-cta"><button type="button" class="flow-btn" id="deepBtn">Start the deeper pass &rarr;</button><span class="prototype-note" id="deepNote">Your partial progress is useful. Finish whenever you have enough.</span></div>
         </article>
+        <article class="flow" id="syncFlow" aria-labelledby="syncFlowHeading">
+          <div class="flow-number">04 &middot; SYNC</div>
+          <h4 id="syncFlowHeading">Take them everywhere.</h4>
+          <p>Accounts are a prototype in this build &mdash; signing up works and keeps every version of your settings together in this browser. Real cross-device sync is coming.</p>
+          <div class="flow-cta"><a class="flow-btn" href="#/signup">Create an account &rarr;</a></div>
+        </article>
       </section>
       <p class="privacy-rule"><strong>Built-in boundary:</strong> personal identifiers and secrets never belong in these files. Useful context is generalized before it reaches either one.</p>
       <div class="always-on">
         <div><strong>It stays current wherever you go.</strong><p>Your settings keep learning on their own: periodic re-checks catch how your preferences shift, and corrections you make in one AI flow back into the file automatically. Set it once — it stays yours everywhere.</p></div>
         <div><span class="soon-tag">Coming soon</span></div>
       </div>
+    </main>
+  </section>
+  <section class="screen" id="loginScreen">
+    <main class="auth-shell">
+      <div class="auth-card">
+        <div class="index">Welcome back</div>
+        <h2>Log in</h2>
+        <p class="auth-sub">Prototype login &mdash; anything you type works, and it never leaves this browser.</p>
+        <form id="loginForm">
+          <label>Email<input type="email" name="email" required autocomplete="email" placeholder="you@example.com"></label>
+          <label>Password<input type="password" name="password" required autocomplete="current-password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"></label>
+          <button class="primary" type="submit">Log in &rarr;</button>
+        </form>
+        <button class="auth-alt" id="googleLoginBtn" type="button">Continue with Google</button>
+        <p class="auth-switch">New here? <a href="#/signup">Create an account</a></p>
+      </div>
+    </main>
+  </section>
+  <section class="screen" id="signupScreen">
+    <main class="auth-shell">
+      <div class="auth-card">
+        <div class="index">Sync prototype</div>
+        <h2>Create your account</h2>
+        <p class="auth-sub">Keeps every version of your settings together in this browser. Real cross-device sync is coming.</p>
+        <form id="signupForm">
+          <label>Name<input type="text" name="name" required autocomplete="name" placeholder="Ada"></label>
+          <label>Email<input type="email" name="email" required autocomplete="email" placeholder="you@example.com"></label>
+          <label>Password<input type="password" name="password" required autocomplete="new-password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"></label>
+          <button class="primary" type="submit">Create account &rarr;</button>
+        </form>
+        <button class="auth-alt" id="googleSignupBtn" type="button">Continue with Google</button>
+        <p class="auth-switch">Already have one? <a href="#/login">Log in</a></p>
+      </div>
+    </main>
+  </section>
+  <section class="screen" id="accountScreen">
+    <main class="account-shell">
+      <div class="index">Your account</div>
+      <h2 id="accountName">&nbsp;</h2>
+      <p class="auth-sub" id="accountEmail">&nbsp;</p>
+      <p class="prototype-note">Prototype account &mdash; stored only in this browser. Real sync is coming.</p>
+      <div class="account-versions-head"><h3>Your versions</h3><span>Restoring replaces your current files.</span></div>
+      <div id="versionList"></div>
+      <div class="account-actions"><button type="button" id="signOutBtn">Sign out</button><a class="flow-btn" href="#/settings">Back to my settings &rarr;</a></div>
     </main>
   </section>
   <div class="toast" id="toast" role="status"></div>
@@ -953,12 +1039,32 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
   var INITIAL_COUNT = 8;
   var state = { index:0, scope:INITIAL_COUNT, deepCompleted:false, answers:{}, lines:[], importedLines:[], suppressedTexts:[], v0Lines:[], diffFilter:'all', diffExpanded:false, scenario:'build', mergeItems:[], fileVersion:1 };
   var $ = function(s){ return document.querySelector(s); };
-  var screens = {intro:$('#introScreen'), interview:$('#interviewScreen'), review:$('#reviewScreen'), finish:$('#finishScreen')};
+  var screens = {intro:$('#introScreen'), interview:$('#interviewScreen'), review:$('#reviewScreen'), finish:$('#finishScreen'), login:$('#loginScreen'), signup:$('#signupScreen'), account:$('#accountScreen')};
 
   function show(name){
     Object.keys(screens).forEach(function(k){ screens[k].classList.toggle('active', k===name); });
     window.scrollTo(0,0);
   }
+  var ROUTES={
+    '/':{screen:'intro',title:'Portable Voice — Teach any AI how to work with you'},
+    '/interview':{screen:'interview',title:'Interview — Portable Voice'},
+    '/review':{screen:'review',title:'Review your draft — Portable Voice'},
+    '/settings':{screen:'finish',title:'Your settings — Portable Voice'},
+    '/login':{screen:'login',title:'Log in — Portable Voice'},
+    '/signup':{screen:'signup',title:'Sign up — Portable Voice'},
+    '/account':{screen:'account',title:'Your account — Portable Voice'}
+  };
+  function go(h){ if(location.hash===h) route(); else location.hash=h; }
+  function route(){
+    var h=(location.hash||'#/').replace(/^#/,'');
+    var r=ROUTES[h]||ROUTES['/'];
+    if((r.screen==='review'||r.screen==='finish') && !state.lines.length && !Object.keys(state.answers).length){ go('#/'); return; }
+    if(r.screen==='account' && !getUser()){ go('#/login'); return; }
+    if(r.screen==='account') renderAccount();
+    document.title=r.title;
+    show(r.screen);
+  }
+  window.addEventListener('hashchange',route);
   function escapeHTML(s){ return String(s).replace(/[&<>'"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c];}); }
   function sanitizeLine(s){
     return String(s)
@@ -1038,8 +1144,8 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
       }); });
     }
     $('#backBtn').addEventListener('click',function(){
-      if(state.index===0){ state.answers={}; state.scope=INITIAL_COUNT; renderLive(false); show('intro'); }
-      else if(state.scope>INITIAL_COUNT && state.index===INITIAL_COUNT){ renderFinish(); show('finish'); }
+      if(state.index===0){ state.answers={}; state.scope=INITIAL_COUNT; renderLive(false); go('#/'); }
+      else if(state.scope>INITIAL_COUNT && state.index===INITIAL_COUNT){ renderFinish(); go('#/settings'); }
       else { state.index--; renderQuestion(); renderLive(false); }
     });
     $('#nextBtn').addEventListener('click',advance);
@@ -1051,9 +1157,9 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
     else if(state.scope===INITIAL_COUNT){
       collectLines();
       state.v0Lines=state.lines.map(function(l){ return {id:l.id,text:l.text,bucket:l.bucket}; });
-      renderFinish(); show('finish');
+      renderFinish(); go('#/settings');
     }
-    else { state.deepCompleted=true; collectLines(); renderReview(); show('review'); }
+    else { state.deepCompleted=true; collectLines(); renderReview(); go('#/review'); }
   }
 
   function renderReview(){
@@ -1365,6 +1471,13 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
     persistTimer=setTimeout(function(){
       try{
         localStorage.setItem('pv1',JSON.stringify({lines:state.lines,answers:state.answers,fileVersion:state.fileVersion,deepCompleted:state.deepCompleted,index:state.index,v0Lines:state.v0Lines,importedLines:state.importedLines,scenario:state.scenario,ts:Date.now()}));
+        try{
+          var vs=JSON.parse(localStorage.getItem('pv-versions')||'[]');
+          if(!vs.length||vs[0].v!==state.fileVersion){
+            vs.unshift({v:state.fileVersion,ts:Date.now(),lines:state.lines});
+            localStorage.setItem('pv-versions',JSON.stringify(vs.slice(0,12)));
+          }
+        }catch(e){}
         var el=$('#saveState'); if(el) el.textContent=' \u00b7 saved in this browser \u2713';
       }catch(e){}
     },400);
@@ -1582,25 +1695,25 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
     toast(name+'.md downloaded');
   }
 
-  $('#startBtn').addEventListener('click',function(){ state.index=0; state.scope=INITIAL_COUNT; state.deepCompleted=false; state.answers={}; state.lines=[]; state.importedLines=[]; state.suppressedTexts=[]; state.mergeItems=[]; state.fileVersion=1; state.v0Lines=[]; state.diffFilter='all'; state.diffExpanded=false; state.scenario='build'; resetImporter(); try{localStorage.removeItem('pv1');}catch(e){} window.__savedState=null; var rb=$('#resumeBanner'); if(rb) rb.hidden=true; $('#promptDetails').classList.remove('open'); $('#togglePromptDetails').setAttribute('aria-expanded','false'); $('#togglePromptDetails').textContent='View prompt'; renderQuestion(); renderLive(false); show('interview'); });
-  $('#reviewDraftBtn').addEventListener('click',function(){ renderReview(); show('review'); });
+  $('#startBtn').addEventListener('click',function(){ state.index=0; state.scope=INITIAL_COUNT; state.deepCompleted=false; state.answers={}; state.lines=[]; state.importedLines=[]; state.suppressedTexts=[]; state.mergeItems=[]; state.fileVersion=1; state.v0Lines=[]; state.diffFilter='all'; state.diffExpanded=false; state.scenario='build'; resetImporter(); try{localStorage.removeItem('pv1'); localStorage.removeItem('pv-versions');}catch(e){} window.__savedState=null; var rb=$('#resumeBanner'); if(rb) rb.hidden=true; $('#promptDetails').classList.remove('open'); $('#togglePromptDetails').setAttribute('aria-expanded','false'); $('#togglePromptDetails').textContent='View prompt'; renderQuestion(); renderLive(false); go('#/interview'); });
+  $('#reviewDraftBtn').addEventListener('click',function(){ renderReview(); go('#/review'); });
   $('#deepBtn').addEventListener('click',function(){
     if(state.deepCompleted) return;
     if(!state.v0Lines.length) state.v0Lines=state.lines.map(function(l){return {id:l.id,text:l.text,bucket:l.bucket};});
     state.scope=questions.length;
     var nextUnanswered=questions.slice(INITIAL_COUNT).findIndex(function(q){ return !answerReady(q); });
     state.index=nextUnanswered===-1?INITIAL_COUNT:INITIAL_COUNT+nextUnanswered;
-    renderQuestion(); renderLive(false); show('interview');
+    renderQuestion(); renderLive(false); go('#/interview');
   });
   $('#exitDeepBtn').addEventListener('click',function(){
     collectLines();
     renderFinish();
-    show('finish');
+    go('#/settings');
   });
   $('#splitBtn').addEventListener('click',function(){
     if(document.activeElement && document.activeElement.classList.contains('line-text')) document.activeElement.blur();
     if(!state.deepCompleted) state.v0Lines=state.lines.map(function(l){return {id:l.id,text:l.text,bucket:l.bucket};});
-    renderFinish(); show('finish');
+    renderFinish(); go('#/settings');
   });
   $('#diffFilter').addEventListener('change',function(){ state.diffFilter=this.value; state.diffExpanded=false; renderVersionDiff(); });
   $('#showDiffBtn').addEventListener('click',function(){ state.diffExpanded=!state.diffExpanded; renderVersionDiff(); });
@@ -1671,6 +1784,32 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
   $('#importAnotherBtn').addEventListener('click',function(){ resetImporter(); $('#digestInput').focus(); });
   document.querySelectorAll('[data-copy]').forEach(function(btn){btn.addEventListener('click',function(){ var text=fileText(btn.dataset.copy); copyText(text).then(function(){toast(btn.dataset.copy+'.md copied');}).catch(function(){toast('Copy unavailable — select the text instead');});});});
   document.querySelectorAll('[data-download]').forEach(function(btn){btn.addEventListener('click',function(){download(btn.dataset.download,fileText(btn.dataset.download));});});
+  function getUser(){ try{ return JSON.parse(localStorage.getItem('pv-user')||'null'); }catch(e){ return null; } }
+  function setUser(u){ try{ localStorage.setItem('pv-user',JSON.stringify(u)); }catch(e){} renderAuthNav(); }
+  function renderAuthNav(){ var u=getUser(); $('#authNav').innerHTML=u?'<a href="#/account">'+escapeHTML(u.name||u.email)+'</a>':'<a href="#/login">Log in</a>'; }
+  function renderAccount(){
+    var u=getUser(); if(!u) return;
+    $('#accountName').textContent=u.name||'Your account';
+    $('#accountEmail').textContent=u.email||'';
+    var vs=[]; try{ vs=JSON.parse(localStorage.getItem('pv-versions')||'[]'); }catch(e){}
+    var list=$('#versionList');
+    if(!vs.length){ list.innerHTML='<div class="version-empty">No versions yet — finish the interview to create your first.</div>'; return; }
+    list.innerHTML=vs.map(function(v,i){
+      var d=new Date(v.ts);
+      return '<div class="version-row"><div><strong>v0.'+v.v+'</strong><span>'+v.lines.length+' lines &middot; '+d.toLocaleDateString()+' '+d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})+'</span></div><button type="button" data-restore="'+i+'">Restore</button></div>';
+    }).join('');
+    list.querySelectorAll('[data-restore]').forEach(function(b){ b.addEventListener('click',function(){
+      var v=vs[Number(b.getAttribute('data-restore'))]; if(!v) return;
+      state.lines=JSON.parse(JSON.stringify(v.lines));
+      state.fileVersion=v.v; state.diffFilter='all'; state.diffExpanded=false;
+      renderFinish(); go('#/settings'); toast('Restored v0.'+v.v);
+    }); });
+  }
+  $('#loginForm').addEventListener('submit',function(e){ e.preventDefault(); var em=this.querySelector('[name=email]').value.trim(); if(!em) return; setUser({name:em.split('@')[0],email:em}); go('#/account'); });
+  $('#signupForm').addEventListener('submit',function(e){ e.preventDefault(); var em=this.querySelector('[name=email]').value.trim(); if(!em) return; var nm=this.querySelector('[name=name]').value.trim(); setUser({name:nm||em.split('@')[0],email:em}); go('#/account'); });
+  $('#googleLoginBtn').addEventListener('click',function(){ setUser({name:'Google User',email:'you@gmail.com'}); go('#/account'); });
+  $('#googleSignupBtn').addEventListener('click',function(){ setUser({name:'Google User',email:'you@gmail.com'}); go('#/account'); });
+  $('#signOutBtn').addEventListener('click',function(){ try{ localStorage.removeItem('pv-user'); }catch(e){} renderAuthNav(); go('#/'); });
   (function restoreSaved(){
     var saved=null;
     try{ saved=JSON.parse(localStorage.getItem('pv1')||'null'); }catch(e){}
@@ -1688,12 +1827,15 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
     state.fileVersion=s.fileVersion||1; state.deepCompleted=!!s.deepCompleted; state.index=s.index||0; state.scenario=s.scenario||'build';
     state.suppressedTexts=[]; state.mergeItems=[]; state.diffFilter='all'; state.diffExpanded=false;
     resetImporter();
-    renderFinish(); show('finish');
+    renderFinish(); go('#/settings');
   });
   $('#freshBtn').addEventListener('click',function(){
     try{ localStorage.removeItem('pv1'); }catch(e){}
     window.__savedState=null; $('#resumeBanner').hidden=true;
   });
+  renderAuthNav();
+  if(!location.hash){ try{ history.replaceState(null,'','#/'); }catch(e){} }
+  route();
   renderLive(false);
 })();
 </script>
