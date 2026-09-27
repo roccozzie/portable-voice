@@ -260,6 +260,9 @@
     .resume-banner .row { display:flex; gap:8px; flex:0 0 auto; }
     .resume-banner .ghost { border:1px solid var(--line); background:transparent; padding:11px 14px; font-size:11px; }
     .save-state { color:var(--muted); font-size:10px; }
+    .returning { margin:14px 0 0; font-size:11px; color:var(--muted); }
+    .returning a { color:var(--ink); }
+    .linklike { background:none; border:0; padding:0; font:inherit; font-size:inherit; color:var(--ink); text-decoration:underline; cursor:pointer; }
     .topnav { position:sticky; top:0; z-index:50; display:flex; align-items:center; justify-content:space-between; padding:14px 28px; background:var(--paper); border-bottom:1px solid var(--line); }
     .brand { font-weight:600; font-size:14px; letter-spacing:-.02em; text-decoration:none; color:var(--ink); }
     #authNav a { font-size:11px; text-decoration:none; color:var(--ink); border:1px solid var(--ink); padding:9px 14px; }
@@ -439,6 +442,7 @@
           <h1>Teach any AI how to work with you.</h1>
           <p class="lede">So every AI you use feels like yours. Answer eight quick questions to create portable settings for how it communicates, makes decisions, and works with you.</p>
           <button class="primary" id="startBtn">Start →</button>
+          <p class="returning" id="returningLine"></p>
           <div class="fine">Accounts are a prototype &mdash; everything is stored in this browser. No names, addresses, credentials, or identifying details are asked for or written.</div>
           <div class="resume-banner" id="resumeBanner" hidden>
             <div><strong>Your settings are saved in this browser.</strong><span id="resumeMeta"></span></div>
@@ -1124,6 +1128,7 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
     if(r.screen==='account' && !getUser()){ go('#/login'); return; }
     if(r.screen==='account') renderAccount();
     if(r.screen==='finish'){ renderPro(); renderFunnel(); }
+    if(r.screen==='intro'){ renderReturning(); }
     document.title=r.title;
     show(r.screen);
   }
@@ -1850,6 +1855,28 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
   $('#importAnotherBtn').addEventListener('click',function(){ resetImporter(); $('#digestInput').focus(); });
   document.querySelectorAll('[data-copy]').forEach(function(btn){btn.addEventListener('click',function(){ var text=fileText(btn.dataset.copy); copyText(text).then(function(){toast(btn.dataset.copy+'.md copied');}).catch(function(){toast('Copy unavailable — select the text instead');});});});
   document.querySelectorAll('[data-download]').forEach(function(btn){btn.addEventListener('click',function(){download(btn.dataset.download,fileText(btn.dataset.download));});});
+  function loadSaved(){ try{ var raw=localStorage.getItem('pv1'); if(!raw) return null; var s=JSON.parse(raw); return (s&&s.lines&&s.lines.length)?s:null; }catch(e){ return null; } }
+  function resumeSaved(){
+    var s=loadSaved()||window.__savedState;
+    if(!s||!s.lines||!s.lines.length) return false;
+    ['lines','answers','v0Lines','importedLines'].forEach(function(k){ state[k]=s[k]||[]; });
+    state.fileVersion=s.fileVersion||1; state.deepCompleted=!!s.deepCompleted; state.index=s.index||0; state.scenario=s.scenario||'build';
+    state.suppressedTexts=[]; state.mergeItems=[]; state.diffFilter='all'; state.diffExpanded=false;
+    resetImporter();
+    window.__savedState=null; var rb=$('#resumeBanner'); if(rb) rb.hidden=true;
+    renderFinish(); go('#/settings'); return true;
+  }
+  function renderReturning(){
+    var el=$('#returningLine'); if(!el) return;
+    var u=getUser(), saved=!!loadSaved();
+    if(u&&saved){
+      el.innerHTML='Welcome back, '+escapeHTML(u.name||u.email)+' &mdash; <button type="button" class="linklike" id="returningGo">jump straight to your settings &rarr;</button>';
+      $('#returningGo').addEventListener('click',function(){ resumeSaved(); });
+    }
+    else if(saved){ el.innerHTML='Been here before? <a href="#/login">Log in</a> &mdash; your settings are saved in this browser.'; }
+    else { el.innerHTML='Been here before? <a href="#/login">Log in</a> or <a href="#/signup">create an account</a>.'; }
+  }
+  function afterAuth(){ renderAuthNav(); renderReturning(); if(!resumeSaved()) go('#/account'); }
   function isPro(){ try{ return localStorage.getItem('pv-pro')==='1'; }catch(e){ return false; } }
   function renderPro(){
     var pro=isPro();
@@ -1886,10 +1913,10 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
       renderFinish(); go('#/settings'); toast('Restored v0.'+v.v);
     }); });
   }
-  $('#loginForm').addEventListener('submit',function(e){ e.preventDefault(); var em=this.querySelector('[name=email]').value.trim(); if(!em) return; setUser({name:em.split('@')[0],email:em}); go('#/account'); });
-  $('#signupForm').addEventListener('submit',function(e){ e.preventDefault(); var em=this.querySelector('[name=email]').value.trim(); if(!em) return; var nm=this.querySelector('[name=name]').value.trim(); setUser({name:nm||em.split('@')[0],email:em}); go('#/account'); });
-  $('#googleLoginBtn').addEventListener('click',function(){ setUser({name:'Google User',email:'you@gmail.com'}); go('#/account'); });
-  $('#googleSignupBtn').addEventListener('click',function(){ setUser({name:'Google User',email:'you@gmail.com'}); go('#/account'); });
+  $('#loginForm').addEventListener('submit',function(e){ e.preventDefault(); var em=this.querySelector('[name=email]').value.trim(); if(!em) return; setUser({name:em.split('@')[0],email:em}); afterAuth(); });
+  $('#signupForm').addEventListener('submit',function(e){ e.preventDefault(); var em=this.querySelector('[name=email]').value.trim(); if(!em) return; var nm=this.querySelector('[name=name]').value.trim(); setUser({name:nm||em.split('@')[0],email:em}); afterAuth(); });
+  $('#googleLoginBtn').addEventListener('click',function(){ setUser({name:'Google User',email:'you@gmail.com'}); afterAuth(); });
+  $('#googleSignupBtn').addEventListener('click',function(){ setUser({name:'Google User',email:'you@gmail.com'}); afterAuth(); });
   $('#signOutBtn').addEventListener('click',function(){ try{ localStorage.removeItem('pv-user'); }catch(e){} renderAuthNav(); go('#/'); });
   $('#upgradeForm').addEventListener('submit',function(e){ e.preventDefault(); try{ localStorage.setItem('pv-pro','1'); }catch(err){} renderAuthNav(); renderPro(); go('#/settings'); toast('Pro unlocked — welcome in'); });
   (function restoreSaved(){
@@ -1903,14 +1930,7 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
     if(saved.ts){ var d=new Date(saved.ts); meta+=' \u00b7 saved '+d.toLocaleDateString()+' '+d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}); }
     $('#resumeMeta').textContent=meta;
   })();
-  $('#resumeBtn').addEventListener('click',function(){
-    var s=window.__savedState; if(!s) return;
-    ['lines','answers','v0Lines','importedLines'].forEach(function(k){ state[k]=s[k]||[]; });
-    state.fileVersion=s.fileVersion||1; state.deepCompleted=!!s.deepCompleted; state.index=s.index||0; state.scenario=s.scenario||'build';
-    state.suppressedTexts=[]; state.mergeItems=[]; state.diffFilter='all'; state.diffExpanded=false;
-    resetImporter();
-    renderFinish(); go('#/settings');
-  });
+  $('#resumeBtn').addEventListener('click',function(){ resumeSaved(); });
   $('#freshBtn').addEventListener('click',function(){
     try{ localStorage.removeItem('pv1'); }catch(e){}
     window.__savedState=null; $('#resumeBanner').hidden=true;
