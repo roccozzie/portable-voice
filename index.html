@@ -204,9 +204,10 @@
     .file-bridge-item strong { display:block; font-size:12px; margin-bottom:5px; }
     .file-bridge-item span { display:block; color:var(--muted); font-size:10px; line-height:1.5; }
     .file-bridge-item.voice { background:var(--soft); }
-    .page-nav { display:flex; gap:22px; padding:18px 0 0; font-size:12px; }
-    .page-nav a { color:var(--muted); text-decoration:none; }
-    .page-nav a[aria-current="page"] { color:var(--ink); text-decoration:underline; text-underline-offset:4px; }
+    .page-nav { display:flex; flex-wrap:wrap; gap:8px; padding:20px 0 0; }
+    .page-nav a, .page-nav button { border:1px solid var(--ink); background:var(--paper); color:var(--ink); padding:10px 16px; font-size:12px; font-weight:600; text-decoration:none; cursor:pointer; font-family:inherit; }
+    .page-nav a[aria-current="page"] { background:var(--ink); color:var(--paper); }
+    .page-nav button:disabled { opacity:.35; cursor:default; }
     .trace-guide { border-top:1px solid var(--ink); padding:20px 22px 12px; }
     .trace-head { padding-bottom:14px; border-bottom:1px solid var(--ink); }
     .trace-kicker { color:var(--muted); font-size:10px; }
@@ -328,14 +329,6 @@
     .char-budget { font-size:10px; color:var(--muted); }
     .char-budget.over { color:#ff6b6b; }
     .file-actions { display:flex; justify-content:space-between; align-items:center; }
-    .next-list { margin-top:44px; border-top:3px solid var(--ink); }
-    .next-list h3 { font-size:clamp(20px,2.6vw,30px); letter-spacing:-.03em; font-weight:500; margin:20px 0 4px; }
-    .next-row { display:flex; align-items:center; justify-content:space-between; width:100%; padding:15px 2px; border:0; border-bottom:1px solid var(--line); color:var(--ink); text-decoration:none; background:none; font:inherit; cursor:pointer; text-align:left; }
-    .next-row-text { display:flex; flex-direction:column; gap:2px; }
-    .next-row-text strong { font-size:14px; font-weight:600; }
-    .next-row-text em { font-style:normal; color:var(--muted); font-size:11px; }
-    .next-row-arrow { font-size:16px; }
-    .next-row:disabled { opacity:.4; cursor:default; }
     .dest-chooser { display:flex; gap:8px; flex-wrap:wrap; margin:24px 0 4px; }
     .dest-btn { border:1px solid var(--line); background:transparent; color:var(--ink); padding:10px 14px; font-size:12px; cursor:pointer; font:inherit; }
     .dest-btn.active { background:var(--ink); color:var(--paper); border-color:var(--ink); }
@@ -543,11 +536,7 @@ Direct, curious, and willing to find the surprising connection.
         <h2 id="finishTitle">See your settings at work.</h2>
         <p id="finishCopy"></p>
       </header>
-      <nav class="page-nav" aria-label="Settings sections">
-        <a href="#/settings" data-nav="settings">Compare</a>
-        <a href="#/files" data-nav="files">Files</a>
-        <a href="#/versions" data-nav="versions">Versions</a>
-      </nav>
+      <nav class="page-nav" data-nav aria-label="Settings sections"></nav>
       <section class="proof" aria-labelledby="proofHeading">
         <div class="proof-title"><h3 id="proofHeading">Same question. Your settings change the answer.</h3><span id="responseVersionTag">v0.1 · first pass</span></div>
         <div class="scenario-switcher" aria-label="Choose a prompt to compare">
@@ -585,14 +574,8 @@ Direct, curious, and willing to find the surprising connection.
     <main class="finish-shell">
       <header class="finish-head">
         <h2>Your settings.</h2>
-        <p>Two small files. Copy them into any AI.</p>
       </header>
-      <nav class="page-nav" aria-label="Settings sections">
-        <a href="#/settings" data-nav="settings">Compare</a>
-        <a href="#/files" data-nav="files">Files</a>
-        <a href="#/versions" data-nav="versions">Versions</a>
-      </nav>
-      <div class="files-label">YOUR SETTINGS<span class="save-state" id="saveState"></span></div>
+      <nav class="page-nav" data-nav aria-label="Settings sections"></nav>
       <div class="file-tabs" role="tablist" aria-label="Settings files">
         <button type="button" class="file-tab active" data-filetab="agent" role="tab" aria-selected="true"><strong>How it works</strong><small>agent.md</small><span class="privacy-tag">PUBLIC</span></button>
         <button type="button" class="file-tab" data-filetab="voice" role="tab" aria-selected="false"><strong>How it sounds</strong><small>voice.md</small><span class="privacy-tag">PRIVATE</span></button>
@@ -607,25 +590,15 @@ Direct, curious, and willing to find the surprising connection.
       </article>
       <div class="finish-actions"><button id="reviewDraftBtn">Tune the draft</button></div>
       <p class="privacy-rule">Personal identifiers never belong in these files.</p>
-      <section class="next-list" aria-labelledby="nextListHeading">
-        <h3 id="nextListHeading">What&apos;s next</h3>
-        <a class="next-row" href="#/setup"><span class="next-row-text"><strong>Use them</strong><em>Get the files into your AIs.</em></span><span class="next-row-arrow" aria-hidden="true">&rarr;</span></a>
-        <a class="next-row" href="#/import"><span class="next-row-text"><strong>Bring your history</strong><em>Fold in what your other AIs already know.</em></span><span class="next-row-arrow" aria-hidden="true">&rarr;</span></a>
-        <button class="next-row" id="deepBtn" type="button"><span class="next-row-text"><strong id="deepTitle">Refine &mdash; free</strong><em id="deepNote">24 more quick exercises.</em></span><span class="next-row-arrow" aria-hidden="true">&rarr;</span></button>
-      </section>
+
     </main>
   </section>
   <section class="screen" id="versionsScreen">
     <main class="finish-shell">
       <header class="finish-head">
         <h2>Versions.</h2>
-        <p>Saved in this browser. Restoring replaces your current files.</p>
       </header>
-      <nav class="page-nav" aria-label="Settings sections">
-        <a href="#/settings" data-nav="settings">Compare</a>
-        <a href="#/files" data-nav="files">Files</a>
-        <a href="#/versions" data-nav="versions">Versions</a>
-      </nav>
+      <nav class="page-nav" data-nav aria-label="Settings sections"></nav>
       <section class="version-diff" id="versionDiffSection" hidden aria-labelledby="versionHeading">
         <div class="version-head">
           <div><h3 id="versionHeading">What changed?</h3><p>See exactly what the deeper questions added to your communication settings.</p></div>
@@ -647,6 +620,7 @@ Direct, curious, and willing to find the surprising connection.
     <main class="setup-shell">
       <div class="index">Setup guide</div>
       <h2>Get it into your AIs.</h2>
+      <nav class="page-nav" data-nav aria-label="Settings sections"></nav>
       <div class="dest-chooser" role="group" aria-label="Choose your AI">
         <button type="button" class="dest-btn active" data-dest="chatgpt">ChatGPT</button>
         <button type="button" class="dest-btn" data-dest="claude">Claude</button>
@@ -661,13 +635,13 @@ Direct, curious, and willing to find the surprising connection.
         <p class="dest-budget" id="destBudget"></p>
       </div>
       <p class="setup-fine">MCP access for Claude Desktop and Cursor is on the roadmap.</p>
-      <p class="auth-switch"><a href="#/files">&larr; Back to my files</a></p>
     </main>
   </section>
 <section class="screen" id="importScreen">
     <main class="import-shell">
       <div class="index">Import</div>
       <h2>Fold in what your other AIs know.</h2>
+      <nav class="page-nav" data-nav aria-label="Settings sections"></nav>
       <p class="auth-sub">Ask a long-running chat for a compact summary of your patterns &mdash; not a transcript. You review every line.</p>
       <ol class="import-steps">
         <li><div><strong>Copy the extraction prompt.</strong></div><div class="prompt-card-actions"><button type="button" id="copyPatternPrompt">Copy prompt</button><button type="button" id="togglePromptDetails" aria-expanded="false">View prompt</button></div></li>
@@ -733,7 +707,6 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
               <h5>Connect via MCP <span class="soon-tag">Early access</span></h5>
               <p>On the roadmap: a hosted MCP endpoint for Claude Desktop, Cursor, and any MCP client.</p>
             </div>
-      <p class="auth-switch"><a href="#/files">&larr; Back to my files</a></p>
     </main>
   </section>
   <div class="toast" id="toast" role="status"></div>
@@ -1085,6 +1058,25 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
     '/setup':{screen:'setup',title:'Setup guide — Portable Voice'},
     '/import':{screen:'import',title:'Import — Portable Voice'}
   };
+  var NAVKEY={finish:'settings',files:'files',versions:'versions',setup:'setup',import:'import'};
+  function renderPageNav(active){
+    var total=questions.length-INITIAL_COUNT, done=deepProgressCount();
+    var rLabel=done>=total?'Refine \u2713':(done?'Refine \u00b7 '+done+'/'+total:'Refine');
+    var rDis=done>=total?' disabled':'';
+    var tabs=[['#/settings','settings','Compare'],['#/files','files','Files'],['#/versions','versions','Versions'],['#/setup','setup','Setup'],['#/import','import','Import']];
+    var html=tabs.map(function(t){ return '<a href="'+t[0]+'"'+(t[1]===active?' aria-current="page"':'')+'>'+t[2]+'</a>'; }).join('');
+    html+='<button type="button" class="refine-tab"'+rDis+'>'+rLabel+'</button>';
+    document.querySelectorAll('nav.page-nav[data-nav]').forEach(function(n){ n.innerHTML=html; });
+  }
+  function startDeep(){
+    var cap=questions.length;
+    if(deepProgressCount()>=cap-INITIAL_COUNT) return;
+    if(!state.v0Lines.length) state.v0Lines=state.lines.map(function(l){return {id:l.id,text:l.text,bucket:l.bucket};});
+    state.scope=cap; state.deepCompleted=false;
+    var nextUnanswered=questions.slice(INITIAL_COUNT).findIndex(function(q){ return !answerReady(q); });
+    state.index=nextUnanswered===-1?INITIAL_COUNT:INITIAL_COUNT+nextUnanswered;
+    renderQuestion(); renderLive(false); go('#/interview');
+  }
   function go(h){ if(location.hash===h) route(); else location.hash=h; }
   function route(){
     var h=(location.hash||'#/').replace(/^#/,'');
@@ -1092,7 +1084,7 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
     if((r.screen==='review'||r.screen==='finish'||r.screen==='files'||r.screen==='versions'||r.screen==='setup') && !state.lines.length && !Object.keys(state.answers).length){ go('#/'); return; }
     if(r.screen==='import'){ if(!state.lines.length && !Object.keys(state.answers).length){ go('#/'); return; } }
     if(r.screen==='finish'||r.screen==='versions'){ renderVersions(); }
-    document.querySelectorAll('.page-nav a').forEach(function(a){ if(a.getAttribute('href')==='#'+h) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current'); });
+    if(NAVKEY[r.screen]){ renderPageNav(NAVKEY[r.screen]); }
     if(r.screen==='intro'){ renderReturning(); }
     if(r.screen==='setup'){ updateDestBudget(); }
 
@@ -1578,14 +1570,6 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
     $('#finishTitle').textContent=deepCount?'Your settings are already taking shape.':'See your settings at work.';
     $('#finishCopy').textContent=state.deepCompleted?'The deeper pass is in — Versions shows what changed.':(deepCount?'You answered '+deepCount+' of '+(questions.length-INITIAL_COUNT)+' deeper questions so far. Pick up where you left off below.':'');
     renderVersions();
-    (function(){
-      var btn=$('#deepBtn'), title=$('#deepTitle'), note=$('#deepNote'); if(!btn||!title||!note) return;
-      var total=questions.length-INITIAL_COUNT, deepCount=deepProgressCount();
-      if(deepCount>=total){ title.textContent='Deeper pass complete'; note.textContent='All '+total+' exercises answered.'; btn.disabled=true; return; }
-      btn.disabled=false;
-      title.textContent='Refine — free';
-      note.textContent=deepCount?('Continue — '+deepCount+' of '+total+' so far.'):(total+' more quick exercises.');
-    })();
     $('#versionHeading').textContent=state.deepCompleted?'What changed?':'What has changed so far?';
     renderComparison();
     renderVersionDiff();
@@ -1799,15 +1783,7 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
 
   $('#startBtn').addEventListener('click',function(){ state.index=0; state.scope=INITIAL_COUNT; state.deepCompleted=false; state.answers={}; state.lines=[]; state.importedLines=[]; state.suppressedTexts=[]; state.mergeItems=[]; state.fileVersion=1; state.v0Lines=[]; state.diffFilter='all'; state.diffExpanded=false; state.scenario='build'; resetImporter(); try{localStorage.removeItem('pv1'); localStorage.removeItem('pv-versions');}catch(e){} window.__savedState=null; var rb=$('#resumeBanner'); if(rb) rb.hidden=true; $('#promptDetails').classList.remove('open'); $('#togglePromptDetails').setAttribute('aria-expanded','false'); $('#togglePromptDetails').textContent='View prompt'; renderQuestion(); renderLive(false); go('#/interview'); });
   $('#reviewDraftBtn').addEventListener('click',function(){ renderReview(); go('#/review'); });
-  $('#deepBtn').addEventListener('click',function(){
-    var cap=questions.length;
-    if(deepProgressCount()>=cap-INITIAL_COUNT) return;
-    if(!state.v0Lines.length) state.v0Lines=state.lines.map(function(l){return {id:l.id,text:l.text,bucket:l.bucket};});
-    state.scope=cap; state.deepCompleted=false;
-    var nextUnanswered=questions.slice(INITIAL_COUNT).findIndex(function(q){ return !answerReady(q); });
-    state.index=nextUnanswered===-1?INITIAL_COUNT:INITIAL_COUNT+nextUnanswered;
-    renderQuestion(); renderLive(false); go('#/interview');
-  });
+  document.addEventListener('click',function(e){ var b=e.target.closest?e.target.closest('.refine-tab'):null; if(b&&!b.disabled) startDeep(); });
   $('#exitDeepBtn').addEventListener('click',function(){
     collectLines();
     renderFinish();
