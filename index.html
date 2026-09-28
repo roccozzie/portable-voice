@@ -198,17 +198,15 @@
     .point-number { position:absolute; left:0; top:.08em; display:grid; place-items:center; width:20px; height:20px; border:1px solid var(--ink); border-radius:50%; background:var(--paper); color:var(--ink); font-size:9px; font-weight:600; }
     .calibrated-point.is-linked { background:var(--select); color:#090909; }
     .file-bridge { border-top:2px solid var(--ink); display:grid; grid-template-columns:.78fr 1fr 1fr; }
-    .file-bridge-intro, .file-bridge-item { padding:16px 18px; }
+    .file-bridge-item { padding:16px 18px; }
     .file-bridge-item { border-left:1px solid var(--ink); }
     .file-bridge-intro { font-size:12px; line-height:1.5; font-weight:600; }
     .file-bridge-item strong { display:block; font-size:12px; margin-bottom:5px; }
     .file-bridge-item span { display:block; color:var(--muted); font-size:10px; line-height:1.5; }
     .file-bridge-item.voice { background:var(--soft); }
     .trace-guide { border-top:1px solid var(--ink); padding:20px 22px 12px; }
-    .trace-head { display:flex; align-items:flex-end; justify-content:space-between; gap:24px; padding-bottom:14px; border-bottom:1px solid var(--ink); }
-    .trace-kicker { color:var(--muted); font-size:10px; margin-bottom:5px; }
-    .trace-head strong { display:block; font-size:15px; }
-    .trace-head p { margin:0; max-width:470px; color:var(--muted); font-size:10px; line-height:1.55; }
+    .trace-head { padding-bottom:14px; border-bottom:1px solid var(--ink); }
+    .trace-kicker { color:var(--muted); font-size:10px; }
     .rule-traces { display:grid; grid-template-columns:1fr 1fr; column-gap:24px; }
     .rule-trace { appearance:none; width:100%; display:grid; grid-template-columns:26px 1fr; gap:10px; align-items:start; padding:12px 0; border:0; border-bottom:1px solid var(--line); background:transparent; color:var(--muted); font:10px/1.5 "IBM Plex Mono", monospace; text-align:left; }
     .rule-source { display:block; color:var(--ink); font-size:9px; font-weight:600; margin-bottom:3px; }
@@ -444,7 +442,6 @@
       .response-panel { padding:0 18px 22px; }
       .response-label { margin:0 -18px 18px; }
       .response-panel + .response-panel { border-left:0; border-top:2px solid var(--ink); }
-      .trace-head { align-items:flex-start; flex-direction:column; gap:8px; }
       .rule-traces { grid-template-columns:1fr; }
       .demo-prompt { padding:19px 18px 22px; }
       .version-line { grid-template-columns:72px 16px minmax(0,1fr); padding-left:0; padding-right:0; }
@@ -474,10 +471,10 @@
         <div>
           <div class="index">Start here · 8 revealing choices</div>
           <h1>Teach any AI how to work with you.</h1>
-          <p class="lede">So every AI you use feels like yours. Answer eight quick questions to create portable settings for how it communicates, makes decisions, and works with you.</p>
+          <p class="lede">So every AI you use feels like yours. Eight quick questions become portable settings.</p>
           <button class="primary" id="startBtn">Start →</button>
           <p class="returning" id="returningLine"></p>
-          <div class="fine">Everything is stored in this browser &mdash; nothing is uploaded anywhere. No names, addresses, credentials, or identifying details are asked for or written.</div>
+          <div class="fine">Stays in this browser. Never asks for names, addresses, or credentials.</div>
           <div class="resume-banner" id="resumeBanner" hidden>
             <div><strong>Your settings are saved in this browser.</strong><span id="resumeMeta"></span></div>
             <div class="row"><button class="primary" id="resumeBtn" type="button">Resume &rarr;</button><button class="ghost" id="freshBtn" type="button">Start fresh</button></div>
@@ -525,11 +522,10 @@ Direct, curious, and willing to find the surprising connection.
     <main class="review-shell">
       <header class="review-head">
         <h2 id="reviewTitle">Make it sound true.</h2>
-        <p id="reviewCopy">Click any line to sharpen it. Delete what doesn't belong. This draft turns your choices into patterns; your edits make them accurate.</p>
+        <p id="reviewCopy">Click a line to sharpen it. Delete what doesn't belong.</p>
       </header>
-      <div class="section-label">YOUR DRAFT — CLICK A LINE TO EDIT</div>
       <div class="line-list" id="lineList"></div>
-      <p class="privacy-rule">This file is for patterns, not identity. The product never asks for names, addresses, account details, credentials, health specifics, or identifying family details.</p>
+      <p class="privacy-rule">Patterns, not identity &mdash; no names, addresses, or credentials.</p>
       <section class="suggestions">
         <div class="section-label">2 PROPOSED REFINEMENTS</div>
         <div id="suggestionList"></div>
@@ -541,8 +537,8 @@ Direct, curious, and willing to find the surprising connection.
   <section class="screen" id="finishScreen">
     <main class="finish-shell">
       <header class="finish-head">
-        <h2 id="finishTitle">See your file at work.</h2>
-        <p id="finishCopy">The same prompt, answered twice. The difference on the right comes from the lines you just made.</p>
+        <h2 id="finishTitle">See your settings at work.</h2>
+        <p id="finishCopy">The same prompt, answered twice.</p>
       </header>
       <section class="proof" aria-labelledby="proofHeading">
         <div class="proof-title"><h3 id="proofHeading">Same question. Your settings change the answer.</h3><span id="responseVersionTag">v0.1 · first pass</span></div>
@@ -552,7 +548,7 @@ Direct, curious, and willing to find the surprising connection.
           <button type="button" data-scenario="explain" aria-pressed="false">understanding an idea</button>
         </div>
         <div class="comparison-stage">
-          <div class="demo-prompt"><strong>SAME PROMPT TO BOTH</strong><span id="demoPromptText">I’ve got three good product directions and two weeks. How should I decide what to build?</span></div>
+          <div class="demo-prompt"><span id="demoPromptText">I’ve got three good product directions and two weeks. How should I decide what to build?</span></div>
           <div class="response-grid">
             <article class="response-panel">
               <div class="response-label"><strong>PLAIN AI</strong><span>no settings</span></div>
@@ -564,14 +560,12 @@ Direct, curious, and willing to find the surprising connection.
             </article>
           </div>
           <div class="file-bridge" aria-label="How your settings shape the answer">
-            <div class="file-bridge-intro">Your settings have two parts. One guides the thinking; one guides the writing.</div>
             <div class="file-bridge-item"><strong>How it works · agent.md</strong><span>Judgment, decisions, and collaboration.</span></div>
             <div class="file-bridge-item voice"><strong>How it sounds · voice.md</strong><span>Tone, phrasing, and structure.</span></div>
           </div>
           <div class="trace-guide">
             <div class="trace-head">
-              <div><div class="trace-kicker">LINES USED FOR THIS ANSWER</div><strong>These are the settings behind the response.</strong></div>
-              <p>Each number connects one line in a file to the part of the answer it changed.</p>
+              <div><div class="trace-kicker">LINES BEHIND THIS ANSWER</div></div>
             </div>
             <div class="rule-traces" id="appliedRules" aria-label="Rules from your file used in the answer"></div>
           </div>
@@ -589,7 +583,7 @@ Direct, curious, and willing to find the surprising connection.
         <div class="version-lines" id="versionLines"></div>
         <button class="show-diff" id="showDiffBtn" type="button"></button>
       </section>
-      <div class="files-label">YOUR SETTINGS, IN TWO SIMPLE PARTS<span class="save-state" id="saveState"></span></div>
+      <div class="files-label">YOUR SETTINGS<span class="save-state" id="saveState"></span></div>
       <div class="file-tabs" role="tablist" aria-label="Settings files">
         <button type="button" class="file-tab active" data-filetab="agent" role="tab" aria-selected="true"><strong>How it works</strong><small>agent.md</small><span class="privacy-tag">PUBLIC</span></button>
         <button type="button" class="file-tab" data-filetab="voice" role="tab" aria-selected="false"><strong>How it sounds</strong><small>voice.md</small><span class="privacy-tag">PRIVATE</span></button>
@@ -609,10 +603,10 @@ Direct, curious, and willing to find the surprising connection.
         <a class="next-row" href="#/import"><span class="next-row-text"><strong>Bring your history</strong><em>Fold in what your other AIs already know.</em></span><span class="next-row-arrow" aria-hidden="true">&rarr;</span></a>
         <button class="next-row" id="deepBtn" type="button"><span class="next-row-text"><strong id="deepTitle">Refine &mdash; free</strong><em id="deepNote">24 more quick exercises.</em></span><span class="next-row-arrow" aria-hidden="true">&rarr;</span></button>
       </section>
-<p class="privacy-rule"><strong>Built-in boundary:</strong> personal identifiers and secrets never belong in these files. Useful context is generalized before it reaches either one.</p>
+<p class="privacy-rule">Personal identifiers never belong in these files.</p>
       <section class="versions-block" aria-labelledby="versionsHeading">
         <h3 id="versionsHeading">Versions</h3>
-        <p class="versions-sub">Every pass is saved in this browser. Restoring replaces your current files.</p>
+        <p class="versions-sub">Saved in this browser. Restoring replaces your current files.</p>
         <div id="versionList"></div>
       </section>
     </main>
@@ -621,7 +615,7 @@ Direct, curious, and willing to find the surprising connection.
     <main class="setup-shell">
       <div class="index">Setup guide</div>
       <h2>Get it into your AIs.</h2>
-      <p class="auth-sub">Each file fits every box. Pick your AI, copy the files, paste them in.</p>
+      <p class="auth-sub">Pick your AI, copy the files, paste them in.</p>
       <div class="dest-chooser" role="group" aria-label="Choose your AI">
         <button type="button" class="dest-btn active" data-dest="chatgpt">ChatGPT</button>
         <button type="button" class="dest-btn" data-dest="claude">Claude</button>
@@ -643,11 +637,11 @@ Direct, curious, and willing to find the surprising connection.
     <main class="import-shell">
       <div class="index">Import</div>
       <h2>Fold in what your other AIs know.</h2>
-      <p class="auth-sub">Ask a chat with real history for a compact summary of your patterns &mdash; not a transcript. You review every line before it shapes either file.</p>
+      <p class="auth-sub">Ask a long-running chat for a compact summary of your patterns &mdash; not a transcript. You review every line.</p>
       <ol class="import-steps">
-        <li><div><strong>Copy the extraction prompt.</strong><span>One compact pattern summary, not a data export.</span></div><div class="prompt-card-actions"><button type="button" id="copyPatternPrompt">Copy prompt</button><button type="button" id="togglePromptDetails" aria-expanded="false">View prompt</button></div></li>
-        <li><div><strong>Run it in a long-running chat.</strong><span>ChatGPT or Claude, with enough history behind it.</span></div></li>
-        <li><div><strong>Paste the summary below.</strong><span>Each line is checked, sorted, and reviewed by you.</span></div></li>
+        <li><div><strong>Copy the extraction prompt.</strong></div><div class="prompt-card-actions"><button type="button" id="copyPatternPrompt">Copy prompt</button><button type="button" id="togglePromptDetails" aria-expanded="false">View prompt</button></div></li>
+        <li><div><strong>Run it in a long-running chat.</strong><span>ChatGPT or Claude, with history behind it.</span></div></li>
+        <li><div><strong>Paste the summary below.</strong></div></li>
       </ol>
 <div class="prompt-box" id="promptDetails">
               <pre id="patternPrompt">Review as much of our past conversation history as you can access and build a profile of how I want AI to communicate and work with me. This profile will be handed to other AI tools, so it must be portable, specific, and free of personal information.
@@ -1548,7 +1542,7 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
     if(ab){ ab.textContent=at.length+' / 1,500'+(fa.held?' \u00b7 '+fa.held+' held back':''); ab.classList.toggle('over',at.length>1500); }
     if(vb){ vb.textContent=vt.length+' / 1,500'+(fv.held?' \u00b7 '+fv.held+' held back':''); vb.classList.toggle('over',vt.length>1500); }
     $('#finishTitle').textContent=state.deepCompleted?'See what the deeper pass changed.':(deepCount?'Your settings are already taking shape.':'See your settings at work.');
-    $('#finishCopy').textContent=state.deepCompleted?'The same prompt now carries more of your cadence and judgment. The version diff shows exactly what the deeper questions added.':(deepCount?'You answered '+deepCount+' of '+(questions.length-INITIAL_COUNT)+' deeper questions. Those answers are already reflected in your settings, and you can pick up where you left off.':'The same prompt, answered twice. The difference on the right comes from the choices you just made.');
+    $('#finishCopy').textContent=state.deepCompleted?'The deeper pass is in — the version diff below shows what it added.':(deepCount?'You answered '+deepCount+' of '+(questions.length-INITIAL_COUNT)+' deeper questions so far. Pick up where you left off below.':'The same prompt, answered twice.');
     renderVersions();
     (function(){
       var btn=$('#deepBtn'), title=$('#deepTitle'), note=$('#deepNote'); if(!btn||!title||!note) return;
