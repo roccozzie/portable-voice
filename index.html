@@ -469,14 +469,14 @@
     <main class="intro">
       <div class="intro-grid">
         <div>
-          <div class="index">Start here · 8 revealing choices</div>
+          <div class="index">Start here · 8 questions</div>
           <h1>Teach any AI how to work with you.</h1>
           <p class="lede">So every AI you use feels like yours. Eight quick questions become portable settings.</p>
           <button class="primary" id="startBtn">Start →</button>
           <p class="returning" id="returningLine"></p>
           <div class="fine">Stays in this browser. Never asks for names, addresses, or credentials.</div>
           <div class="resume-banner" id="resumeBanner" hidden>
-            <div><strong>Your settings are saved in this browser.</strong><span id="resumeMeta"></span></div>
+            <div><strong>Welcome back.</strong><span id="resumeMeta"></span></div>
             <div class="row"><button class="primary" id="resumeBtn" type="button">Resume &rarr;</button><button class="ghost" id="freshBtn" type="button">Start fresh</button></div>
           </div>
         </div>
@@ -538,7 +538,7 @@ Direct, curious, and willing to find the surprising connection.
     <main class="finish-shell">
       <header class="finish-head">
         <h2 id="finishTitle">See your settings at work.</h2>
-        <p id="finishCopy">The same prompt, answered twice.</p>
+        <p id="finishCopy"></p>
       </header>
       <section class="proof" aria-labelledby="proofHeading">
         <div class="proof-title"><h3 id="proofHeading">Same question. Your settings change the answer.</h3><span id="responseVersionTag">v0.1 · first pass</span></div>
@@ -615,7 +615,6 @@ Direct, curious, and willing to find the surprising connection.
     <main class="setup-shell">
       <div class="index">Setup guide</div>
       <h2>Get it into your AIs.</h2>
-      <p class="auth-sub">Pick your AI, copy the files, paste them in.</p>
       <div class="dest-chooser" role="group" aria-label="Choose your AI">
         <button type="button" class="dest-btn active" data-dest="chatgpt">ChatGPT</button>
         <button type="button" class="dest-btn" data-dest="claude">Claude</button>
@@ -688,7 +687,7 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
 
 # Interaction preferences
 - [Stated] (strong) …"></textarea>
-              <div class="import-actions"><span>The fixed headings and evidence tags make the merge reviewable.</span><button type="button" id="analyzeDigestBtn">Check and compare →</button></div>
+              <div class="import-actions"><button type="button" id="analyzeDigestBtn">Check and compare →</button></div>
             </div>
             <div class="import-status" id="importStatus" role="status"></div>
             <div class="merge-review" id="mergeReview">
@@ -700,7 +699,7 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
           </section>
 <div class="mcp-block">
               <h5>Connect via MCP <span class="soon-tag">Early access</span></h5>
-              <p>On the roadmap: a hosted MCP endpoint &mdash; your settings readable by Claude Desktop, Cursor, and any MCP client, always the latest version.</p>
+              <p>On the roadmap: a hosted MCP endpoint for Claude Desktop, Cursor, and any MCP client.</p>
             </div>
       <p class="auth-switch"><a href="#/settings">&larr; Back to my settings</a></p>
     </main>
@@ -1542,7 +1541,7 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
     if(ab){ ab.textContent=at.length+' / 1,500'+(fa.held?' \u00b7 '+fa.held+' held back':''); ab.classList.toggle('over',at.length>1500); }
     if(vb){ vb.textContent=vt.length+' / 1,500'+(fv.held?' \u00b7 '+fv.held+' held back':''); vb.classList.toggle('over',vt.length>1500); }
     $('#finishTitle').textContent=state.deepCompleted?'See what the deeper pass changed.':(deepCount?'Your settings are already taking shape.':'See your settings at work.');
-    $('#finishCopy').textContent=state.deepCompleted?'The deeper pass is in — the version diff below shows what it added.':(deepCount?'You answered '+deepCount+' of '+(questions.length-INITIAL_COUNT)+' deeper questions so far. Pick up where you left off below.':'The same prompt, answered twice.');
+    $('#finishCopy').textContent=state.deepCompleted?'The deeper pass is in — the version diff below shows what it added.':(deepCount?'You answered '+deepCount+' of '+(questions.length-INITIAL_COUNT)+' deeper questions so far. Pick up where you left off below.':'');
     renderVersions();
     (function(){
       var btn=$('#deepBtn'), title=$('#deepTitle'), note=$('#deepNote'); if(!btn||!title||!note) return;
