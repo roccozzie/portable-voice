@@ -197,13 +197,16 @@
     .calibrated-point { padding-left:30px; transition:background .15s ease; }
     .point-number { position:absolute; left:0; top:.08em; display:grid; place-items:center; width:20px; height:20px; border:1px solid var(--ink); border-radius:50%; background:var(--paper); color:var(--ink); font-size:9px; font-weight:600; }
     .calibrated-point.is-linked { background:var(--select); color:#090909; }
-    .file-bridge { border-top:2px solid var(--ink); display:grid; grid-template-columns:.78fr 1fr 1fr; }
-    .file-bridge-item { padding:16px 18px; }
+    .file-bridge { border-top:2px solid var(--ink); display:grid; grid-template-columns:1fr 1fr; }
+    a.file-bridge-item { padding:16px 18px; color:inherit; text-decoration:none; display:block; }
+    a.file-bridge-item:hover strong { text-decoration:underline; }
     .file-bridge-item { border-left:1px solid var(--ink); }
-    .file-bridge-intro { font-size:12px; line-height:1.5; font-weight:600; }
     .file-bridge-item strong { display:block; font-size:12px; margin-bottom:5px; }
     .file-bridge-item span { display:block; color:var(--muted); font-size:10px; line-height:1.5; }
     .file-bridge-item.voice { background:var(--soft); }
+    .page-nav { display:flex; gap:22px; padding:18px 0 0; font-size:12px; }
+    .page-nav a { color:var(--muted); text-decoration:none; }
+    .page-nav a[aria-current="page"] { color:var(--ink); text-decoration:underline; text-underline-offset:4px; }
     .trace-guide { border-top:1px solid var(--ink); padding:20px 22px 12px; }
     .trace-head { padding-bottom:14px; border-bottom:1px solid var(--ink); }
     .trace-kicker { color:var(--muted); font-size:10px; }
@@ -540,6 +543,11 @@ Direct, curious, and willing to find the surprising connection.
         <h2 id="finishTitle">See your settings at work.</h2>
         <p id="finishCopy"></p>
       </header>
+      <nav class="page-nav" aria-label="Settings sections">
+        <a href="#/settings" data-nav="settings">Compare</a>
+        <a href="#/files" data-nav="files">Files</a>
+        <a href="#/versions" data-nav="versions">Versions</a>
+      </nav>
       <section class="proof" aria-labelledby="proofHeading">
         <div class="proof-title"><h3 id="proofHeading">Same question. Your settings change the answer.</h3><span id="responseVersionTag">v0.1 · first pass</span></div>
         <div class="scenario-switcher" aria-label="Choose a prompt to compare">
@@ -560,8 +568,8 @@ Direct, curious, and willing to find the surprising connection.
             </article>
           </div>
           <div class="file-bridge" aria-label="How your settings shape the answer">
-            <div class="file-bridge-item"><strong>How it works · agent.md</strong><span>Judgment, decisions, and collaboration.</span></div>
-            <div class="file-bridge-item voice"><strong>How it sounds · voice.md</strong><span>Tone, phrasing, and structure.</span></div>
+            <a class="file-bridge-item" href="#/files"><strong>How it works · agent.md</strong><span>Judgment, decisions, and collaboration.</span></a>
+            <a class="file-bridge-item voice" href="#/files"><strong>How it sounds · voice.md</strong><span>Tone, phrasing, and structure.</span></a>
           </div>
           <div class="trace-guide">
             <div class="trace-head">
@@ -571,18 +579,19 @@ Direct, curious, and willing to find the surprising connection.
           </div>
         </div>
       </section>
-      <section class="version-diff" id="versionDiffSection" hidden aria-labelledby="versionHeading">
-        <div class="version-head">
-          <div><h3 id="versionHeading">What changed?</h3><p>See exactly what the deeper questions added to your communication settings.</p></div>
-          <div class="version-controls">
-            <select id="previousVersion" aria-label="Previous version"><option value="v01">v0.1 · first pass</option></select>
-            <select id="diffFilter" aria-label="Filter changes by file"><option value="all">both files</option><option value="agent">agent.md</option><option value="voice">voice.md</option></select>
-          </div>
-        </div>
-        <div class="diff-summary"><span>v0.1 → v0.2</span><span id="diffCount"></span></div>
-        <div class="version-lines" id="versionLines"></div>
-        <button class="show-diff" id="showDiffBtn" type="button"></button>
-      </section>
+    </main>
+  </section>
+  <section class="screen" id="filesScreen">
+    <main class="finish-shell">
+      <header class="finish-head">
+        <h2>Your settings.</h2>
+        <p>Two small files. Copy them into any AI.</p>
+      </header>
+      <nav class="page-nav" aria-label="Settings sections">
+        <a href="#/settings" data-nav="settings">Compare</a>
+        <a href="#/files" data-nav="files">Files</a>
+        <a href="#/versions" data-nav="versions">Versions</a>
+      </nav>
       <div class="files-label">YOUR SETTINGS<span class="save-state" id="saveState"></span></div>
       <div class="file-tabs" role="tablist" aria-label="Settings files">
         <button type="button" class="file-tab active" data-filetab="agent" role="tab" aria-selected="true"><strong>How it works</strong><small>agent.md</small><span class="privacy-tag">PUBLIC</span></button>
@@ -597,16 +606,39 @@ Direct, curious, and willing to find the surprising connection.
         <div class="file-actions"><span class="char-budget" id="voiceBudget"></span><span class="file-btns"><button type="button" data-copy="voice">copy</button><button type="button" data-download="voice">download</button></span></div>
       </article>
       <div class="finish-actions"><button id="reviewDraftBtn">Tune the draft</button></div>
-            <section class="next-list" aria-labelledby="nextListHeading">
+      <p class="privacy-rule">Personal identifiers never belong in these files.</p>
+      <section class="next-list" aria-labelledby="nextListHeading">
         <h3 id="nextListHeading">What&apos;s next</h3>
         <a class="next-row" href="#/setup"><span class="next-row-text"><strong>Use them</strong><em>Get the files into your AIs.</em></span><span class="next-row-arrow" aria-hidden="true">&rarr;</span></a>
         <a class="next-row" href="#/import"><span class="next-row-text"><strong>Bring your history</strong><em>Fold in what your other AIs already know.</em></span><span class="next-row-arrow" aria-hidden="true">&rarr;</span></a>
         <button class="next-row" id="deepBtn" type="button"><span class="next-row-text"><strong id="deepTitle">Refine &mdash; free</strong><em id="deepNote">24 more quick exercises.</em></span><span class="next-row-arrow" aria-hidden="true">&rarr;</span></button>
       </section>
-<p class="privacy-rule">Personal identifiers never belong in these files.</p>
-      <section class="versions-block" aria-labelledby="versionsHeading">
-        <h3 id="versionsHeading">Versions</h3>
-        <p class="versions-sub">Saved in this browser. Restoring replaces your current files.</p>
+    </main>
+  </section>
+  <section class="screen" id="versionsScreen">
+    <main class="finish-shell">
+      <header class="finish-head">
+        <h2>Versions.</h2>
+        <p>Saved in this browser. Restoring replaces your current files.</p>
+      </header>
+      <nav class="page-nav" aria-label="Settings sections">
+        <a href="#/settings" data-nav="settings">Compare</a>
+        <a href="#/files" data-nav="files">Files</a>
+        <a href="#/versions" data-nav="versions">Versions</a>
+      </nav>
+      <section class="version-diff" id="versionDiffSection" hidden aria-labelledby="versionHeading">
+        <div class="version-head">
+          <div><h3 id="versionHeading">What changed?</h3><p>See exactly what the deeper questions added to your communication settings.</p></div>
+          <div class="version-controls">
+            <select id="previousVersion" aria-label="Previous version"><option value="v01">v0.1 · first pass</option></select>
+            <select id="diffFilter" aria-label="Filter changes by file"><option value="all">both files</option><option value="agent">agent.md</option><option value="voice">voice.md</option></select>
+          </div>
+        </div>
+        <div class="diff-summary"><span>v0.1 → v0.2</span><span id="diffCount"></span></div>
+        <div class="version-lines" id="versionLines"></div>
+        <button class="show-diff" id="showDiffBtn" type="button"></button>
+      </section>
+      <section class="versions-block">
         <div id="versionList"></div>
       </section>
     </main>
@@ -629,7 +661,7 @@ Direct, curious, and willing to find the surprising connection.
         <p class="dest-budget" id="destBudget"></p>
       </div>
       <p class="setup-fine">MCP access for Claude Desktop and Cursor is on the roadmap.</p>
-      <p class="auth-switch"><a href="#/settings">&larr; Back to my settings</a></p>
+      <p class="auth-switch"><a href="#/files">&larr; Back to my files</a></p>
     </main>
   </section>
 <section class="screen" id="importScreen">
@@ -701,7 +733,7 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
               <h5>Connect via MCP <span class="soon-tag">Early access</span></h5>
               <p>On the roadmap: a hosted MCP endpoint for Claude Desktop, Cursor, and any MCP client.</p>
             </div>
-      <p class="auth-switch"><a href="#/settings">&larr; Back to my settings</a></p>
+      <p class="auth-switch"><a href="#/files">&larr; Back to my files</a></p>
     </main>
   </section>
   <div class="toast" id="toast" role="status"></div>
@@ -1037,7 +1069,7 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
   var INITIAL_COUNT = 8;
   var state = { index:0, scope:INITIAL_COUNT, deepCompleted:false, answers:{}, lines:[], importedLines:[], suppressedTexts:[], v0Lines:[], diffFilter:'all', diffExpanded:false, scenario:'build', mergeItems:[], fileVersion:1 };
   var $ = function(s){ return document.querySelector(s); };
-  var screens = {intro:$('#introScreen'), interview:$('#interviewScreen'), review:$('#reviewScreen'), finish:$('#finishScreen'), setup:$('#setupScreen'), import:$('#importScreen')};
+  var screens = {intro:$('#introScreen'), interview:$('#interviewScreen'), review:$('#reviewScreen'), finish:$('#finishScreen'), files:$('#filesScreen'), versions:$('#versionsScreen'), setup:$('#setupScreen'), import:$('#importScreen')};
 
   function show(name){
     Object.keys(screens).forEach(function(k){ screens[k].classList.toggle('active', k===name); });
@@ -1048,6 +1080,8 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
     '/interview':{screen:'interview',title:'Interview — Portable Voice'},
     '/review':{screen:'review',title:'Review your draft — Portable Voice'},
     '/settings':{screen:'finish',title:'Your settings — Portable Voice'},
+    '/files':{screen:'files',title:'Your files — Portable Voice'},
+    '/versions':{screen:'versions',title:'Versions — Portable Voice'},
     '/setup':{screen:'setup',title:'Setup guide — Portable Voice'},
     '/import':{screen:'import',title:'Import — Portable Voice'}
   };
@@ -1055,9 +1089,10 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
   function route(){
     var h=(location.hash||'#/').replace(/^#/,'');
     var r=ROUTES[h]||ROUTES['/'];
-    if((r.screen==='review'||r.screen==='finish'||r.screen==='setup') && !state.lines.length && !Object.keys(state.answers).length){ go('#/'); return; }
+    if((r.screen==='review'||r.screen==='finish'||r.screen==='files'||r.screen==='versions'||r.screen==='setup') && !state.lines.length && !Object.keys(state.answers).length){ go('#/'); return; }
     if(r.screen==='import'){ if(!state.lines.length && !Object.keys(state.answers).length){ go('#/'); return; } }
-    if(r.screen==='finish'){ renderVersions(); }
+    if(r.screen==='finish'||r.screen==='versions'){ renderVersions(); }
+    document.querySelectorAll('.page-nav a').forEach(function(a){ if(a.getAttribute('href')==='#'+h) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current'); });
     if(r.screen==='intro'){ renderReturning(); }
     if(r.screen==='setup'){ updateDestBudget(); }
 
@@ -1540,8 +1575,8 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
     var ab=$('#agentBudget'), vb=$('#voiceBudget');
     if(ab){ ab.textContent=at.length+' / 1,500'+(fa.held?' \u00b7 '+fa.held+' held back':''); ab.classList.toggle('over',at.length>1500); }
     if(vb){ vb.textContent=vt.length+' / 1,500'+(fv.held?' \u00b7 '+fv.held+' held back':''); vb.classList.toggle('over',vt.length>1500); }
-    $('#finishTitle').textContent=state.deepCompleted?'See what the deeper pass changed.':(deepCount?'Your settings are already taking shape.':'See your settings at work.');
-    $('#finishCopy').textContent=state.deepCompleted?'The deeper pass is in — the version diff below shows what it added.':(deepCount?'You answered '+deepCount+' of '+(questions.length-INITIAL_COUNT)+' deeper questions so far. Pick up where you left off below.':'');
+    $('#finishTitle').textContent=deepCount?'Your settings are already taking shape.':'See your settings at work.';
+    $('#finishCopy').textContent=state.deepCompleted?'The deeper pass is in — Versions shows what changed.':(deepCount?'You answered '+deepCount+' of '+(questions.length-INITIAL_COUNT)+' deeper questions so far. Pick up where you left off below.':'');
     renderVersions();
     (function(){
       var btn=$('#deepBtn'), title=$('#deepTitle'), note=$('#deepNote'); if(!btn||!title||!note) return;
@@ -1781,7 +1816,7 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
   $('#splitBtn').addEventListener('click',function(){
     if(document.activeElement && document.activeElement.classList.contains('line-text')) document.activeElement.blur();
     if(!state.deepCompleted) state.v0Lines=state.lines.map(function(l){return {id:l.id,text:l.text,bucket:l.bucket};});
-    renderFinish(); go('#/settings');
+    renderFinish(); go(state.deepCompleted?'#/versions':'#/settings');
   });
   $('#diffFilter').addEventListener('change',function(){ state.diffFilter=this.value; state.diffExpanded=false; renderVersionDiff(); });
   $('#showDiffBtn').addEventListener('click',function(){ state.diffExpanded=!state.diffExpanded; renderVersionDiff(); });
