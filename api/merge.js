@@ -25,6 +25,33 @@ const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages';
 const MODEL = process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5-20251001';
 const MAX_TOKENS = 2000;
 
+// Crude per-IP token bucket: 10 merge calls per minute per IP, per serverless
+// instance. Instances don't share memory, so this stops accidents and casual
+// abuse, not a distributed attack — the real backstop is the monthly spend
+// limit in the Anthropic console. Rejected callers get 429; the page treats
+// any failed merge call as "online merge unavailable" and matches on-device.
+const buckets = new Map();
+const WINDOW_MS = 60 * 1000;
+const MAX_HITS = 10;
+function clientIp(req) {
+  const fwd = req.headers['x-forwarded-for'];
+  if (typeof fwd === 'string' && fwd) return fwd.split(',')[0].trim();
+  return (req.socket && req.socket.remoteAddress) || 'unknown';
+}
+function rateLimited(ip) {
+  const now = Date.now();
+  let b = buckets.get(ip);
+  if (!b || now - b.start > WINDOW_MS) {
+    b = { start: now, count: 0 };
+    buckets.set(ip, b);
+  }
+  if (buckets.size > 2000 && Math.random() < 0.02) {
+    for (const [k, v] of buckets) if (now - v.start > WINDOW_MS) buckets.delete(k);
+  }
+  b.count += 1;
+  return b.count > MAX_HITS;
+}
+
 const SYSTEM = `You merge a structured user digest into two behavior files. Be strict.
 
 The two files:
@@ -70,6 +97,11 @@ module.exports = async function handler(req, res) {
     res.status(405).json({ error: 'POST only' });
     return;
   }
+  const ip = clientIp(req);
+  if (rateLimited(ip)) {
+    res.status(429).json({ error: 'too many merge requests — try again in a minute' });
+    return;
+  }
   if (!process.env.ANTHROPIC_API_KEY) {
     // Not configured yet — the page falls back to its local rule-based merge.
     res.status(200).json({ configured: false });
@@ -79,8 +111,8 @@ module.exports = async function handler(req, res) {
   const digest = typeof body.digest === 'string' ? body.digest : '';
   const agent = typeof body.agent === 'string' ? body.agent : '';
   const voice = typeof body.voice === 'string' ? body.voice : '';
-  if (!digest.trim() || digest.length > 20000) {
-    res.status(400).json({ error: 'digest required (max 20k chars)' });
+  if (!digest.trim() || digest.length > 8000) {
+    res.status(400).json({ error: 'digest required (max 8k chars)' });
     return;
   }
 
