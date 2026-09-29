@@ -23,7 +23,6 @@
       --red-bg:#fff0ee;
       --green:#176b3a;
       --green-bg:#eaf8ef;
-      --shadow:#0 3px 0 var(--ink);
     }
     @media (prefers-color-scheme: dark) {
       :root {
@@ -38,8 +37,7 @@
         --red-bg:#2b1615;
         --green:#79d99f;
         --green-bg:#11281a;
-        --shadow:#0 3px 0 var(--ink);
-      }
+        }
     }
     * { box-sizing:border-box; }
     html { background:var(--paper); color:var(--ink); scroll-padding-top:84px; }
@@ -49,16 +47,18 @@
     button:focus-visible, input:focus-visible, textarea:focus-visible { outline:3px solid var(--select); outline-offset:2px; }
     .screen { display:none; min-height:100vh; }
     .screen.active { display:block; }
+    #interviewScreen.active { min-height:calc(100vh - 52px); }
 
     .intro { max-width:1180px; margin:0 auto; padding:clamp(28px,5vw,70px) clamp(18px,4vw,54px); }
     .intro-grid { min-height:calc(100vh - 140px); display:grid; grid-template-columns:minmax(0, .85fr) minmax(360px, 1.15fr); gap:clamp(34px,7vw,96px); align-items:center; }
     .index { color:var(--muted); font-size:12px; margin-bottom:28px; }
     h1 { margin:0 0 24px; max-width:660px; font-size:clamp(36px,4.8vw,68px); font-weight:500; line-height:1; letter-spacing:-.05em; }
     .lede { max-width:590px; font-size:clamp(15px,1.7vw,19px); line-height:1.6; margin:0 0 34px; color:var(--muted); }
-    .primary { border:2px solid var(--ink); background:var(--ink); color:var(--paper); padding:14px 18px; font-weight:600; min-height:48px; box-shadow:var(--shadow); }
-    .primary:hover { transform:translateY(2px); box-shadow:none; }
+    .primary { border:2px solid var(--ink); background:var(--ink); color:var(--paper); padding:14px 18px; font-weight:600; min-height:48px; box-shadow:4px 4px 0 var(--line); }
+    .primary:hover { transform:translate(-2px,-2px); box-shadow:6px 6px 0 var(--line); }
+    .primary:active { transform:translate(2px,2px); box-shadow:2px 2px 0 var(--line); }
     .fine { margin-top:16px; color:var(--muted); font-size:12px; line-height:1.5; }
-    .file-window { border:2px solid var(--ink); background:var(--paper); min-height:500px; display:flex; flex-direction:column; }
+    .file-window { border:2px solid var(--ink); background:var(--paper); min-height:420px; display:flex; flex-direction:column; }
     .file-bar { min-height:45px; border-bottom:1px solid var(--ink); display:flex; align-items:center; justify-content:space-between; padding:0 14px; font-size:12px; }
     .file-dot { display:inline-block; width:9px; height:9px; background:var(--ink); margin-right:9px; }
     .file-body { padding:24px; line-height:1.7; font-size:clamp(12px,1.2vw,15px); flex:1; white-space:pre-wrap; }
@@ -66,8 +66,8 @@
     .cursor { display:inline-block; width:9px; height:1.15em; background:var(--ink); vertical-align:-.15em; animation:blink 1s steps(1) infinite; }
     @keyframes blink { 50% { opacity:0; } }
 
-    .work-shell { min-height:100vh; display:grid; grid-template-columns:minmax(360px, 43%) 1fr; }
-    .conversation { padding:clamp(24px,5vw,70px); border-right:1px solid var(--ink); display:flex; flex-direction:column; min-height:100vh; }
+    .work-shell { min-height:calc(100vh - 52px); display:grid; grid-template-columns:minmax(360px, 43%) 1fr; }
+    .conversation { padding:clamp(24px,5vw,70px); border-right:1px solid var(--ink); display:flex; flex-direction:column; min-height:calc(100vh - 52px); }
     .progress-row { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; color:var(--muted); font-size:12px; margin-bottom:56px; }
     .progress-meta { min-width:0; flex:1; }
     .progress-meta-line { display:flex; justify-content:space-between; gap:16px; }
@@ -97,10 +97,10 @@
     .text-answer { width:100%; border:none; border-bottom:2px solid var(--ink); background:transparent; border-radius:0; padding:14px 0; font-size:clamp(19px,2.5vw,28px); resize:none; min-height:65px; }
     .text-answer::placeholder { color:var(--faint); }
     .question-actions { display:flex; align-items:center; justify-content:space-between; gap:18px; margin-top:28px; }
-    .back { border:0; background:transparent; padding:12px 0; color:var(--muted); }
+    .back { border:0; background:transparent; padding:12px 0 12px 16px; color:var(--muted); }
     .next { border:1px solid var(--ink); background:var(--ink); color:var(--paper); padding:12px 18px; font-weight:600; min-width:120px; }
     .next:disabled { opacity:.35; cursor:not-allowed; }
-    .live-file { min-width:0; background:var(--soft); min-height:100vh; display:flex; flex-direction:column; }
+    .live-file { min-width:0; background:var(--soft); min-height:calc(100vh - 52px); display:flex; flex-direction:column; }
     .live-head { padding:18px 24px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; font-size:12px; position:sticky; top:0; background:var(--soft); z-index:2; }
     .live-head span:last-child { color:var(--muted); }
     .markdown { padding:clamp(24px,4vw,56px); font-size:clamp(13px,1.35vw,16px); line-height:1.75; white-space:pre-wrap; overflow-wrap:anywhere; }
@@ -205,18 +205,22 @@
     .calibrated-point { padding-left:30px; transition:background .15s ease; }
     .point-number { position:absolute; left:0; top:.08em; display:grid; place-items:center; width:20px; height:20px; border:1px solid var(--ink); border-radius:50%; background:var(--paper); color:var(--ink); font-size:9px; font-weight:600; }
     .calibrated-point.is-linked { background:var(--select); color:#090909; }
+    .response-copy.is-linked { background:var(--select); }
     .file-bridge { border-top:2px solid var(--ink); display:grid; grid-template-columns:1fr 1fr; }
     a.file-bridge-item { padding:16px 18px; color:inherit; text-decoration:none; display:block; }
     a.file-bridge-item:hover strong { text-decoration:underline; }
+    .file-bridge-item:first-child { border-left:0; }
     .file-bridge-item { border-left:1px solid var(--ink); }
     .file-bridge-item strong { display:block; font-size:12px; margin-bottom:5px; }
     .file-bridge-item span { display:block; color:var(--muted); font-size:10px; line-height:1.5; }
     .file-bridge-item.voice { background:var(--soft); }
-    .page-nav { display:flex; flex-wrap:wrap; gap:8px; padding:20px 0 0; }
+    .page-nav { display:flex; flex-wrap:wrap; gap:8px; padding:12px 0 20px; }
     .page-nav a, .page-nav button { border:1px solid var(--ink); background:var(--paper); color:var(--ink); padding:10px 16px; font-size:12px; font-weight:600; text-decoration:none; cursor:pointer; font-family:inherit; }
     .page-nav a[aria-current="page"] { background:var(--ink); color:var(--paper); }
+    .page-nav button.refine-tab { border:1px solid var(--ink); background:var(--paper); color:var(--ink); padding:10px 16px; font-size:12px; font-weight:600; cursor:pointer; font-family:inherit; }
+    .page-nav button.refine-tab:hover { background:var(--ink); color:var(--paper); }
     .page-nav button:disabled { opacity:.35; cursor:default; }
-    .trace-guide { border-top:1px solid var(--ink); padding:20px 22px 12px; }
+    .trace-guide { border-top:1px solid var(--ink); padding:20px 22px; }
     .trace-head { padding-bottom:14px; border-bottom:1px solid var(--ink); }
     .trace-kicker { color:var(--muted); font-size:10px; }
     .rule-traces { display:grid; grid-template-columns:1fr 1fr; column-gap:24px; }
@@ -241,7 +245,7 @@
     .version-sign.removed { color:var(--red); }
     .show-diff { margin-top:12px; border:0; border-bottom:1px solid var(--ink); background:transparent; padding:6px 0; font-size:11px; }
     .files-label { margin:42px 0 10px; color:var(--muted); font-size:11px; }
-    .next-route { margin-top:48px; border-top:3px solid var(--ink); }
+    .next-route { margin-top:48px; border-top:2px solid var(--ink); }
     .next-route-head { display:grid; grid-template-columns:.75fr 1.25fr; gap:36px; padding:24px 0 26px; border-bottom:1px solid var(--ink); }
     .next-route-head h3 { margin:0; font-size:clamp(24px,3.4vw,42px); line-height:1.05; letter-spacing:-.04em; font-weight:500; }
     .next-route-head p { margin:0; align-self:end; color:var(--muted); font-size:13px; line-height:1.65; max-width:600px; }
@@ -272,9 +276,10 @@
     .resume-banner .ghost { border:1px solid var(--line); background:transparent; padding:11px 14px; font-size:11px; }
     .save-state { color:var(--muted); font-size:10px; }
     .returning { margin:14px 0 0; font-size:11px; color:var(--muted); }
+    .returning:empty { display:none; }
     .returning a { color:var(--ink); }
     .linklike { background:none; border:0; padding:0; font:inherit; font-size:inherit; color:var(--ink); text-decoration:underline; cursor:pointer; }
-    .topnav { position:sticky; top:0; z-index:50; display:flex; align-items:center; justify-content:space-between; padding:14px 28px; background:var(--paper); border-bottom:1px solid var(--line); }
+    .topnav { position:sticky; top:0; z-index:50; display:flex; align-items:center; justify-content:space-between; padding:14px clamp(18px,4vw,54px); background:var(--paper); border-bottom:1px solid var(--line); }
     .brand { font-weight:600; font-size:14px; letter-spacing:-.02em; text-decoration:none; color:var(--ink); }
     .auth-sub { color:var(--muted); font-size:12px; line-height:1.65; margin:0 0 26px; }
     .auth-card label { display:grid; gap:7px; font-size:11px; font-weight:600; }
@@ -313,8 +318,8 @@
     .card-row > label { min-width:0; }
     .card-row input { width:100%; box-sizing:border-box; }
     .upgrade-shell h2 { line-height:1.05; }
-    .setup-shell { max-width:720px; margin:0 auto; padding:64px 28px 90px; }
-    .setup-shell h2 { margin:0 0 8px; font-size:clamp(28px,4vw,44px); font-weight:500; letter-spacing:-.04em; }
+    .setup-shell { max-width:1240px; margin:0 auto; padding:64px 28px 90px; }
+    .setup-shell h2 { margin:0 0 8px; font-size:clamp(28px,4.6vw,58px); font-weight:500; letter-spacing:-.045em; line-height:1; }
     .setup-shell > .auth-sub { margin-bottom:30px; }
     .setup-card { border-top:1px solid var(--line); padding:22px 0; }
     .setup-card h3 { margin:0 0 6px; font-size:17px; font-weight:600; letter-spacing:-.02em; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
@@ -328,13 +333,14 @@
     .setup-card a { color:var(--ink); }
     .file-tabs { display:flex; gap:8px; margin:20px 0 0; }
     .file-tab { flex:1; border:1px solid var(--line); background:transparent; color:var(--ink); padding:12px 14px; cursor:pointer; text-align:left; display:flex; flex-direction:column; gap:2px; font:inherit; }
-    .file-tab.active { border-color:var(--ink); }
+    .file-tab.active { border:2px solid var(--ink); padding:11px 13px; }
     .file-tab strong { font-size:13px; }
     .file-tab small { color:var(--muted); font-size:10px; }
     .file-tab .privacy-tag { align-self:flex-start; margin-top:4px; }
     .file-panel { margin-top:0; border-top:0; }
     .char-budget { font-size:10px; color:var(--muted); }
     .char-budget.over { color:#ff6b6b; }
+    .file-btns { display:flex; gap:8px; }
     .dest-chooser { display:flex; gap:8px; flex-wrap:wrap; margin:24px 0 4px; }
     .dest-btn { border:1px solid var(--line); background:transparent; color:var(--ink); padding:10px 14px; font-size:12px; cursor:pointer; font:inherit; }
     .dest-btn.active { background:var(--ink); color:var(--paper); border-color:var(--ink); }
@@ -343,10 +349,10 @@
     .setup-fine { margin-top:26px; font-size:11px; color:var(--muted); }
     .setup-fine a, .dest-copy a { color:var(--ink); }
     .dest-budget { font-size:11px; color:var(--muted); margin:14px 0 0; }
-    .dest-budget.over { color:#ff9b9b; }
+    .dest-budget.over { color:#ff6b6b; }
     .dest-budget a { color:var(--ink); }
-    .import-shell { max-width:860px; margin:0 auto; padding:64px 28px 90px; }
-    .import-shell h2 { margin:0 0 8px; font-size:clamp(28px,4vw,44px); font-weight:500; letter-spacing:-.04em; }
+    .import-shell { max-width:1240px; margin:0 auto; padding:64px 28px 90px; }
+    .import-shell h2 { margin:0 0 8px; font-size:clamp(28px,4.6vw,58px); font-weight:500; letter-spacing:-.045em; line-height:1; }
     .import-shell > .auth-sub { margin-bottom:26px; }
     .import-steps { list-style:none; margin:0; padding:0; }
     .import-steps li { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:14px 0; border-bottom:1px solid var(--line); }
@@ -360,11 +366,11 @@
     .prompt-card-actions button { border:1px solid var(--ink); background:var(--paper); padding:10px 13px; font-size:10px; }
     .prompt-card-actions button:first-child { background:var(--ink); color:var(--paper); }
     .prompt-card-actions button:hover { background:var(--ink); color:var(--paper); }
-    .prompt-box { display:none; border:1px solid var(--ink); background:var(--soft); padding:20px 22px; margin-top:16px; }
+    .prompt-box { display:none; border:1px solid var(--ink); background:var(--soft); padding:20px 22px; margin-top:16px; max-width:940px; }
     .prompt-box.open { display:block; }
     .prompt-box pre { margin:0; white-space:pre-wrap; overflow-wrap:anywhere; font:11px/1.65 "IBM Plex Mono", monospace; }
     .import-flow { display:block; border-top:1px solid var(--ink); padding:24px 0 0; margin-top:10px; }
-    .digest-input { width:100%; min-height:210px; resize:vertical; border:1px solid var(--ink); background:var(--paper); padding:16px; font:11px/1.65 "IBM Plex Mono", monospace; }
+    .digest-input { width:100%; max-width:940px; min-height:210px; resize:vertical; border:1px solid var(--ink); background:var(--paper); padding:16px; font:11px/1.65 "IBM Plex Mono", monospace; }
     .import-actions { display:flex; justify-content:space-between; align-items:center; gap:14px; padding:12px 0 22px; }
     .import-actions span { color:var(--muted); font-size:9px; line-height:1.5; }
     .import-actions button, .merge-footer button, .import-reset { border:1px solid var(--ink); background:var(--paper); padding:11px 14px; font-size:11px; }
@@ -431,15 +437,16 @@
       .try-row { flex-direction:column; }
       .file-bridge { grid-template-columns:1fr; }
       .file-bridge-item { border-left:0; border-top:1px solid var(--ink); }
+      .file-bridge-item:first-child { border-top:0; }
       .next-route-head { grid-template-columns:1fr; gap:18px; }
       .prompt-card-summary { align-items:flex-start; flex-direction:column; }
       .prompt-card-actions { width:100%; }
       .prompt-card-actions button { flex:1; }
       .merge-row { grid-template-columns:1fr; gap:9px; }
+      .import-steps li { flex-direction:column; align-items:stretch; }
       .merge-choice { flex-wrap:wrap; }
       .merge-footer, .merge-done { align-items:flex-start; flex-direction:column; }
       .flow-steps > li { grid-template-columns:34px 1fr; gap:12px; }
-      .prompt-box { border-left:0; border-top:1px solid var(--ink); }
       .response-grid { grid-template-columns:1fr; }
       .response-panel { padding:0 18px 22px; }
       .response-label { margin:0 -18px 18px; }
@@ -456,7 +463,7 @@
       .progress-row { margin-bottom:24px; }
       .intro { padding:24px 16px 50px; }
       .file-body { padding:18px; }
-      .line-item { grid-template-columns:24px 1fr 34px; }
+      .line-item { grid-template-columns:24px 1fr auto; }
       .add-row { flex-direction:column; }
       .question-actions { margin-top:22px; }
     }
@@ -541,7 +548,7 @@ Short, plain sentences. No throat-clearing.
         <h2>See the difference.</h2>
         <p>Ask anything. One answer from a regular AI, one from an AI that&rsquo;s read your files.</p>
       </header>
-      <nav class="page-nav" data-nav aria-label="Settings sections"></nav>
+      <nav class="page-nav" data-nav aria-label="Sections"></nav>
       <section class="proof" aria-labelledby="proofHeading">
         <div class="proof-title"><h3 id="proofHeading">Same question. Two answers.</h3><span id="responseVersionTag">live</span></div>
         <div class="try-box">
@@ -583,7 +590,7 @@ Short, plain sentences. No throat-clearing.
         <h2>Your files.</h2>
         <p>Two little cheat sheets about you. Any AI that reads them works the way you like.</p>
       </header>
-      <nav class="page-nav" data-nav aria-label="Settings sections"></nav>
+      <nav class="page-nav" data-nav aria-label="Sections"></nav>
       <div class="file-tabs" role="tablist" aria-label="Settings files">
         <button type="button" class="file-tab active" data-filetab="agent" role="tab" aria-selected="true"><strong>How it works</strong><small>agent.md</small><span class="privacy-tag">PUBLIC</span></button>
         <button type="button" class="file-tab" data-filetab="voice" role="tab" aria-selected="false"><strong>How it sounds</strong><small>voice.md</small><span class="privacy-tag">PRIVATE</span></button>
@@ -606,7 +613,7 @@ Short, plain sentences. No throat-clearing.
       <header class="finish-head">
         <h2>History.</h2>
       </header>
-      <nav class="page-nav" data-nav aria-label="Settings sections"></nav>
+      <nav class="page-nav" data-nav aria-label="Sections"></nav>
       <section class="version-diff" id="versionDiffSection" hidden aria-labelledby="versionHeading">
         <div class="version-head">
           <div><h3 id="versionHeading">What changed?</h3><p>See exactly what the deeper questions added to your communication settings.</p></div>
@@ -629,7 +636,7 @@ Short, plain sentences. No throat-clearing.
       <div class="index">Setup guide</div>
       <h2>Set up your AI.</h2>
       <p class="auth-sub">Pick where you use AI, then follow the steps. Takes about a minute.</p>
-      <nav class="page-nav" data-nav aria-label="Settings sections"></nav>
+      <nav class="page-nav" data-nav aria-label="Sections"></nav>
       <div class="dest-chooser" role="group" aria-label="Choose your AI">
         <button type="button" class="dest-btn active" data-dest="chatgpt">ChatGPT</button>
         <button type="button" class="dest-btn" data-dest="claude">Claude</button>
@@ -650,8 +657,8 @@ Short, plain sentences. No throat-clearing.
     <main class="import-shell">
       <div class="index">Import</div>
       <h2>Bring what your AI already knows.</h2>
-      <nav class="page-nav" data-nav aria-label="Settings sections"></nav>
       <p class="auth-sub">If you have chatted with an AI a lot, it already knows your habits. Ask it for a summary, paste it below, and you review every line before anything is kept.</p>
+      <nav class="page-nav" data-nav aria-label="Sections"></nav>
       <ol class="import-steps">
         <li><div><strong>Copy the extraction prompt.</strong></div><div class="prompt-card-actions"><button type="button" id="copyPatternPrompt">Copy prompt</button><button type="button" id="togglePromptDetails" aria-expanded="false">View prompt</button></div></li>
         <li><div><strong>Run it in a chat with some history.</strong><span>ChatGPT or Claude &mdash; anywhere you have talked a while.</span></div></li>
