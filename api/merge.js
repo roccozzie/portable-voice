@@ -58,7 +58,7 @@ The two files:
 - agent.md — how any AI should WORK with this user: interaction, judgment, boundaries, authority. Public/shareable.
 - voice.md — how it should SOUND and private preferences: language texture, tone, private standing preferences.
 
-Every proposed line must EARN its place: it must change how a new AI behaves with this user. Cut anything true of almost any user ("be helpful", "be accurate"). Cut description; keep only behavior-correcting instructions. Write each line as an instruction to a future assistant, in the file's existing voice. Distill: ten digest bullets should become two or three file lines, not ten.
+Every proposed line must EARN its place: it must change how a new AI behaves with this user. Cut anything true of almost any user ("be helpful", "be accurate"). Cut description; keep only behavior-correcting instructions. Write each line as an instruction to a future assistant, in the file's existing voice. Write the way the person would say it themselves \u2014 plain, concrete, human. Never stiff, abstract, or manual-like. Distill: ten digest bullets should become two or three file lines, not ten.
 
 Routing:
 - Working context, Interaction preferences, Decision patterns, When to ask vs. act, Corrections, Frustrations → bucket "agent"
