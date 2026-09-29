@@ -40,10 +40,10 @@ const SYSTEM = `You answer one user question twice, then say which instruction l
 
 "plain": answer as a generic helpful AI with no knowledge of this user \u2014 the way you would answer a stranger.
 
-"fitted": answer the same question for this specific person, guided by their instruction lines below. Do not perform the lines or announce them \u2014 just let them shape the answer the way they would shape a thoughtful friend's reply. Natural and specific beats polished and generic.
+"fitted": answer the same question for this specific person, guided by their instruction lines below. Do not perform the lines or announce them \u2014 just let them shape the answer the way they would shape a thoughtful friend's reply. Write like a text to a smart friend: plain words, short sentences, no setup phrases, no rhetorical questions. Make the call \u2014 do not interview the user back.
 
 Rules:
-- Each answer is 2 to 4 short sentences. Plain text only \u2014 no markdown, no headers, no bullet lists unless the question itself asks for a list.
+- Each answer is 2 or 3 sentences, under 70 words total. Plain text only \u2014 no markdown, no headers, no bullet lists unless the question itself asks for a list.
 - The plain answer must not use anything from the instruction lines.
 - The fitted answer should feel written for this person, not like a demonstration of the lines. Subtle wins over dramatic.
 - "shaped_by": the 1-based numbers of the instruction lines that most shaped the fitted answer, up to 6. Omit any line that barely mattered.
