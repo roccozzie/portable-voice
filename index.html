@@ -474,9 +474,9 @@
     <main class="intro">
       <div class="intro-grid">
         <div>
-          <div class="index">Start here · 8 questions</div>
+          <div class="index">Start here · 10 questions</div>
           <h1>Teach any AI how to work with you.</h1>
-          <p class="lede">So every AI you use feels like yours. Answer 8 quick questions and we&rsquo;ll write up how you like to work &mdash; a cheat sheet you can hand to any AI.</p>
+          <p class="lede">So every AI you use feels like yours. Answer 10 quick questions and we&rsquo;ll write up how you like to work &mdash; a cheat sheet you can hand to any AI.</p>
           <button class="primary" id="startBtn">Start →</button>
           <p class="returning" id="returningLine"></p>
           <div class="fine">Stays in this browser. Never asks for names, addresses, or credentials.</div>
@@ -729,12 +729,12 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
   var questions = [
     {
       key:'opening', phase:'first pass', label:'trust', type:'choice',
-      title:'An answer can be right and still feel off. Which opening would you trust?',
-      note:'Same answer. Different first move.',
+      title:'How should an answer start?',
+      note:'Same answer either way. Just a different first sentence.',
       options:[
-        {title:'“Here’s the move.”', desc:'Take a position, then explain why.', lines:[{text:'Say what you think first, then show your work.',bucket:'agent'},{text:'Confidence is fine — just let me see how you got there.',bucket:'voice'}]},
-        {title:'“Here’s what’s really going on.”', desc:'Get underneath the question first.', lines:[{text:'If I’m asking the wrong question, say so before answering.',bucket:'agent'},{text:'I’d rather wait for the real point than get a fast, shallow answer.',bucket:'voice'}]},
-        {title:'“There are two things pulling against each other.”', desc:'Show me the tradeoff before you pick a side.', lines:[{text:'Lay out the tradeoff before you pick a side.',bucket:'agent'},{text:'Don’t pretend a hard tradeoff is simple.',bucket:'voice'}]}
+        {title:'“The short answer is yes.”', desc:'Start with the answer, then explain.', lines:[{text:'Start with the answer, then explain.',bucket:'agent'},{text:'Lead with the conclusion, not the buildup.',bucket:'voice'}]},
+        {title:'“Here’s what’s going on.”', desc:'Help me understand first.', lines:[{text:'Help me understand the situation before giving the answer.',bucket:'agent'},{text:'Set the scene briefly, then answer.',bucket:'voice'}]},
+        {title:'“It depends on one thing.”', desc:'Tell me what it hinges on, then answer.', lines:[{text:'Name what the answer hinges on before answering.',bucket:'agent'},{text:'When it hinges on one thing, say that first.',bucket:'voice'}]}
       ]
     },
     {
@@ -749,12 +749,42 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
     },
     {
       key:'uncertainty', phase:'first pass', label:'when you’re not sure', type:'choice',
-      title:'You have to decide before you know everything. What helps most?',
-      note:'You don’t need fake certainty. You need a useful way forward.',
+      title:'When the AI isn’t sure, what should it tell you?',
+      note:'No pretending. Just the most useful thing to know.',
       options:[
-        {title:'Tell me how sure you are', desc:'Give me your best read and how strongly you believe it.', lines:[{text:'Tell me how sure you are — “I’m confident” and “this is a guess” mean different things.',bucket:'agent'}]},
-        {title:'Tell me what would change your mind', desc:'Name the new fact that would flip the answer.', lines:[{text:'Say what would change your mind.',bucket:'agent'},{text:'I like answers I can update when new facts show up.',bucket:'voice'}]},
-        {title:'Show me what happens if we’re wrong', desc:'Compare the cost of each mistake.', lines:[{text:'Compare what goes wrong in each case, not just the odds.',bucket:'agent'},{text:'Show me the cost of being wrong — that’s what makes a decision clear.',bucket:'voice'}]}
+        {title:'How sure it is', desc:'Its best guess, and how confident it feels.', lines:[{text:'Tell me how sure you are — “I’m confident” and “this is a guess” mean different things.',bucket:'agent'}]},
+        {title:'What would settle it', desc:'The one thing that would make it clear.', lines:[{text:'If you don’t know, say what would settle it.',bucket:'agent'},{text:'I like answers I can update when new facts show up.',bucket:'voice'}]},
+        {title:'What’s at risk', desc:'What happens if the guess is wrong.', lines:[{text:'Show me the cost of being wrong — that’s what makes a decision clear.',bucket:'agent'}]}
+      ]
+    },
+    {
+      key:'warmth', phase:'first pass', label:'warmth', type:'choice',
+      title:'A personal plan falls apart. Pick the opening.',
+      note:'Human, without drifting into therapy voice.',
+      options:[
+        {title:'“That’s frustrating. Let’s sort the part you can still control.”', desc:'Acknowledge, then help.', lines:[{text:'Name the feeling once, then focus on what I can still control.',bucket:'voice'}]},
+        {title:'“Okay. The plan changed; the goal didn’t.”', desc:'Steady and forward-looking.', lines:[{text:'Stay steady and forward-looking — don’t try to console me.',bucket:'voice'}]},
+        {title:'“Before we fix it: what part of this matters most now?”', desc:'Make room before acting.', lines:[{text:'When it’s personal, ask what matters most before jumping to fix it.',bucket:'voice'}]}
+      ]
+    },
+    {
+      key:'jargon', phase:'first pass', label:'plain language', type:'choice',
+      title:'A technical term would help here. What should the AI do?',
+      note:'Pick the version that feels natural.',
+      options:[
+        {title:'Use it, then explain it in a few words.', desc:'Keep the useful term without slowing me down.', lines:[{text:'Use the technical term, then explain it in a few words.',bucket:'voice'}]},
+        {title:'Say it in plain English.', desc:'The idea matters more than the label.', lines:[{text:'Put it in plain English unless the exact term matters.',bucket:'voice'}]},
+        {title:'Just use it.', desc:'Don’t explain what’s already clear from context.', lines:[{text:'Don’t explain terms I clearly already know.',bucket:'voice'}]}
+      ]
+    },
+    {
+      key:'paragraphs', phase:'first pass', label:'layout', type:'choice',
+      title:'What makes a longer answer easy to read?',
+      note:'Pick the layout you naturally trust.',
+      options:[
+        {title:'Short paragraphs, not many bullets.', desc:'One clean line of thought.', lines:[{text:'Short paragraphs. Bullets only when the items are truly parallel.',bucket:'voice'}]},
+        {title:'Headings and short lists.', desc:'Easy to scan and come back to.', lines:[{text:'Use clear headings and tight lists for longer answers.',bucket:'voice'}]},
+        {title:'Regular paragraphs when the flow matters.', desc:'Let the argument build.', lines:[{text:'When the argument builds step by step, use flowing paragraphs.',bucket:'voice'}]}
       ]
     },
     {
@@ -769,79 +799,48 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
     },
     {
       key:'dissent', phase:'first pass', label:'when you disagree', type:'choice',
-      title:'You and the AI see it differently. What should it do?',
-      note:'You don’t want a yes-man or an argument for argument’s sake.',
+      title:'You and the AI disagree. What should it do?',
+      note:'Not a yes-man. Not a debate.',
       options:[
-        {title:'Push back once, clearly', desc:'Make the best case, then respect my call.', lines:[{text:'Make your best case once, then go with my call.',bucket:'agent'}]},
-        {title:'Figure out what we’re each assuming', desc:'Check that before arguing about the answer.', lines:[{text:'When we disagree, check what we’re each assuming first.',bucket:'agent'},{text:'Question my assumptions — don’t just repeat your point.',bucket:'voice'}]},
-        {title:'Show me what happens next', desc:'Skip the debate and make the real-world effect clear.', lines:[{text:'Don’t just say you disagree — show me what happens next.',bucket:'agent'}]}
-      ]
-    },
-    {
-      key:'intelligence', phase:'first pass', label:'what feels smart', type:'choice',
-      title:'What makes an answer feel genuinely smart to you?',
-      note:'Pick the thing you notice first.',
-      options:[
-        {title:'It makes a mess feel clear', desc:'A lot of information becomes one simple shape.', lines:[{text:'Don’t dump everything back at me — tell me what it adds up to.',bucket:'agent'},{text:'Find the shape in the mess without sanding off the nuance.',bucket:'voice'}]},
-        {title:'It spots the bigger pattern', desc:'It connects this moment to something larger.', lines:[{text:'Point out the pattern — and why it matters right now.',bucket:'agent'},{text:'I love when a pattern makes me see the whole thing differently.',bucket:'voice'}]},
-        {title:'It helps me make the next move', desc:'The insight actually changes what I do.', lines:[{text:'Turn the analysis into something I should actually do.',bucket:'agent'},{text:'A good answer changes what happens next.',bucket:'voice'}]},
-        {title:'It makes a surprising connection', desc:'Two different ideas suddenly make each other clearer.', lines:[{text:'Bring in a connection from somewhere else if it makes things clearer.',bucket:'agent'},{text:'Surprise me only if it makes me go “oh — of course.”',bucket:'voice'}]}
-      ]
-    },
-    {
-      key:'attention', phase:'first pass', label:'updates', type:'choice',
-      title:'When should the AI interrupt you?',
-      note:'Think about a task that takes an afternoon, not ten seconds.',
-      options:[
-        {title:'Only when it’s done', desc:'Silence is fine while the work is moving.', lines:[{text:'When the work is moving, stay quiet and show me the result.',bucket:'agent'}]},
-        {title:'Only when it really needs me', desc:'Interrupt if my answer would change what happens.', lines:[{text:'Only interrupt me if you need a decision or something actually changed.',bucket:'agent'}]},
-        {title:'Give me quick check-ins', desc:'A short update helps me steer.', lines:[{text:'Quick check-ins are fine — keep them short and useful.',bucket:'agent'}]}
+        {title:'Say its piece once', desc:'Make its best case, then go with my call.', lines:[{text:'Make your best case once, then go with my call.',bucket:'agent'}]},
+        {title:'Check we’re on the same page', desc:'Maybe we just mean different things.', lines:[{text:'When we disagree, check what we’re each assuming first.',bucket:'agent'},{text:'Question my assumptions — don’t just repeat your point.',bucket:'voice'}]},
+        {title:'Show me how it plays out', desc:'Skip the argument. Tell me what would happen.', lines:[{text:'Don’t just say you disagree — show me what happens next.',bucket:'agent'}]}
       ]
     },
     {
       key:'brave', phase:'first pass', label:'what matters', type:'choice',
-      title:'Which line feels the most like you?',
-      note:'Pick the one you’d want every AI to use consistently.',
+      title:'Which one sounds most like you?',
+      note:'They all sound good. Pick the one that matters most.',
       options:[
-        {title:'“I want a point of view, not a neutral pile of options.”', desc:'Making a call is part of the job.', lines:[{text:'Take a stand when the evidence is there — don’t hide behind “on the other hand.”',bucket:'agent'},{text:'Give me a real recommendation, not a menu of options.',bucket:'voice'}]},
-        {title:'“I want the real tradeoff, not fake certainty.”', desc:'It’s okay to leave some things unresolved.', lines:[{text:'Leave things unresolved when that’s the honest answer.',bucket:'agent'},{text:'I’d rather hear “it depends” than a clean answer that’s wrong.',bucket:'voice'}]},
-        {title:'“I want sharp ideas, not polished generalities.”', desc:'Specific thinking beats smooth language.', lines:[{text:'Be specific. Polished generalities are worse than nothing.',bucket:'agent'},{text:'I can tell when smooth words are covering thin thinking.',bucket:'voice'}]},
-        {title:'“I want momentum, not more reading.”', desc:'The answer should help me move.', lines:[{text:'End with the smallest useful next step.',bucket:'agent'},{text:'Keep me moving — a rough next step beats a perfect plan.',bucket:'voice'}]}
+        {title:'“Just tell me what you’d do.”', desc:'An opinion, not a list of options.', lines:[{text:'Give me a real recommendation, not a menu of options.',bucket:'agent'},{text:'I’d rather react to a real recommendation than sort through options.',bucket:'voice'}]},
+        {title:'“Give me the honest picture.”', desc:'Don’t sound surer than you are.', lines:[{text:'I’d rather hear “it depends” than a clean answer that’s wrong.',bucket:'agent'},{text:'Leave things unresolved when that’s the honest answer.',bucket:'voice'}]},
+        {title:'“Be specific.”', desc:'Real details, not vague advice.', lines:[{text:'Be specific. Polished generalities are worse than nothing.',bucket:'agent'},{text:'I can tell when smooth words are covering thin thinking.',bucket:'voice'}]},
+        {title:'“Keep it moving.”', desc:'Less to read, more to do.', lines:[{text:'Keep me moving — a rough next step beats a perfect plan.',bucket:'agent'},{text:'End with the smallest useful next step.',bucket:'voice'}]}
       ]
     },
     {
-      key:'cadence', phase:'voice exercises', label:'01 · how it sounds', type:'choice',
-      title:'Pick the sentence you’d actually send.',
-      note:'Don’t overthink it. Choose by ear.',
+      key:'length', phase:'first pass', label:'length', type:'choice',
+      title:'How long should answers be?',
+      note:'Pick the one you’d actually enjoy reading.',
       options:[
-        {title:'“I think this is the move. It’s not perfect, but it’s the clearest bet.”', desc:'Careful, with the one caveat that matters.', lines:[{text:'Say the call plainly, then add the one caveat that matters.',bucket:'voice'}]},
-        {title:'“This is the move — clear upside, manageable downside.”', desc:'Short and decisive.', lines:[{text:'Short sentences. Make the tradeoff obvious.',bucket:'voice'}]},
-        {title:'“My read: this is the move. Here’s why.”', desc:'Conversational, then clear.', lines:[{text:'Talk like a person first, then walk me through it.',bucket:'voice'}]}
+        {title:'Short', desc:'A few sentences. Get to the point.', lines:[{text:'Keep answers short — a few sentences, get to the point.',bucket:'voice'}]},
+        {title:'Medium', desc:'Enough room to explain properly.', lines:[{text:'Give answers enough room to explain properly.',bucket:'voice'}]},
+        {title:'As long as it needs', desc:'I’d rather read more than miss something.', lines:[{text:'Write as long as the answer needs — missing something is worse than length.',bucket:'voice'}]}
       ]
     },
     {
-      key:'badnews', phase:'voice exercises', label:'02 · saying no', type:'choice',
-      title:'The answer’s no. Which version sounds right?',
+      key:'badnews', phase:'voice exercises', label:'01 · saying no', type:'choice',
+      title:'The AI has to say no. Which version do you want to hear?',
       note:'Pick the one you’d least want to rewrite.',
       options:[
         {title:'“No — that constraint makes this a dead end.”', desc:'Direct, with the reason attached.', lines:[{text:'Give it to me straight, with the reason attached.',bucket:'voice'}]},
         {title:'“I wouldn’t do that. The better route is…”', desc:'Move quickly to the better option.', lines:[{text:'If it’s a no, point me at the better option fast.',bucket:'voice'}]},
-        {title:'“That works only if X is true. Right now, it isn’t.”', desc:'Let the reason do the work.', lines:[{text:'Show me which part fails instead of just saying no.',bucket:'voice'}]}
+        {title:'“That works only if we had more time. Right now, we don’t.”', desc:'Let the reason do the work.', lines:[{text:'Show me which part fails instead of just saying no.',bucket:'voice'}]}
       ]
     },
     {
-      key:'uncertainline', phase:'voice exercises', label:'03 · when you’re not sure', type:'choice',
-      title:'Which sounds most like you when you’re unsure?',
-      note:'Same doubt. Different way of saying it.',
-      options:[
-        {title:'“My best read is X, but I don’t have much to go on.”', desc:'Give a view and be clear about its limits.', lines:[{text:'Have a view, but be honest about how thin the evidence is.',bucket:'voice'}]},
-        {title:'“I’d treat X as the best guess for now, not the final answer.”', desc:'Leave room to change your mind.', lines:[{text:'Treat it as a working theory — we can always revise.',bucket:'voice'}]},
-        {title:'“I don’t know yet. X is what would settle it.”', desc:'Say what would help you know.', lines:[{text:'If you don’t know, say what would settle it.',bucket:'voice'}]}
-      ]
-    },
-    {
-      key:'praise', phase:'voice exercises', label:'04 · praise', type:'choice',
-      title:'Someone brings you a strong idea. What do you say first?',
+      key:'praise', phase:'voice exercises', label:'02 · praise', type:'choice',
+      title:'You bring the AI a strong idea. What should it say first?',
       note:'Pick the praise that feels useful, not just polite.',
       options:[
         {title:'“The best part is how it flips the usual idea.”', desc:'Name exactly what works.', lines:[{text:'When you praise something, name exactly what works.',bucket:'voice'}]},
@@ -850,8 +849,8 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
       ]
     },
     {
-      key:'trim', phase:'voice exercises', label:'05 · editing', type:'choice',
-      title:'Which edit improves this sentence?',
+      key:'trim', phase:'voice exercises', label:'03 · editing', type:'choice',
+      title:'The AI wrote a clunky sentence. Which fixed version do you want?',
       note:'Original: “It is important to note that there are several potential ways we could approach this.”',
       options:[
         {title:'“There are three ways to approach this.”', desc:'Remove the runway.', lines:[{text:'Skip the warmup — start where the substance starts.',bucket:'voice'}]},
@@ -860,8 +859,8 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
       ]
     },
     {
-      key:'texture', phase:'voice exercises', label:'06 · word choice', type:'choice',
-      title:'Which line sounds best to you?',
+      key:'texture', phase:'voice exercises', label:'04 · word choice', type:'choice',
+      title:'Which of these do you want the AI to sound like?',
       note:'Go by feel, not just meaning.',
       options:[
         {title:'“The idea is sound, but the edges are still soft.”', desc:'Use one simple image.', lines:[{text:'One good image beats a paragraph of analysis.',bucket:'voice'}]},
@@ -870,47 +869,27 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
       ]
     },
     {
-      key:'hedge', phase:'voice exercises', label:'07 · how direct', type:'choice',
-      title:'You have a strong view, but you’re not certain. How do you say it?',
+      key:'hedge', phase:'voice exercises', label:'05 · how direct', type:'choice',
+      title:'The AI has a strong view but isn’t certain. How should it say it?',
       note:'Pick how direct you want to be.',
       options:[
         {title:'“I think the strongest option is A.”', desc:'Leave a little room for doubt.', lines:[{text:'Hedge a little when it’s judgment, not when it’s fact.',bucket:'voice'}]},
         {title:'“The strongest option is A.”', desc:'Say the answer cleanly.', lines:[{text:'If the evidence is there, say it cleanly — no reflexive “might.”',bucket:'voice'}]},
-        {title:'“Choose A. Revisit only if X changes.”', desc:'Make the call and say what would change it.', lines:[{text:'Make the call, and say what would change it.',bucket:'voice'}]}
+        {title:'“Choose the new plan. Revisit only if the timeline changes.”', desc:'Make the call and say what would change it.', lines:[{text:'Make the call, and say what would change it.',bucket:'voice'}]}
       ]
     },
     {
-      key:'warmth', phase:'voice exercises', label:'08 · warmth', type:'choice',
-      title:'A personal plan falls apart. Pick the opening.',
-      note:'Human, without drifting into therapy voice.',
+      key:'analogy', phase:'voice exercises', label:'06 · comparisons', type:'choice',
+      title:'Do comparisons help you?',
+      note:'Like “a password manager is a key ring for your logins.”',
       options:[
-        {title:'“That’s frustrating. Let’s sort the part you can still control.”', desc:'Acknowledge, then help.', lines:[{text:'Name the feeling once, then focus on what I can still control.',bucket:'voice'}]},
-        {title:'“Okay. The plan changed; the goal didn’t.”', desc:'Steady and forward-looking.', lines:[{text:'Stay steady and forward-looking — don’t try to console me.',bucket:'voice'}]},
-        {title:'“Before we fix it: what part of this matters most now?”', desc:'Make room before acting.', lines:[{text:'When it’s personal, ask what matters most before jumping to fix it.',bucket:'voice'}]}
+        {title:'Yes, often', desc:'They help things click for me.', lines:[{text:'Use comparisons often — they help things click for me.',bucket:'voice'}]},
+        {title:'Only when it’s tricky', desc:'Plain is fine for easy stuff.', lines:[{text:'Use comparisons only when the idea is tricky; plain words for easy stuff.',bucket:'voice'}]},
+        {title:'No, just explain it', desc:'Comparisons slow me down.', lines:[{text:'Skip comparisons — just explain it directly.',bucket:'voice'}]}
       ]
     },
     {
-      key:'challenge', phase:'voice exercises', label:'09 · pushback', type:'choice',
-      title:'You think the whole idea starts from the wrong place. What do you say?',
-      note:'Pick the version that would actually make you listen.',
-      options:[
-        {title:'“I think we’re assuming too much here.”', desc:'Question the starting point.', lines:[{text:'It’s fine to challenge the premise — just don’t make it a fight.',bucket:'voice'}]},
-        {title:'“Before we make this better, I’d check whether it needs to exist.”', desc:'Don’t spend time solving the wrong problem.', lines:[{text:'If the whole frame might be wrong, stop and check that before doing the work.',bucket:'agent'}]},
-        {title:'“This fixes the obvious problem and may make the real one worse.”', desc:'Show what could happen next.', lines:[{text:'Make pushback land by showing what happens next.',bucket:'voice'}]}
-      ]
-    },
-    {
-      key:'analogy', phase:'voice exercises', label:'10 · comparisons', type:'choice',
-      title:'What should a good comparison do?',
-      note:'Pick the line you’d keep.',
-      options:[
-        {title:'“It’s less a library than a compass: useful because it changes direction.”', desc:'Help me see the whole thing differently.', lines:[{text:'Use a comparison when it changes how I see the thing — not as decoration.',bucket:'voice'}]},
-        {title:'“Think of it like version control for judgment.”', desc:'Make a tricky idea click faster.', lines:[{text:'A quick analogy beats a long explanation when it clicks faster.',bucket:'voice'}]},
-        {title:'Skip the comparison. Just explain how it works.', desc:'Be exact and direct.', lines:[{text:'Don’t force a comparison when plain words already do the job.',bucket:'voice'}]}
-      ]
-    },
-    {
-      key:'humor', phase:'voice exercises', label:'11 · humor', type:'choice',
+      key:'humor', phase:'voice exercises', label:'07 · humor', type:'choice',
       title:'Where does humor belong?',
       note:'Choose the amount that sounds natural.',
       options:[
@@ -920,37 +899,7 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
       ]
     },
     {
-      key:'jargon', phase:'voice exercises', label:'12 · technical language', type:'choice',
-      title:'A technical term would help here. What should the AI do?',
-      note:'Pick the version that feels natural.',
-      options:[
-        {title:'Use it, then explain it in a few words.', desc:'Keep the useful term without slowing me down.', lines:[{text:'Use the technical term, then explain it in a few words.',bucket:'voice'}]},
-        {title:'Say it in plain English.', desc:'The idea matters more than the label.', lines:[{text:'Put it in plain English unless the exact term matters.',bucket:'voice'}]},
-        {title:'Just use it.', desc:'Don’t explain what’s already clear from context.', lines:[{text:'Don’t explain terms I clearly already know.',bucket:'voice'}]}
-      ]
-    },
-    {
-      key:'openingline', phase:'voice exercises', label:'13 · openings', type:'choice',
-      title:'How should a long answer start?',
-      note:'Pick what you want in the first two seconds.',
-      options:[
-        {title:'With the answer.', desc:'“The short answer: yes.”', lines:[{text:'Start with the answer.',bucket:'voice'}]},
-        {title:'With the setup.', desc:'“There are two separate questions here.”', lines:[{text:'Start by naming the shape of the answer when that changes how it lands.',bucket:'voice'}]},
-        {title:'With the tradeoff.', desc:'“Speed helps here, until it starts erasing signal.”', lines:[{text:'Start with the tradeoff when that’s the whole point.',bucket:'voice'}]}
-      ]
-    },
-    {
-      key:'paragraphs', phase:'voice exercises', label:'14 · how it looks', type:'choice',
-      title:'What makes a longer answer easy to read?',
-      note:'Pick the layout you naturally trust.',
-      options:[
-        {title:'Short paragraphs, not many bullets.', desc:'One clean line of thought.', lines:[{text:'Short paragraphs. Bullets only when the items are truly parallel.',bucket:'voice'}]},
-        {title:'Headings and short lists.', desc:'Easy to scan and come back to.', lines:[{text:'Use clear headings and tight lists for longer answers.',bucket:'voice'}]},
-        {title:'Regular paragraphs when the flow matters.', desc:'Let the argument build.', lines:[{text:'When the argument builds step by step, use flowing paragraphs.',bucket:'voice'}]}
-      ]
-    },
-    {
-      key:'example', phase:'voice exercises', label:'15 · examples', type:'choice',
+      key:'example', phase:'voice exercises', label:'08 · examples', type:'choice',
       title:'One example makes the idea click. Which one?',
       note:'Choose how examples should earn their space.',
       options:[
@@ -960,17 +909,17 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
       ]
     },
     {
-      key:'choicewidth', phase:'voice exercises', label:'16 · choices', type:'choice',
+      key:'choicewidth', phase:'voice exercises', label:'09 · choices', type:'choice',
       title:'You ask “what should I do?” What kind of answer do you want?',
       note:'How many choices feel helpful instead of like homework?',
       options:[
         {title:'“Do A. It wins because…”', desc:'Give me one recommendation.', lines:[{text:'Recommend one path and say why it wins.',bucket:'agent'}]},
-        {title:'“Do A. If X changes, switch to B.”', desc:'Give me one path and one backup.', lines:[{text:'Give me the pick, plus one backup if things change.',bucket:'agent'}]},
+        {title:'“Take the new job. If the pay changes, switch to the other offer.”', desc:'Give me one path and one backup.', lines:[{text:'Give me the pick, plus one backup if things change.',bucket:'agent'}]},
         {title:'“A, B, and C could work. I’d choose B.”', desc:'Show me a few options, then make the call.', lines:[{text:'Show me a few real options, then make the call.',bucket:'agent'}]}
       ]
     },
     {
-      key:'nextmove', phase:'voice exercises', label:'17 · endings', type:'choice',
+      key:'nextmove', phase:'voice exercises', label:'10 · endings', type:'choice',
       title:'Pick the ending that feels complete.',
       note:'No generic “let me know” closers.',
       options:[
@@ -980,17 +929,17 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
       ]
     },
     {
-      key:'correction', phase:'voice exercises', label:'18 · getting it right', type:'choice',
+      key:'correction', phase:'voice exercises', label:'11 · getting it right', type:'choice',
       title:'The AI gets it wrong. Which response works best?',
       note:'Pick the one that wins your trust back fastest.',
       options:[
         {title:'“You’re right. Better version:”', desc:'A quick nod, then the fix.', lines:[{text:'A quick “you’re right,” then the fix — no long apology.',bucket:'voice'}]},
-        {title:'“I read X as Y. You meant Z.”', desc:'Show what changed.', lines:[{text:'Say what you got wrong and what it should be, in one line.',bucket:'voice'}]},
+        {title:'“I read that as a deadline. You meant a rough estimate.”', desc:'Show what changed.', lines:[{text:'Say what you got wrong and what it should be, in one line.',bucket:'voice'}]},
         {title:'Just replace the answer.', desc:'No fuss.', lines:[{text:'If the fix is obvious, just fix it. No monologue.',bucket:'voice'}]}
       ]
     },
     {
-      key:'abstraction', phase:'voice exercises', label:'19 · explaining things', type:'choice',
+      key:'abstraction', phase:'voice exercises', label:'12 · explaining things', type:'choice',
       title:'What’s the easiest way into a new idea?',
       note:'Pick the order that helps it click.',
       options:[
@@ -1000,7 +949,7 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
       ]
     },
     {
-      key:'source', phase:'voice exercises', label:'20 · backing it up', type:'choice',
+      key:'source', phase:'voice exercises', label:'13 · backing it up', type:'choice',
       title:'Something needs backing up. What do you want to see?',
       note:'Pick what would convince you.',
       options:[
@@ -1010,17 +959,7 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
       ]
     },
     {
-      key:'scope', phase:'voice exercises', label:'21 · staying focused', type:'choice',
-      title:'The idea keeps getting bigger. What should the AI say?',
-      note:'Pick the one that keeps the main thing clear.',
-      options:[
-        {title:'“Does this make the core product better?”', desc:'Bring it back to what matters.', lines:[{text:'Ask: does this make the core thing better?',bucket:'agent'}]},
-        {title:'“Interesting, but separate.”', desc:'Keep the idea without cramming it in.', lines:[{text:'“Interesting — but separate.” Keep it without cramming it in.',bucket:'agent'}]},
-        {title:'“Follow it once, then decide.”', desc:'Take one quick detour, then make the call.', lines:[{text:'Follow it once, then decide if it belongs.',bucket:'agent'}]}
-      ]
-    },
-    {
-      key:'momentum', phase:'voice exercises', label:'22 · getting unstuck', type:'choice',
+      key:'momentum', phase:'voice exercises', label:'14 · getting unstuck', type:'choice',
       title:'You keep thinking instead of moving. What gets you unstuck?',
       note:'Pick the nudge that would actually work on you.',
       options:[
@@ -1028,31 +967,9 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
         {title:'“What would we do if we had to decide today?”', desc:'Make a call for now.', lines:[{text:'Decide for now — we can revisit with a deadline.',bucket:'agent'}]},
         {title:'“What don’t we know that could actually change the answer?”', desc:'Separate what matters from what’s just interesting.', lines:[{text:'Before more research: what don’t we know that would actually change the answer?',bucket:'agent'}]}
       ]
-    },
-    {
-      key:'learning', phase:'voice exercises', label:'23 · spotting patterns', type:'choice',
-      title:'One edit might show a preference. What should the system do?',
-      note:'It should learn without making a rule out of one moment.',
-      options:[
-        {title:'Suggest a rule.', desc:'You approve it before it sticks.', lines:[{text:'If an edit looks like a real preference, suggest it as a rule for me to approve.',bucket:'agent'}]},
-        {title:'Wait to see it again.', desc:'One example is a clue, not a rule.', lines:[{text:'One example is a clue, not a rule — wait until it repeats.',bucket:'agent'}]},
-        {title:'Save the example, not the rule.', desc:'Let more moments show the pattern.', lines:[{text:'Save the example, not the rule, until the pattern is clear.',bucket:'agent'}]}
-      ]
-    },
-    {
-      key:'signature', phase:'voice exercises', label:'24 · last one', type:'choice',
-      title:'Which line sounds the most like you?',
-      note:'Last one. Pick by gut.',
-      options:[
-        {title:'“The pattern is the value; the specifics are the risk.”', desc:'A big idea in one clean line.', lines:[{text:'I like a clean contrast that makes an idea stick.',bucket:'voice'}]},
-        {title:'“If it can’t change the next move, it’s probably not the insight.”', desc:'An idea only matters if it changes something.', lines:[{text:'If it can’t change what I do next, it’s not an insight.',bucket:'voice'}]},
-        {title:'“Keep the tension. Lose the fog.”', desc:'Short, punchy, and direct.', lines:[{text:'Short and punchy, but don’t sand off the nuance.',bucket:'voice'}]},
-        {title:'“Show me the edge, then show me what survives it.”', desc:'Push the idea, then see if it holds up.', lines:[{text:'I like bold ideas — the kind that survive being pushed hard.',bucket:'voice'}]}
-      ]
     }
   ];
-
-  var INITIAL_COUNT = 8;
+  var INITIAL_COUNT = 10;
   var state = { index:0, scope:INITIAL_COUNT, deepCompleted:false, answers:{}, lines:[], importedLines:[], suppressedTexts:[], v0Lines:[], diffFilter:'all', diffExpanded:false, scenario:'build', mergeItems:[], fileVersion:1 };
   var $ = function(s){ return document.querySelector(s); };
   var screens = {intro:$('#introScreen'), interview:$('#interviewScreen'), review:$('#reviewScreen'), finish:$('#finishScreen'), files:$('#filesScreen'), versions:$('#versionsScreen'), setup:$('#setupScreen'), import:$('#importScreen')};
@@ -1227,7 +1144,7 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
   }
   function renderSuggestions(){
     var suggestions=[
-      {id:'s1',bucket:'agent', oldText:'Give me a useful answer.', newText:'Name what\u2019s unresolved, then take a stand I can react to.'},
+      {id:'s1',bucket:'agent', oldText:'Give me a useful answer.', newText:'Say what you think first, then show your work.'},
       {id:'s2',bucket:'voice', oldText:'I like good ideas.', newText:'I like a surprise that makes me go “oh — of course.” — not novelty for its own sake.'}
     ];
     var host=$('#suggestionList');
@@ -1236,8 +1153,8 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
       row.querySelector('.accept').addEventListener('click',function(){
         var s=suggestions[i];
         var replacement=-1;
-        if(s.id==='s1') replacement=state.lines.findIndex(function(l){ return l.bucket==='agent' && (l.text.indexOf('Lay out the tradeoff')===0 || l.text.indexOf('Take a stand when the evidence is there')===0); });
-        if(s.id==='s2') replacement=state.lines.findIndex(function(l){ return l.bucket==='voice' && (l.text.indexOf('Surprise me only if')===0 || l.text.indexOf('I like a sharp edge')===0); });
+        if(s.id==='s1') replacement=state.lines.findIndex(function(l){ return l.bucket==='agent' && (l.text.indexOf('Say what you think first')===0 || l.text.indexOf('Give me a real recommendation')===0); });
+        if(s.id==='s2') replacement=state.lines.findIndex(function(l){ return l.bucket==='voice' && (l.text.indexOf('I like a sharp edge')===0); });
         if(replacement>-1){ state.lines[replacement].text=s.newText; state.lines[replacement].handEdited=true; }
         else state.lines.push({id:'refine'+Date.now()+i,text:s.newText,bucket:s.bucket});
         row.remove(); toast('Suggestion accepted');
@@ -1257,15 +1174,12 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
     'things that frustrate me':'How to answer','tentative':'Voice and style'
   };
   var QUESTION_SECTION={
-    opening:'How to answer',ambiguity:'When to ask vs. act',uncertainty:'How to answer',ideas:'Building',
-    dissent:'How to answer',intelligence:'How to answer',attention:'When to ask vs. act',brave:'Decisions',
-    cadence:'Voice and style',badnews:'Voice and style',uncertainline:'Voice and style',praise:'Voice and style',
-    trim:'Writing',texture:'Voice and style',hedge:'Voice and style',warmth:'Voice and style',
-    challenge:'How to answer',analogy:'Writing',humor:'Voice and style',jargon:'Voice and style',
-    openingline:'Writing',paragraphs:'Writing',example:'Writing',choicewidth:'How to answer',
-    nextmove:'Writing',correction:'How to answer',abstraction:'Writing',source:'How to answer',
-    scope:'Building',momentum:'Building',learning:'Building',signature:'Voice and style'
-  };
+    opening:'How to answer',ambiguity:'When to ask vs. act',uncertainty:'How to answer',warmth:'Voice and style',
+    jargon:'Voice and style',paragraphs:'Writing',ideas:'Building',dissent:'How to answer',brave:'Decisions',
+    length:'Voice and style',badnews:'Voice and style',praise:'Voice and style',trim:'Writing',
+    texture:'Voice and style',hedge:'Voice and style',analogy:'Writing',humor:'Voice and style',
+    example:'Writing',choicewidth:'How to answer',nextmove:'Writing',correction:'How to answer',
+    abstraction:'Writing',source:'How to answer',momentum:'Building'};
   function headingFor(l){
     if(HEADING_ORDER.indexOf(l.section)>-1) return l.section;
     var key=String(l.section||'').toLowerCase();
