@@ -174,9 +174,18 @@
     .finish-actions button { border:1px solid var(--ink); background:var(--paper); padding:10px 14px; font-size:12px; }
     .proof { margin:0 0 46px; }
     .proof-title { display:flex; align-items:flex-end; justify-content:space-between; gap:24px; padding:0 0 18px; }
-    .scenario-switcher { display:flex; flex-wrap:wrap; gap:8px; padding:12px 0 16px; border-top:1px solid var(--line); }
-    .scenario-switcher button { border:1px solid var(--ink); background:var(--paper); padding:9px 12px; font-size:11px; }
-    .scenario-switcher button[aria-pressed="true"] { background:var(--ink); color:var(--paper); }
+    .try-box { padding:16px 0 20px; border-top:1px solid var(--line); }
+    .try-label { display:block; font-size:11px; color:var(--muted); margin:0 0 8px; }
+    .try-row { display:flex; gap:8px; }
+    .try-row input { flex:1; border:1px solid var(--ink); background:var(--paper); color:var(--ink); padding:10px 12px; font:inherit; font-size:14px; min-width:0; }
+    .try-row input:disabled { opacity:.5; }
+    .try-row button { border:1px solid var(--ink); background:var(--ink); color:var(--paper); padding:10px 16px; font:inherit; font-size:12px; font-weight:600; cursor:pointer; white-space:nowrap; }
+    .try-row button:disabled { opacity:.4; cursor:default; }
+    .try-note { font-size:11px; color:var(--muted); margin:10px 0 0; }
+    .try-note button { background:none; border:0; padding:0; color:var(--ink); font:inherit; font-size:11px; font-weight:600; text-decoration:underline; text-underline-offset:3px; cursor:pointer; }
+    .empty-hint { color:var(--muted); font-size:13px; }
+    .thinking { color:var(--muted); font-size:13px; animation:pulse 1.2s ease-in-out infinite; }
+    @keyframes pulse { 0%,100% { opacity:.4; } 50% { opacity:1; } }
     .proof-title h3 { margin:0; max-width:700px; font-size:clamp(22px,3vw,38px); font-weight:500; letter-spacing:-.04em; line-height:1.08; }
     .proof-title span { color:var(--muted); font-size:11px; white-space:nowrap; }
     .comparison-stage { border:2px solid var(--ink); background:var(--paper); }
@@ -422,7 +431,7 @@
       .flow-step + .flow-step { border-left:0; border-top:1px solid var(--line); padding-left:0; }
       .proof-title, .version-head { align-items:flex-start; flex-direction:column; }
       .proof-title span { white-space:normal; }
-      .scenario-switcher button { flex:1 1 100%; }
+      .try-row { flex-direction:column; }
       .file-bridge { grid-template-columns:1fr; }
       .file-bridge-item { border-left:0; border-top:1px solid var(--ink); }
       .next-route-head { grid-template-columns:1fr; gap:18px; }
@@ -467,7 +476,7 @@
         <div>
           <div class="index">Start here · 8 questions</div>
           <h1>Teach any AI how to work with you.</h1>
-          <p class="lede">So every AI you use feels like yours. Eight quick questions become portable settings.</p>
+          <p class="lede">So every AI you use feels like yours. Answer 8 quick questions and we&rsquo;ll write up how you like to work &mdash; a cheat sheet you can hand to any AI.</p>
           <button class="primary" id="startBtn">Start →</button>
           <p class="returning" id="returningLine"></p>
           <div class="fine">Stays in this browser. Never asks for names, addresses, or credentials.</div>
@@ -533,38 +542,40 @@ Direct, curious, and willing to find the surprising connection.
   <section class="screen" id="finishScreen">
     <main class="finish-shell">
       <header class="finish-head">
-        <h2 id="finishTitle">See your settings at work.</h2>
-        <p id="finishCopy"></p>
+        <h2>See the difference.</h2>
+        <p>Ask anything. One answer from a regular AI, one from an AI that&rsquo;s read your files.</p>
       </header>
       <nav class="page-nav" data-nav aria-label="Settings sections"></nav>
       <section class="proof" aria-labelledby="proofHeading">
-        <div class="proof-title"><h3 id="proofHeading">Same question. Your settings change the answer.</h3><span id="responseVersionTag">v0.1 · first pass</span></div>
-        <div class="scenario-switcher" aria-label="Choose a prompt to compare">
-          <button type="button" data-scenario="build" aria-pressed="true">making something</button>
-          <button type="button" data-scenario="personal" aria-pressed="false">a personal decision</button>
-          <button type="button" data-scenario="explain" aria-pressed="false">understanding an idea</button>
+        <div class="proof-title"><h3 id="proofHeading">Same question. Two answers.</h3><span id="responseVersionTag">live</span></div>
+        <div class="try-box">
+          <label class="try-label" for="tryInput">Ask anything</label>
+          <div class="try-row">
+            <input id="tryInput" type="text" maxlength="300" autocomplete="off" placeholder="e.g. Help me pick a birthday gift for my dad">
+            <button id="tryBtn" type="button">Show me the difference</button>
+          </div>
+          <p class="try-note">One question at a time &mdash; each answer comes from a live AI. <button id="tryAgainBtn" type="button" hidden>Ask another &rarr;</button></p>
         </div>
         <div class="comparison-stage">
-          <div class="demo-prompt"><span id="demoPromptText">I’ve got three good product directions and two weeks. How should I decide what to build?</span></div>
           <div class="response-grid">
             <article class="response-panel">
-              <div class="response-label"><strong>PLAIN AI</strong><span>no settings</span></div>
+              <div class="response-label"><strong>REGULAR AI</strong><span>no files</span></div>
               <div class="response-copy baseline" id="baselineResponse"></div>
             </article>
             <article class="response-panel fitted">
-              <div class="response-label"><strong>WITH YOUR SETTINGS</strong><span id="calibratedLabel">v0.1</span></div>
+              <div class="response-label"><strong>YOUR AI</strong><span id="calibratedLabel">v0.1</span></div>
               <div class="response-copy" id="calibratedResponse"></div>
             </article>
           </div>
           <div class="file-bridge" aria-label="How your settings shape the answer">
-            <a class="file-bridge-item" href="#/files"><strong>How it works · agent.md</strong><span>Judgment, decisions, and collaboration.</span></a>
-            <a class="file-bridge-item voice" href="#/files"><strong>How it sounds · voice.md</strong><span>Tone, phrasing, and structure.</span></a>
+            <a class="file-bridge-item" href="#/files"><strong>How it works · agent.md</strong><span>How you like to get things done.</span></a>
+            <a class="file-bridge-item voice" href="#/files"><strong>How it sounds · voice.md</strong><span>How you like to be talked to.</span></a>
           </div>
-          <div class="trace-guide">
+          <div class="trace-guide" id="traceGuide" hidden>
             <div class="trace-head">
-              <div><div class="trace-kicker">LINES BEHIND THIS ANSWER</div></div>
+              <div><div class="trace-kicker">WHAT SHAPED THIS ANSWER</div></div>
             </div>
-            <div class="rule-traces" id="appliedRules" aria-label="Rules from your file used in the answer"></div>
+            <div class="rule-traces" id="appliedRules" aria-label="Lines from your files that shaped the answer"></div>
           </div>
         </div>
       </section>
@@ -573,7 +584,8 @@ Direct, curious, and willing to find the surprising connection.
   <section class="screen" id="filesScreen">
     <main class="finish-shell">
       <header class="finish-head">
-        <h2>Your settings.</h2>
+        <h2>Your files.</h2>
+        <p>Two little cheat sheets about you. Any AI that reads them works the way you like.</p>
       </header>
       <nav class="page-nav" data-nav aria-label="Settings sections"></nav>
       <div class="file-tabs" role="tablist" aria-label="Settings files">
@@ -588,7 +600,7 @@ Direct, curious, and willing to find the surprising connection.
         <pre class="output-body" id="voiceOutput"></pre>
         <div class="file-actions"><span class="char-budget" id="voiceBudget"></span><span class="file-btns"><button type="button" data-copy="voice">copy</button><button type="button" data-download="voice">download</button></span></div>
       </article>
-      <div class="finish-actions"><button id="reviewDraftBtn">Tune the draft</button></div>
+      <div class="finish-actions"><button id="reviewDraftBtn">Edit the wording</button></div>
       <p class="privacy-rule">Personal identifiers never belong in these files.</p>
 
     </main>
@@ -596,7 +608,7 @@ Direct, curious, and willing to find the surprising connection.
   <section class="screen" id="versionsScreen">
     <main class="finish-shell">
       <header class="finish-head">
-        <h2>Versions.</h2>
+        <h2>History.</h2>
       </header>
       <nav class="page-nav" data-nav aria-label="Settings sections"></nav>
       <section class="version-diff" id="versionDiffSection" hidden aria-labelledby="versionHeading">
@@ -619,7 +631,8 @@ Direct, curious, and willing to find the surprising connection.
     <section class="screen" id="setupScreen">
     <main class="setup-shell">
       <div class="index">Setup guide</div>
-      <h2>Get it into your AIs.</h2>
+      <h2>Set up your AI.</h2>
+      <p class="auth-sub">Pick where you use AI, then follow the steps. Takes about a minute.</p>
       <nav class="page-nav" data-nav aria-label="Settings sections"></nav>
       <div class="dest-chooser" role="group" aria-label="Choose your AI">
         <button type="button" class="dest-btn active" data-dest="chatgpt">ChatGPT</button>
@@ -640,12 +653,12 @@ Direct, curious, and willing to find the surprising connection.
 <section class="screen" id="importScreen">
     <main class="import-shell">
       <div class="index">Import</div>
-      <h2>Fold in what your other AIs know.</h2>
+      <h2>Bring what your AI already knows.</h2>
       <nav class="page-nav" data-nav aria-label="Settings sections"></nav>
-      <p class="auth-sub">Ask a long-running chat for a compact summary of your patterns &mdash; not a transcript. You review every line.</p>
+      <p class="auth-sub">If you have chatted with an AI a lot, it already knows your habits. Ask it for a summary, paste it below, and you review every line before anything is kept.</p>
       <ol class="import-steps">
         <li><div><strong>Copy the extraction prompt.</strong></div><div class="prompt-card-actions"><button type="button" id="copyPatternPrompt">Copy prompt</button><button type="button" id="togglePromptDetails" aria-expanded="false">View prompt</button></div></li>
-        <li><div><strong>Run it in a long-running chat.</strong><span>ChatGPT or Claude, with history behind it.</span></div></li>
+        <li><div><strong>Run it in a chat with some history.</strong><span>ChatGPT or Claude &mdash; anywhere you have talked a while.</span></div></li>
         <li><div><strong>Paste the summary below.</strong></div></li>
       </ol>
 <div class="prompt-box" id="promptDetails">
@@ -1063,7 +1076,7 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
     var total=questions.length-INITIAL_COUNT, done=deepProgressCount();
     var rLabel=done>=total?'Refine \u2713':(done?'Refine \u00b7 '+done+'/'+total:'Refine');
     var rDis=done>=total?' disabled':'';
-    var tabs=[['#/settings','settings','Compare'],['#/files','files','Files'],['#/versions','versions','Versions'],['#/setup','setup','Setup'],['#/import','import','Import']];
+    var tabs=[['#/settings','settings','Try it'],['#/files','files','Your files'],['#/versions','versions','History'],['#/setup','setup','Set up'],['#/import','import','Import']];
     var html=tabs.map(function(t){ return '<a href="'+t[0]+'"'+(t[1]===active?' aria-current="page"':'')+'>'+t[2]+'</a>'; }).join('');
     html+='<button type="button" class="refine-tab"'+rDis+'>'+rLabel+'</button>';
     document.querySelectorAll('nav.page-nav[data-nav]').forEach(function(n){ n.innerHTML=html; });
@@ -1368,158 +1381,80 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
   function fileText(bucket){ return fitFile(assembleFile(bucket)).text; }
   function fileFit(bucket){ return fitFile(assembleFile(bucket)); }
   function answerIndex(key){ return typeof state.answers[key]==='number'?state.answers[key]:0; }
-  function chosenLine(key,bucket){
-    var q=questions.find(function(item){ return item.key===key; });
-    var i=answerIndex(key);
-    var lines=q && q.options[i] ? q.options[i].lines : [];
-    var line=lines.find(function(item){ return item.bucket===bucket; }) || lines[0] || {text:'',bucket:bucket||'agent'};
-    return line;
+
+  function liveLines(){
+    return state.lines.filter(function(l){ return l.text && l.text.trim(); }).map(function(l){
+      return { id:l.id, text:l.text, bucket:l.bucket };
+    });
+  }
+  function setTryState(st){
+    var input=$('#tryInput'), btn=$('#tryBtn'), again=$('#tryAgainBtn');
+    if(!input||!btn) return;
+    if(st==='loading'){ input.disabled=true; btn.disabled=true; btn.textContent='Asking…'; again.hidden=true; }
+    else if(st==='done'){ input.disabled=true; btn.disabled=true; btn.textContent='Show me the difference'; again.hidden=false; }
+    else { input.disabled=false; btn.disabled=false; btn.textContent='Show me the difference'; again.hidden=true; }
+  }
+  function renderLiveResult(data){
+    var lines=liveLines();
+    $('#baselineResponse').innerHTML='<p>'+escapeHTML(data.plain)+'</p>';
+    $('#calibratedResponse').innerHTML='<p>'+escapeHTML(data.fitted)+'</p>';
+    var guide=$('#traceGuide');
+    if(data.shaped_by && data.shaped_by.length){
+      guide.hidden=false;
+      $('#appliedRules').innerHTML=data.shaped_by.map(function(n){
+        var line=lines[n-1]; if(!line) return '';
+        return '<div class="rule-trace" data-shape><b>\u00b7</b><span><span class="rule-source">'+escapeHTML(line.bucket+'.md')+'</span>'+escapeHTML(line.text)+'</span></div>';
+      }).join('');
+      document.querySelectorAll('[data-shape]').forEach(function(el){
+        el.addEventListener('mouseenter',function(){ $('#calibratedResponse').classList.add('is-linked'); });
+        el.addEventListener('mouseleave',function(){ $('#calibratedResponse').classList.remove('is-linked'); });
+      });
+    } else { guide.hidden=true; $('#appliedRules').innerHTML=''; }
+    var versionLabel='v0.'+state.fileVersion;
+    $('#responseVersionTag').textContent='live';
+    $('#calibratedLabel').textContent=versionLabel;
+    setTryState('done');
   }
   function renderComparison(){
-    var opening=answerIndex('opening');
-    var ambiguity=answerIndex('ambiguity');
-    var uncertainty=answerIndex('uncertainty');
-    var idea=answerIndex('ideas');
-    var brave=answerIndex('brave');
-    var scenario;
-
-    if(state.scenario==='personal'){
-      scenario={
-        prompt:'My week is packed, I’m dropping balls, and I can’t do everything. Help me decide what to cut.',
-        baseline:[
-          'Start by listing your commitments and ranking them by urgency and importance.',
-          'Consider delegating what you can, postponing lower-priority items, and making time for rest. Be realistic about what you can accomplish; it’s okay to say no.'
-        ],
-        fitted:[
-          [
-            'Cut the commitment that looks useful but doesn’t change the week. Protect anything with a real consequence — and one thing that gives you energy back.',
-            'The real problem isn’t time. It’s that everything is being treated like it deserves the same kind of yes.',
-            'You’re balancing responsibility against recovery. Don’t let the urgent-looking work erase the thing that keeps the week livable.'
-          ][opening],
-          [
-            'I’m assuming none of these are health or family emergencies. If they are, they move to the top and the rest gets simpler.',
-            'Ask one question: which commitment would still matter if nobody noticed you skipped it? Keep that one.',
-            'If the pressure is mostly deadlines, cut scope. If it’s mostly people, reset expectations before you cancel.'
-          ][ambiguity],
-          [
-            'My best read: the low-consequence obligation is the first to go. You can add it back next week if the space doesn’t help.',
-            'Change the call only if dropping something creates a consequence you can’t repair later.',
-            'The bigger mistake isn’t disappointing someone once. It’s carrying so much that you do the important things badly.'
-          ][uncertainty],
-          [
-            'Make three columns: must happen, can slip, should disappear. Delete one thing from the third column today.',
-            'Find the recurring pattern: what keeps making the list because it sounds responsible, not because it matters? Cut one instance of that.',
-            'Cancel one thing cleanly, then see what the extra space makes possible.'
-          ][Math.min(idea,2)]+' '+[
-            'Make a call you can reverse. Don’t spend tonight building a perfect system for an overloaded week.',
-            'Keep the tradeoff visible: a fuller calendar is buying less attention for everything on it.',
-            'Be specific. “Do less” is advice; one canceled commitment is a decision.',
-            'Before bed, send the one message that creates the most room tomorrow.'
-          ][brave]
-        ],
-        trace:[['opening','agent'],['ambiguity','agent'],['uncertainty','voice'],['brave','voice']]
-      };
-    } else if(state.scenario==='explain'){
-      scenario={
-        prompt:'Explain why AI agents can seem smart and still fail at long, multi-step tasks.',
-        baseline:[
-          'AI agents can struggle with long tasks because they need to maintain context, plan multiple steps, use tools correctly, and recover from errors.',
-          'Even if the model performs well on each individual step, small mistakes can accumulate. Better planning, state tracking, verification, and human oversight can improve reliability.'
-        ],
-        fitted:[
-          [
-            'They usually don’t fail because any single step is too hard. They fail because a small mistake early on quietly changes every step after it.',
-            'The useful distinction is intelligence versus reliability. An agent can reason well in the moment and still be bad at carrying a goal across time.',
-            'Long tasks trade speed for control: every new step creates another place where context can drift, a tool can misfire, or a bad assumption can survive.'
-          ][opening],
-          [
-            'I’m assuming “agent” means a model planning and using tools, not a fixed automation. Fixed workflows fail differently — they’re brittle, but easier to inspect.',
-            'The key question is whether the agent checks its own work. If it can’t compare the result with the goal, errors just keep moving forward.',
-            'There are two common cases: the plan is wrong, or the plan is fine and execution drifts. The fix depends on which one you have.'
-          ][ambiguity],
-          [
-            'A good mental model is compound interest in reverse: 95% reliability per step becomes about 60% across ten dependent steps.',
-            'What would change this? Shorter loops, explicit checks, and the ability to restart from a known-good point.',
-            'The costly failure isn’t one bad tool call. It’s an agent that sounds confident enough that nobody notices the task has gone off course.'
-          ][uncertainty],
-          [
-            'So judge agents by recovery, not just first-pass cleverness.',
-            'That same pattern shows up in teams: local competence doesn’t guarantee the handoffs will hold.',
-            'The practical test is simple: give it a task with checkpoints and see whether it can catch its own drift.',
-            'The surprising part is that stronger reasoning can hide weaker process. Fluency makes the failure harder to see.'
-          ][brave]
-        ],
-        trace:[['opening','agent'],['ambiguity','agent'],['uncertainty','voice'],['brave','voice']]
-      };
-    } else {
-      scenario={
-        prompt:'I’ve got three good product directions and two weeks. How should I decide what to build?',
-        baseline:[
-          'Consider evaluating each direction based on market demand, feasibility, strategic alignment, and potential impact.',
-          'You could create a scoring matrix, talk to prospective users, and choose the option with the strongest overall balance. It may also help to stay flexible as you learn more.'
-        ],
-        fitted:[
-          [
-            'Build the one you can put in front of real users fastest.',
-            'The real question isn’t which idea sounds best. It’s which one can teach you something useful in two weeks.',
-            'You’re balancing belief in the idea against speed of learning. For now, favor speed of learning.'
-          ][opening],
-          [
-            'I’m assuming all three can be tested without a big build. If that’s wrong, drop any option that can’t reach users within the two weeks.',
-            'Ask one question first: what would you need to learn to rule each idea out? The idea with the clearest answer gets the slot.',
-            'If one idea already has a path to users, test that one. Otherwise, choose the smallest test that could prove an idea wrong.'
-          ][ambiguity],
-          [
-            'I’d call this a solid bet, not a sure thing. A real user giving up time, money, or an old habit is the signal to trust.',
-            'Change course if another idea can give you stronger evidence in the same two weeks.',
-            'The bigger risk isn’t choosing the wrong idea. It’s spending two weeks building something that teaches you nothing.'
-          ][uncertainty],
-          [
-            'Build the thinnest useful version and put it in front of five people. Watch what they do, not what they say they like.',
-            'Pick the idea that gets stronger with each new user, then test only the part that makes that advantage real.',
-            'Give each idea one day for its boldest version. Then commit to the one with the clearest reason to exist.'
-          ][idea]+' '+[
-            'Skip the big scorecard. Make a call you can reverse, and let real use change your mind.',
-            'You’re buying learning, not certainty.',
-            'Keep the test real: a real user, a real task, and a result that can fail.',
-            'Tomorrow, write the riskiest assumption under each idea. Test the cheapest one first.'
-          ][brave]
-        ],
-        trace:[['opening','agent'],['ambiguity','agent'],['uncertainty','voice'],['brave','voice']]
-      };
-    }
-
-    if(deepProgressCount()>0 && typeof state.answers.cadence==='number'){
-      var cadence=answerIndex('cadence');
-      if(cadence===0) scenario.fitted[0]+=' It’s not perfect, but it’s the clearest bet.';
-      if(cadence===2) scenario.fitted[0]='My read: '+scenario.fitted[0].charAt(0).toLowerCase()+scenario.fitted[0].slice(1);
-    }
-    if(state.deepCompleted){
-      scenario.trace=[['cadence','voice'],['trim','voice'],['nextmove','voice'],['learning','agent']];
-    }
-
-    $('#demoPromptText').textContent=scenario.prompt;
-    $('#baselineResponse').innerHTML=scenario.baseline.map(function(p){ return '<p>'+escapeHTML(p)+'</p>'; }).join('');
-    $('#calibratedResponse').innerHTML=scenario.fitted.map(function(p,i){ return '<p class="calibrated-point" data-link="'+i+'"><span class="point-number" aria-hidden="true">'+(i+1)+'</span>'+escapeHTML(p)+'</p>'; }).join('');
-    $('#appliedRules').innerHTML=scenario.trace.map(function(spec,i){
-      var line=chosenLine(spec[0],spec[1]);
-      return '<button type="button" class="rule-trace" data-link="'+i+'"><b>'+(i+1)+'</b><span><span class="rule-source">'+escapeHTML(line.bucket+'.md')+'</span>'+escapeHTML(line.text)+'</span></button>';
-    }).join('');
-    document.querySelectorAll('[data-scenario]').forEach(function(button){ button.setAttribute('aria-pressed',button.dataset.scenario===state.scenario?'true':'false'); });
-    function linkRule(index,on){
-      document.querySelectorAll('[data-link="'+index+'"]').forEach(function(el){ el.classList.toggle('is-linked',on); });
-    }
-    document.querySelectorAll('.rule-trace').forEach(function(rule){
-      var index=rule.dataset.link;
-      rule.addEventListener('mouseenter',function(){ linkRule(index,true); });
-      rule.addEventListener('mouseleave',function(){ linkRule(index,false); });
-      rule.addEventListener('focus',function(){ linkRule(index,true); });
-      rule.addEventListener('blur',function(){ linkRule(index,false); });
-    });
-    var deepCount=deepProgressCount();
+    var last=state.lastCompare;
     var versionLabel='v0.'+state.fileVersion;
-    $('#responseVersionTag').textContent=versionLabel+(state.fileVersion>2?' · merged settings':(state.deepCompleted?' · deeper pass':(deepCount?' draft · '+deepCount+'/'+(questions.length-INITIAL_COUNT)+' deeper choices':' · first pass')));
-    $('#calibratedLabel').textContent=versionLabel+(deepCount&&!state.deepCompleted&&state.fileVersion===2?' draft':'');
+    $('#responseVersionTag').textContent='live';
+    $('#calibratedLabel').textContent=versionLabel;
+    if(last){
+      $('#tryInput').value=last.prompt;
+      renderLiveResult(last);
+    } else {
+      $('#baselineResponse').innerHTML='<p class="empty-hint">The regular-AI answer lands here.</p>';
+      $('#calibratedResponse').innerHTML='<p class="empty-hint">And your version lands here.</p>';
+      $('#traceGuide').hidden=true; $('#appliedRules').innerHTML='';
+      setTryState('idle');
+    }
+  }
+  function runLiveCompare(){
+    var input=$('#tryInput');
+    var prompt=input.value.trim();
+    if(!prompt) { input.focus(); return; }
+    setTryState('loading');
+    $('#baselineResponse').innerHTML='<p class="thinking">Thinking…</p>';
+    $('#calibratedResponse').innerHTML='<p class="thinking">Thinking…</p>';
+    $('#traceGuide').hidden=true;
+    fetch('/api/compare',{
+      method:'POST',
+      headers:{'content-type':'application/json'},
+      body:JSON.stringify({ prompt:prompt.slice(0,300), lines:liveLines() })
+    }).then(function(r){ return r.json().then(function(j){ return {ok:r.ok, status:r.status, body:j}; }); })
+    .then(function(res){
+      if(!res.ok || !res.body.plain){
+        throw new Error((res.body && res.body.error) || 'unreachable');
+      }
+      state.lastCompare={ prompt:prompt, plain:res.body.plain, fitted:res.body.fitted, shaped_by:res.body.shaped_by||[] };
+      renderLiveResult(state.lastCompare);
+    })
+    .catch(function(){
+      $('#baselineResponse').innerHTML='<p class="empty-hint">The regular-AI answer lands here.</p>';
+      $('#calibratedResponse').innerHTML='<p class="empty-hint">Couldn\u2019t reach the AI just now — check your connection and try again.</p>';
+      setTryState('idle');
+    });
   }
   function renderVersionDiff(){
     var section=$('#versionDiffSection');
@@ -1567,8 +1502,6 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
     var ab=$('#agentBudget'), vb=$('#voiceBudget');
     if(ab){ ab.textContent=at.length+' / 1,500'+(fa.held?' \u00b7 '+fa.held+' held back':''); ab.classList.toggle('over',at.length>1500); }
     if(vb){ vb.textContent=vt.length+' / 1,500'+(fv.held?' \u00b7 '+fv.held+' held back':''); vb.classList.toggle('over',vt.length>1500); }
-    $('#finishTitle').textContent=deepCount?'Your settings are already taking shape.':'See your settings at work.';
-    $('#finishCopy').textContent=state.deepCompleted?'The deeper pass is in — Versions shows what changed.':(deepCount?'You answered '+deepCount+' of '+(questions.length-INITIAL_COUNT)+' deeper questions so far. Pick up where you left off below.':'');
     renderVersions();
     $('#versionHeading').textContent=state.deepCompleted?'What changed?':'What has changed so far?';
     renderComparison();
@@ -1784,6 +1717,9 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
   $('#startBtn').addEventListener('click',function(){ state.index=0; state.scope=INITIAL_COUNT; state.deepCompleted=false; state.answers={}; state.lines=[]; state.importedLines=[]; state.suppressedTexts=[]; state.mergeItems=[]; state.fileVersion=1; state.v0Lines=[]; state.diffFilter='all'; state.diffExpanded=false; state.scenario='build'; resetImporter(); try{localStorage.removeItem('pv1'); localStorage.removeItem('pv-versions');}catch(e){} window.__savedState=null; var rb=$('#resumeBanner'); if(rb) rb.hidden=true; $('#promptDetails').classList.remove('open'); $('#togglePromptDetails').setAttribute('aria-expanded','false'); $('#togglePromptDetails').textContent='View prompt'; renderQuestion(); renderLive(false); go('#/interview'); });
   $('#reviewDraftBtn').addEventListener('click',function(){ renderReview(); go('#/review'); });
   document.addEventListener('click',function(e){ var b=e.target.closest?e.target.closest('.refine-tab'):null; if(b&&!b.disabled) startDeep(); });
+  $('#tryBtn').addEventListener('click',runLiveCompare);
+  $('#tryInput').addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); runLiveCompare(); } });
+  $('#tryAgainBtn').addEventListener('click',function(){ state.lastCompare=null; $('#tryInput').value=''; renderComparison(); $('#tryInput').focus(); });
   $('#exitDeepBtn').addEventListener('click',function(){
     collectLines();
     renderFinish();
@@ -1796,7 +1732,6 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
   });
   $('#diffFilter').addEventListener('change',function(){ state.diffFilter=this.value; state.diffExpanded=false; renderVersionDiff(); });
   $('#showDiffBtn').addEventListener('click',function(){ state.diffExpanded=!state.diffExpanded; renderVersionDiff(); });
-  document.querySelectorAll('[data-scenario]').forEach(function(button){ button.addEventListener('click',function(){ state.scenario=button.dataset.scenario; renderComparison(); }); });
 
   $('#togglePromptDetails').addEventListener('click',function(){
     var open=!$('#promptDetails').classList.contains('open');
@@ -1863,11 +1798,11 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
   document.querySelectorAll('[data-copy]').forEach(function(btn){btn.addEventListener('click',function(){ var text=fileText(btn.dataset.copy); copyText(text).then(function(){toast(btn.dataset.copy+'.md copied');}).catch(function(){toast('Copy unavailable — select the text instead');});});});
   document.querySelectorAll('[data-setup-copy]').forEach(function(btn){btn.addEventListener('click',function(){ var text=fileText(btn.dataset.setupCopy); copyText(text).then(function(){toast(btn.dataset.setupCopy+'.md copied ('+text.length+' chars)');}).catch(function(){toast('Copy unavailable — select the text instead');});});});
   var DESTS={
-    chatgpt:{path:'Profile \u2192 Settings \u2192 Personalization \u2192 Custom instructions',copy:'Two boxes, 1,500 characters each on the free plan (more on paid plans). Turn \u201cEnable customization\u201d on, paste agent.md into \u201cWhat would you like ChatGPT to know about you?\u201d and voice.md into \u201cHow would you like ChatGPT to respond?\u201d, then save. Both fit.'},
-    claude:{path:'Settings \u2192 Profile',copy:'Look for the field \u201cWhat personal preferences should Claude consider in responses?\u201d (it may sit under General instead). Paste both files, one after the other. No published character cap. For a single project, use that Project\u2019s instructions instead.'},
-    gemini:{path:'Settings & help \u2192 Settings \u2192 Instructions for Gemini',copy:'Add each file as its own entry with Add. Gemini rewords entries when it saves them, so expect a paraphrase of your words, not the exact text.'},
-    code:{path:'CLAUDE.md \u00b7 AGENTS.md \u00b7 project rules',copy:'Paste both files into your project\u2019s instruction file. No size limit to worry about.'},
-    other:{path:'No instruction box?',copy:'Paste both files as the first message of a new chat \u2014 or as the system prompt if you are calling an API.'}
+    chatgpt:{path:'Profile \u2192 Settings \u2192 Personalization \u2192 Custom instructions',copy:'Turn \u201cEnable customization\u201d on. Paste agent.md into the first box (\u201cWhat would you like ChatGPT to know about you?\u201d) and voice.md into the second (\u201cHow would you like ChatGPT to respond?\u201d), then save. Both fit.'},
+    claude:{path:'Settings \u2192 Profile',copy:'Find \u201cWhat personal preferences should Claude consider in responses?\u201d and paste both files there, one after the other. To use them in just one project, paste them into that project\u2019s instructions instead.'},
+    gemini:{path:'Settings & help \u2192 Settings \u2192 Instructions for Gemini',copy:'Add each file as its own entry with Add. Heads up: Gemini rewords what you save, so expect a paraphrase of your words, not the exact text.'},
+    code:{path:'CLAUDE.md \u00b7 AGENTS.md \u00b7 project rules',copy:'Paste both files into your project\u2019s instruction file \u2014 whichever one it uses for project rules.'},
+    other:{path:'No instruction box?',copy:'Start a new chat and paste both files as the first message. The AI reads them and follows them from there.'}
   };
   function selectDest(k){ var d=DESTS[k]||DESTS.chatgpt;
     document.querySelectorAll('[data-dest]').forEach(function(b){ b.classList.toggle('active',b.dataset.dest===k); });
