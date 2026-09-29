@@ -277,7 +277,6 @@
     .resume-banner .ghost { border:1px solid var(--line); background:transparent; padding:11px 14px; font-size:11px; }
     .save-state { color:var(--muted); font-size:10px; }
     .returning { margin:14px 0 0; font-size:11px; color:var(--muted); }
-    .returning:empty { display:none; }
     .returning a { color:var(--ink); }
     .linklike { background:none; border:0; padding:0; font:inherit; font-size:inherit; color:var(--ink); text-decoration:underline; cursor:pointer; }
     .topnav { position:sticky; top:0; z-index:50; display:flex; align-items:center; justify-content:space-between; padding:14px clamp(18px,4vw,54px); background:var(--paper); border-bottom:1px solid var(--line); }
@@ -467,6 +466,8 @@
       .line-item { grid-template-columns:24px 1fr auto; }
       .add-row { flex-direction:column; }
       .question-actions { margin-top:22px; }
+      .resume-banner { flex-wrap:wrap; }
+      .resume-banner .row { flex-wrap:wrap; }
     }
     @media (prefers-reduced-motion:reduce) { *, *::before, *::after { animation:none!important; transition:none!important; scroll-behavior:auto!important; } }
   </style>
@@ -483,7 +484,6 @@
           <h1>Teach any AI how to work with you.</h1>
           <p class="lede">So every AI you use feels like yours. Answer 10 quick questions and we&rsquo;ll write up how you like to work &mdash; a cheat sheet you can hand to any AI.</p>
           <button class="primary" id="startBtn">Start →</button>
-          <p class="returning" id="returningLine"></p>
           <div class="fine">Stays in this browser. Never asks for names, addresses, or credentials.</div>
           <div class="resume-banner" id="resumeBanner" hidden>
             <div><strong>Welcome back.</strong><span id="resumeMeta"></span></div>
@@ -1023,7 +1023,6 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
     if(r.screen==='review'){ renderReview(); }
     if(r.screen==='interview'){ if(state.index>=questions.length) state.index=questions.length-1; renderQuestion(); renderLive(false); }
     if(NAVKEY[r.screen]){ renderPageNav(NAVKEY[r.screen]); }
-    if(r.screen==='intro'){ renderReturning(); }
     if(r.screen==='setup'){ updateDestBudget(); }
 
     document.title=r.title;
@@ -1778,11 +1777,6 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
     }
     renderFinish(); go('#/settings'); return true;
   }
-  function renderReturning(){
-    var el=$('#returningLine'); if(!el) return;
-    if(loadSaved()){ el.innerHTML='Your voice is waiting &mdash; <button type="button" class="linklike" id="returningGo">jump straight to your settings &rarr;</button>'; $('#returningGo').addEventListener('click',function(){ resumeSaved(true); }); }
-    else { el.innerHTML=''; }
-  }
   function renderVersions(){
     var vs=[]; try{ vs=JSON.parse(localStorage.getItem('pv-versions')||'[]'); }catch(e){}
     var list=$('#versionList'); if(!list) return;
@@ -1806,9 +1800,11 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
     window.__savedState=saved;
     var banner=$('#resumeBanner'); if(!banner) return;
     banner.hidden=false;
-    var meta=isMidInterview(saved)?'interview in progress':((saved.fileVersion?('v0.'+saved.fileVersion+' \u00b7 '):'')+saved.lines.length+' lines');
+    var mid=isMidInterview(saved);
+    var meta=mid?'interview in progress':((saved.fileVersion?('v0.'+saved.fileVersion+' \u00b7 '):'')+saved.lines.length+' lines');
     if(saved.ts){ var d=new Date(saved.ts); meta+=' \u00b7 saved '+d.toLocaleDateString()+' '+d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}); }
     $('#resumeMeta').textContent=meta;
+    $('#resumeBtn').innerHTML=mid?'Resume &rarr;':'Your settings &rarr;';
   })();
   $('#resumeBtn').addEventListener('click',function(){ resumeSaved(); });
   $('#freshBtn').addEventListener('click',function(){
