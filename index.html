@@ -1017,6 +1017,9 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
     if((r.screen==='review'||r.screen==='finish'||r.screen==='files'||r.screen==='versions'||r.screen==='setup') && !state.lines.length && !Object.keys(state.answers).length){ go('#/'); return; }
     if(r.screen==='import'){ if(!state.lines.length && !Object.keys(state.answers).length){ go('#/'); return; } }
     if(r.screen==='finish'||r.screen==='versions'){ renderVersions(); }
+    if(r.screen==='finish'){ renderFinish(); }
+    if(r.screen==='review'){ renderReview(); }
+    if(r.screen==='interview'){ if(state.index>=questions.length) state.index=questions.length-1; renderQuestion(); renderLive(false); }
     if(NAVKEY[r.screen]){ renderPageNav(NAVKEY[r.screen]); }
     if(r.screen==='intro'){ renderReturning(); }
     if(r.screen==='setup'){ updateDestBudget(); }
@@ -1400,10 +1403,10 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
         localStorage.setItem('pv1',JSON.stringify({lines:state.lines,answers:state.answers,fileVersion:state.fileVersion,deepCompleted:state.deepCompleted,index:state.index,v0Lines:state.v0Lines,importedLines:state.importedLines,scenario:state.scenario,ts:Date.now()}));
         try{
           var vs=JSON.parse(localStorage.getItem('pv-versions')||'[]');
-          if(!vs.length||vs[0].v!==state.fileVersion){
-            vs.unshift({v:state.fileVersion,ts:Date.now(),lines:state.lines});
-            localStorage.setItem('pv-versions',JSON.stringify(vs.slice(0,12)));
-          }
+          var snap={v:state.fileVersion,ts:Date.now(),lines:JSON.parse(JSON.stringify(state.lines))};
+          if(!vs.length||vs[0].v!==snap.v){ vs.unshift(snap); }
+          else { vs[0]=snap; }
+          localStorage.setItem('pv-versions',JSON.stringify(vs.slice(0,12)));
         }catch(e){}
         var el=$('#saveState'); if(el) el.textContent=' \u00b7 saved in this browser \u2713';
       }catch(e){}
