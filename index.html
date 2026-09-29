@@ -146,6 +146,7 @@
     .output-head strong { font-size:14px; }
     .output-head strong small { display:block; margin-top:4px; color:var(--muted); font-size:9px; font-weight:400; }
     .privacy-tag { font-size:10px; border:1px solid var(--ink); padding:3px 6px; }
+    .privacy-note { margin:12px 0 0; font-size:11px; color:var(--muted); }
     .output-body { margin:0; padding:22px; min-height:310px; white-space:pre-wrap; overflow-wrap:anywhere; font:13px/1.7 "IBM Plex Mono", monospace; }
     .file-actions { padding:14px 16px; border-top:1px solid var(--line); display:flex; gap:8px; justify-content:space-between; align-items:center; }
     .file-actions button { border:1px solid var(--ink); background:var(--paper); padding:10px 14px; font-size:12px; }
@@ -595,6 +596,7 @@ Short, plain sentences. No throat-clearing.
         <button type="button" class="file-tab active" data-filetab="agent" role="tab" aria-selected="true"><strong>How it works</strong><small>agent.md</small><span class="privacy-tag">PUBLIC</span></button>
         <button type="button" class="file-tab" data-filetab="voice" role="tab" aria-selected="false"><strong>How it sounds</strong><small>voice.md</small><span class="privacy-tag">PRIVATE</span></button>
       </div>
+      <p class="privacy-note">agent.md is public &mdash; share it anywhere. voice.md is private &mdash; paste it into your own AIs, but don&rsquo;t post it.</p>
       <article class="output-file file-panel" data-filepanel="agent">
         <pre class="output-body" id="agentOutput"></pre>
         <div class="file-actions"><span class="char-budget" id="agentBudget"></span><span class="file-btns"><button type="button" data-copy="agent">copy</button><button type="button" data-download="agent">download</button></span></div>
@@ -998,7 +1000,7 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
     var rDis=done>=total?' disabled':'';
     var tabs=[['#/settings','settings','Try it'],['#/files','files','Your files'],['#/versions','versions','History'],['#/setup','setup','Set up'],['#/import','import','Import']];
     var html=tabs.map(function(t){ return '<a href="'+t[0]+'"'+(t[1]===active?' aria-current="page"':'')+'>'+t[2]+'</a>'; }).join('');
-    html+='<button type="button" class="refine-tab"'+rDis+'>'+rLabel+'</button>';
+    html+='<button type="button" class="refine-tab" title="14 quick voice exercises to sharpen your files"'+rDis+'>'+rLabel+'</button>';
     document.querySelectorAll('nav.page-nav[data-nav]').forEach(function(n){ n.innerHTML=html; });
   }
   function startDeep(){
@@ -1230,7 +1232,7 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
   var FILE_BUDGET=1500;
   function assembleFile(bucket){
     var title=bucket==='agent'?'# How to work with me':'# How to communicate with me';
-    var intro=bucket==='agent'?'\\n\\nRead this first \u2014 it\u2019s how I like to work.':'\\n\\nRead this first \u2014 it\u2019s how I like to be talked to.';
+    var intro=bucket==='agent'?'\n\nRead this first \u2014 it\u2019s how I like to work.':'\n\nRead this first \u2014 it\u2019s how I like to be talked to.';
     var lines=state.lines.filter(function(l){return l.bucket===bucket&&l.text;});
     var groups={}; var order=[]; var seen={};
     lines.forEach(function(l){
@@ -1758,7 +1760,7 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
     }
     return false;
   }
-  function resumeSaved(){
+  function resumeSaved(toSettings){
     var s=loadSaved()||window.__savedState;
     if(!s) return false;
     var hasLines=s.lines&&s.lines.length;
@@ -1768,7 +1770,7 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
     state.suppressedTexts=[]; state.mergeItems=[]; state.diffFilter='all'; state.diffExpanded=false;
     resetImporter();
     window.__savedState=null; var rb=$('#resumeBanner'); if(rb) rb.hidden=true;
-    if(isMidInterview(s)){
+    if(!toSettings&&isMidInterview(s)){
       // Pick up on the next unanswered question.
       state.scope=savedScope(state.index);
       if(state.index>=state.scope) state.index=state.scope-1;
@@ -1778,7 +1780,7 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
   }
   function renderReturning(){
     var el=$('#returningLine'); if(!el) return;
-    if(loadSaved()){ el.innerHTML='Your voice is waiting &mdash; <button type="button" class="linklike" id="returningGo">jump straight to your settings &rarr;</button>'; $('#returningGo').addEventListener('click',function(){ resumeSaved(); }); }
+    if(loadSaved()){ el.innerHTML='Your voice is waiting &mdash; <button type="button" class="linklike" id="returningGo">jump straight to your settings &rarr;</button>'; $('#returningGo').addEventListener('click',function(){ resumeSaved(true); }); }
     else { el.innerHTML=''; }
   }
   function renderVersions(){
