@@ -774,12 +774,12 @@ Concise bullets. 800–1,500 words. Prefer fewer, sharper bullets with examples 
     },
     {
       key:'jargon', phase:'first pass', label:'plain language', type:'choice',
-      title:'There’s a technical word for this. What should the AI do?',
-      note:'Pick the version that feels natural.',
+      title:'You’re asking about something and the AI knows the technical term for it — what should it do?',
+      note:'Pick the one that feels like you.',
       options:[
         {title:'Use it, then explain it in a few words.', desc:'Keep the useful term without slowing me down.', lines:[{text:'Use the technical term, then explain it in a few words.',bucket:'voice'}]},
         {title:'Say it in plain English.', desc:'The idea matters more than the label.', lines:[{text:'Put it in plain English unless the exact term matters.',bucket:'voice'}]},
-        {title:'Just use it.', desc:'Don’t explain what’s already clear from context.', lines:[{text:'Don’t explain terms I clearly already know.',bucket:'voice'}]}
+        {title:'Match what I already know.', desc:'Use words I’ve used; explain the rest.', lines:[{text:'Match my vocabulary — use terms I’ve used, explain ones I haven’t.',bucket:'voice'}]}
       ]
     },
     {
